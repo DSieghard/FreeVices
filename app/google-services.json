@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "359256601901",
+    "project_id": "freevices-a88fa",
+    "storage_bucket": "freevices-a88fa.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:359256601901:android:f2f9e60e4758c52fc6cfa4",
+        "android_client_info": {
+          "package_name": "com.sgtech.freevices"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAkOGAx-Hg454G9XMLKQ3tn9W1EQfHp_fE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

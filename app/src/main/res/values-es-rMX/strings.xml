@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">FreeVices - Control of vices</string>
+    <string name="about_title">Sobre nosotros</string>
+    <string name="action_settings">Configuracion</string>
+    <string name="action_sign_out">Cerrar sesión</string>
+    <string name="main_activity_title">Inicio</string>
+    <string name="menu_home">Inicio</string>
+    <string name="menu_history">Historial</string>
+    <string name="menu_overview">Vista General</string>
+    <string name="header_text">Transformando la vida, quitando los vicios</string>
+    <string name="fab_content_desc">Botón flotante: Agrega objetos</string>
+    <string name="tobacco">Tabaco</string>
+    <string name="alcohol">Alcohol</string>
+    <string name="parties">Fiestas</string>
+    <string name="others">Otros</string>
+    <string name="add">Añadir</string>
+    <string name="add_habit">Agregar mal hábito</string>
+    <string name="how_many">Cuanto has gastado?</string>
+    <string name="added_text">Añadido con éxito</string>
+    <string name="login_activity_title">Inicia sesión o Registrate</string>
+    <string name="password">Contraseña</string>
+    <string name="email">Correo</string>
+    <string name="sign_in">Iniciar sesión</string>
+    <string name="create_account">Crear cuenta</string>
+    <string name="welcome">Bienvenido otra vez: %s</string>
+    <string name="invalid_credentials_or_account_not_found">Credenciales inválidas o la cuenta no existe</string>
+    <string name="register">Registrarse</string>
+    <string name="phone_optional">Telefono (Opcional)</string>
+    <string name="first_name">Nombre</string>
+    <string name="last_name">Apellido</string>
+    <string name="confirm_password">Confirmar</string>
+    <string name="username">Nombre de Usuario</string>
+    <string name="register_email">Correo</string>
+    <string name="back">Volver</string>
+    <string name="error_field_incomplete">Debes llenar todos los campos</string>
+    <string name="account_success">Cuenta creada con éxito</string>
+    <string name="ok">Ok</string>
+    <string name="account_create_error">Error Creando cuenta</string>
+</resources>
