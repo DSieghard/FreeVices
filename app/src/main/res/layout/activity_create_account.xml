@@ -10,28 +10,7 @@
 
     <!-- Register Text -->
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/phoneTextLayout"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_width="180dp"
-        android:layout_height="50dp"
-        android:layout_marginTop="24dp"
-        android:ems="10"
-        android:hint="@string/phone_optional"
-        android:inputType="phone"
-        android:textAlignment="center"
-        android:textSize="16sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/uneConstraintLayout">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/phoneEditText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            tools:ignore="TextContrastCheck" />
-
-    </com.google.android.material.textfield.TextInputLayout> <!-- Phone Number -->
+    <!-- Phone Number -->
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/fnlnConstraintLayout"
@@ -52,6 +31,8 @@
             android:ems="10"
             android:hint="@string/first_name"
             android:inputType="text"
+            android:singleLine="true"
+            android:imeOptions="actionNext"
             android:textAlignment="gravity"
             android:textSize="16sp"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -78,6 +59,8 @@
             android:inputType="text"
             android:textAlignment="center"
             android:textSize="16sp"
+            android:singleLine="true"
+            android:imeOptions="actionNext"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/firstNameTextLayout"
@@ -111,6 +94,8 @@
             android:hint="@string/password"
             android:inputType="textPassword"
             android:textAlignment="center"
+            android:singleLine="true"
+            android:imeOptions="actionNext"
             android:textAllCaps="false"
             android:textSize="16sp"
             app:endIconMode="password_toggle"
@@ -138,6 +123,8 @@
             android:inputType="textPassword"
             android:textAlignment="center"
             android:textSize="16sp"
+            android:singleLine="true"
+            android:imeOptions="actionNext"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:endIconMode="password_toggle"
@@ -174,6 +161,8 @@
             android:ems="10"
             android:hint="@string/username"
             android:inputType="text"
+            android:singleLine="true"
+            android:imeOptions="actionNext"
             android:textAlignment="center"
             android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"
@@ -195,6 +184,8 @@
             android:layout_marginEnd="12dp"
             android:ems="10"
             android:hint="@string/register_email"
+            android:singleLine="true"
+            android:imeOptions="actionNext"
             android:inputType="textEmailAddress"
             android:textAlignment="center"
             android:textSize="16sp"
@@ -230,13 +221,14 @@
             android:layout_marginTop="72dp"
             android:layout_marginEnd="72dp"
             android:layout_marginBottom="48dp"
-            android:text="@string/sign_in"
+            android:text="@string/create_account"
             android:textAlignment="center"
             android:textColor="?android:textColorPrimary"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/backButton"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="DuplicateSpeakableTextCheck" />
 
         <Button
             android:id="@+id/backButton"
@@ -255,6 +247,31 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/phoneTextLayout"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="180dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="24dp"
+        android:ems="10"
+        android:hint="@string/phone_optional"
+        android:imeOptions="actionDone"
+        android:inputType="phone"
+        android:singleLine="true"
+        android:textAlignment="center"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/uneConstraintLayout">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/phoneEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:ignore="TextContrastCheck" />
+
+    </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/materialToolbar"

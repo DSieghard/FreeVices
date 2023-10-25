@@ -37,4 +37,14 @@
     <string name="account_success">Cuenta creada con éxito</string>
     <string name="ok">Ok</string>
     <string name="account_create_error">Error Creando cuenta</string>
+    <string name="tobacco_value">Tabaco: %s</string>
+    <string name="parties_value">Fiestas: %s</string>
+    <string name="alcohol_value">Alcohol: %s</string>
+    <string name="others_value">Otros: %s</string>
+    <string name="total_value">Total (Mensual): %s</string>
+    <string name="total_value_ov">Total (Mensual): %s</string>
+    <string name="creating_account">Creando cuenta</string>
+    <string name="error_user_already_exists">El usuario ya existe</string>
+    <string name="error_invalid_email">Correo inválido</string>
+    <string name="passwords_do_not_match">Las contraseñas no coinciden</string>
 </resources>

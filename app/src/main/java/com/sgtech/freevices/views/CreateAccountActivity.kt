@@ -3,13 +3,17 @@ package com.sgtech.freevices.views
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
+import android.view.inputmethod.EditorInfo
 import android.widget.Button
 import android.widget.Toast
 import com.google.android.material.textfield.TextInputEditText
 import com.sgtech.freevices.R
 import com.sgtech.freevices.utils.FirebaseUtils
+import com.sgtech.freevices.utils.FirebaseUtils.createAccount
 
 class CreateAccountActivity : AppCompatActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_create_account)
@@ -22,29 +26,52 @@ class CreateAccountActivity : AppCompatActivity() {
         val firstNameEditText = findViewById<TextInputEditText>(R.id.firstNameEditText)
         val lastNameEditText = findViewById<TextInputEditText>(R.id.lastNameEditText)
         val phoneEditText = findViewById<TextInputEditText>(R.id.phoneEditText)
+        val usernameEditText = findViewById<TextInputEditText>(R.id.usernameEditText)
 
+        phoneEditText.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                signUpButton.performClick()
+                true
+            } else {
+                false
+            }
+        }
 
         signUpButton.setOnClickListener {
-            val firstname = firstNameEditText.text.toString()
-            val lastname = lastNameEditText.text.toString()
-            val email = emailEditText.text.toString()
-            val password = passwordEditText.text.toString()
-            val confirmPassword = confirmPasswordEditText.text.toString()
-            val phoneConvert = phoneEditText.text.toString()
-            val phone = phoneConvert.toInt()
 
-            if (email.isNotEmpty() && password.isNotEmpty() && confirmPassword.isNotEmpty() && firstname.isNotEmpty() && lastname.isNotEmpty() && phoneConvert.isNotEmpty()) {
-                if (password == confirmPassword) {
-                    FirebaseUtils.createAccount(this, email, password, true)
-                    try {
-                        FirebaseUtils.createDataOnFirestore(this, firstname, lastname, email, phone)
-                    } catch (e: Exception) {
-                        Toast.makeText(this, e.message, Toast.LENGTH_SHORT).show()
-                    }
+            fun String.toIntOrDefault(defaultValue: Int): Int {
+                return try {
+                    toInt()
+                } catch (e: NumberFormatException) {
+                    defaultValue
                 }
             }
-            else {
-                Toast.makeText(this, getString(R.string.error_field_incomplete), Toast.LENGTH_SHORT).show()
+
+            val firstname = firstNameEditText.text.toString().trim()
+            val lastname = lastNameEditText.text.toString().trim()
+            val email = emailEditText.text.toString().trim()
+            val username = usernameEditText.text.toString().trim()
+            val password = passwordEditText.text.toString().trim()
+            val confirmPassword = confirmPasswordEditText.text.toString().trim()
+            val phoneConvert = phoneEditText.text.toString().trim()
+            val phone = phoneConvert.toIntOrDefault(0)
+
+            if (email.isNotEmpty() && password.isNotEmpty() && confirmPassword.isNotEmpty() && firstname.isNotEmpty() && lastname.isNotEmpty()) {
+                if (password == confirmPassword) {
+                    createAccount(this, email, password) {
+                        FirebaseUtils.createDataOnFirestore(
+                            firstname,
+                            lastname,
+                            username,
+                            email,
+                            phone
+                        )
+                    }
+                } else {
+                    Toast.makeText(this,
+                        getString(R.string.passwords_do_not_match), Toast.LENGTH_SHORT).show()
+                }
+                Log.d("CreateAccountActivity", "createDataOnFirestore:success")
             }
         }
 
@@ -54,4 +81,5 @@ class CreateAccountActivity : AppCompatActivity() {
             finish()
         }
     }
+
 }

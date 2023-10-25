@@ -2,6 +2,7 @@ package com.sgtech.freevices.views.ui.home
 
 import android.content.res.Configuration
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,6 +15,7 @@ import com.github.mikephil.charting.data.PieEntry
 import com.github.mikephil.charting.utils.ColorTemplate
 import com.sgtech.freevices.R
 import com.sgtech.freevices.databinding.FragmentHomeBinding
+import com.sgtech.freevices.utils.FirebaseUtils.getDataFromFirestore
 
 class HomeFragment : Fragment() {
 
@@ -30,7 +32,7 @@ class HomeFragment : Fragment() {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        pieChart = root.findViewById(R.id.mainGraph)
+        pieChart = root.findViewById(R.id.tobaccoGraph)
         pieChartHandler()
 
         return root
@@ -42,32 +44,50 @@ class HomeFragment : Fragment() {
     }
 
     private fun pieChartHandler() {
-        val entries = listOf(
-            PieEntry(30f, "Tabaco"),
-            PieEntry(35f, "Alcohol"),
-            PieEntry(40f, "Fiestas"),
-            PieEntry(20f, "Otros")
+        // Llamar a la función para recuperar los datos de Firestore
+        getDataFromFirestore(
+            onSuccess = { data ->
+                // Crear una lista de PieEntry a partir de los datos recuperados
+                val entries = data.map { (name, value) ->
+                    PieEntry(value, name)
+                }
+
+                // Crear el conjunto de datos y asignar colores
+                val dataSet = PieDataSet(entries, "")
+                dataSet.colors = ColorTemplate.COLORFUL_COLORS.toList()
+
+                // Crear el objeto PieData y establecerlo en tu PieChart
+                val pieData = PieData(dataSet)
+                pieChart.data = pieData
+
+                // Configurar colores de fondo según el tema
+                val backgroundColor =
+                    when (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
+                        Configuration.UI_MODE_NIGHT_YES -> {
+                            ContextCompat.getColor(
+                                requireContext(),
+                                R.color.pieChartBackgroundColorDark
+                            )
+                        }
+
+                        else -> {
+                            ContextCompat.getColor(
+                                requireContext(),
+                                R.color.pieChartBackgroundColorLight
+                            )
+                        }
+                    }
+
+                // Configurar colores de fondo en el gráfico
+                pieChart.setBackgroundColor(backgroundColor)
+
+                // Invalidar el gráfico para que se muestren los cambios
+                pieChart.invalidate()
+            },
+            onFailure = { exception ->
+                // Manejar errores, por ejemplo, mostrar un mensaje de error
+                Log.e("TAG", "Error al recuperar datos: $exception")
+            }
         )
-
-        val dataSet = PieDataSet(entries, "")
-        dataSet.colors = ColorTemplate.COLORFUL_COLORS.toList()
-
-        val pieData = PieData(dataSet)
-
-        val backgroundColor = when (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
-            Configuration.UI_MODE_NIGHT_YES -> {
-                ContextCompat.getColor(requireContext(), R.color.pieChartBackgroundColorDark)
-            }
-            else -> {
-                ContextCompat.getColor(requireContext(), R.color.pieChartBackgroundColorLight)
-            }
-        }
-
-
-        pieChart.data = pieData
-        pieChart.description.isEnabled = false
-        pieChart.setBackgroundColor(backgroundColor)
-        pieChart.setDrawEntryLabels(false)
-        pieChart.invalidate()
     }
 }

@@ -3,8 +3,9 @@ package com.sgtech.freevices.views
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
+import android.view.inputmethod.EditorInfo
 import android.widget.Button
-import android.widget.Toast
 import com.google.android.material.textfield.TextInputEditText
 import com.sgtech.freevices.R
 import com.sgtech.freevices.utils.FirebaseUtils
@@ -19,11 +20,23 @@ class LoginActivity : AppCompatActivity() {
         val emailEditText = findViewById<TextInputEditText>(R.id.signInEmailEditText)
         val passwordEditText = findViewById<TextInputEditText>(R.id.signInPasswordEditText)
 
+        passwordEditText.setOnEditorActionListener() { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                signInButton.performClick()
+                true
+            } else {
+                false
+            }
+        }
+
         signInButton.setOnClickListener {
-            /*if (emailEditText.toString().isNotEmpty() && passwordEditText.toString().isNotEmpty()) {
-                FirebaseUtils.signInWithEmail(this, emailEditText.toString(), passwordEditText.toString(), true)
-            }*/
-            startActivity(Intent(this, MainActivity::class.java))
+            val email = emailEditText.text.toString().trim()
+            val password = passwordEditText.text.toString().trim()
+
+            Log.d("FirebaseUtils", "$email $password")
+            if (email.isNotEmpty() && password.isNotEmpty()) {
+                FirebaseUtils.signInWithEmail(this, email, password)
+            }
         }
 
         createAccountButton.setOnClickListener{

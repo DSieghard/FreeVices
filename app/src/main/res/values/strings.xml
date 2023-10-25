@@ -43,11 +43,17 @@
     <string name="back">Back</string>
     <string name="error_field_incomplete">Please enter all fields</string>
     <string name="account_success">Account created successfully</string>
-    <string name="ok">Ok</string>
+    <string name="ok">OK</string>
     <string name="account_create_error">Error creating Account</string>
     <string name="tobacco_value">Tobacco: %s</string>
     <string name="parties_value">Parties: %s</string>
     <string name="alcohol_value">Alcohol: %s</string>
     <string name="others_value">Others: %s</string>
-    <string name="total_value">Total: %s</string>
+    <string name="total_value">Total (Monthly): %s \nWith this you can do: \n%s</string>
+    <string name="total_value_ov">Totals (Monthly): %s</string>
+    <string name="creating_account">Creating Account</string>
+    <string name="error" translatable="false">Error</string>
+    <string name="error_user_already_exists">User already exists</string>
+    <string name="error_invalid_email">Invalid Email Address</string>
+    <string name="passwords_do_not_match">Passwords do not match</string>
 </resources>
