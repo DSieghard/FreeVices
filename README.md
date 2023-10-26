@@ -1,15 +1,15 @@
-# FreeVicies
+# FreeVices
 
 ## Added Features
 - Create Account
 - Login
 - Firestore as Database
 - Singleton Items
+- Settings
 
 ## Features to be Added
-- Settings
-- Home Screen
 - Welcome Screen
+- Home Screen
 - Overview Screen
 - History Screen
 
