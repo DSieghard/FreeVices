@@ -118,7 +118,6 @@
                 android:layout_height="wrap_content"
                 android:importantForAccessibility="yes"
                 android:inputType="textPassword"
-                android:textAlignment="center"
                 android:textColor="?android:textColorPrimary"
                 android:textColorHighlight="?android:textColorPrimary"
                 android:textColorHint="?android:textColorPrimary"

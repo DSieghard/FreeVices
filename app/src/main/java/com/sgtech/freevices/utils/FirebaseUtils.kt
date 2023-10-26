@@ -8,6 +8,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat.startActivity
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthActionCodeException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.firestore.FirebaseFirestore
@@ -34,6 +35,7 @@ object FirebaseUtils {
     }
     fun signInWithEmail(context: Context, email: String, password: String) {
         val auth = FirebaseAuth.getInstance()
+        showLoadingDialog(context)
         auth.signInWithEmailAndPassword(email.trim(), password.trim())
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
@@ -41,8 +43,27 @@ object FirebaseUtils {
                         checkIfUserIsLoggedIn(context)
                         val intent = Intent(context, MainActivity::class.java)
                         startActivity(context, intent, null)
+                        hideLoadingDialog()
+                    } catch (e: FirebaseAuthInvalidUserException) {
+                        val title = context.getString(R.string.error)
+                        val message = context.getString(R.string.error_user_not_found)
+                        buildAlertDialog(context, title, message)
+                        Log.d("FirebaseUtils", "signInWithEmail:failure", e)
+                        hideLoadingDialog()
+                    } catch (ec: FirebaseAuthActionCodeException) {
+                        val title = context.getString(R.string.error)
+                        val message = context.getString(R.string.error_invalid_token)
+                        buildAlertDialog(context, title, message)
+                        Log.d("FirebaseUtils", "signInWithEmail:failure", ec)
+                        hideLoadingDialog()
                     } catch (e: Exception) {
-                        Log.d("FirebaseUtils", "signInWithEmail:failure", task.exception)
+                        val title = context.getString(R.string.error)
+                        val message = context.getString(R.string.error_unknown)
+                        buildAlertDialog(context, title, message)
+                        Log.d("FirebaseUtils", "signInWithEmail:failure", e)
+                        hideLoadingDialog()
+                    } finally {
+                        hideLoadingDialog()
                     }
                 }
             }

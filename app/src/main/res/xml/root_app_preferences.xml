@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:title="@string/title_appearance"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:enabled="true"
+        android:showDividers="middle">
+        <SwitchPreference
+            android:id="@+id/dark_mode"
+            android:key="dark_mode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:defaultValue="false"
+            android:title="@string/settings_dark_mode"
+            android:summary="@string/settings_dark_theme"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/title_enable_notifications"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:enabled="true"
+        android:showDividers="middle">
+        <CheckBoxPreference
+            android:id="@+id/notifications"
+            android:key="notifications"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:defaultValue="false"
+            android:title="@string/title_enable_notifications"
+            android:summary="@string/setting_allow_notifications"/>
+        <Preference
+            android:id="@+id/reset_notifications"
+            android:key="reset_notifications"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:defaultValue="Default value"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/title_reset_notifications"
+            android:summary="@string/settings_reset_notifications"/>
+    </PreferenceCategory>
+</PreferenceScreen>

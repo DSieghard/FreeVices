@@ -1,0 +1,63 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+        android:title="@string/personal_settings"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:enabled="true"
+        android:showDividers="middle">
+        <Preference
+            android:id="@+id/name_update"
+            android:key="name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:defaultValue="Default value"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/title_update_name"
+            android:summary="@string/settings_update_name"/>
+        <Preference
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:defaultValue="Default value"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/title_update_username"
+            android:summary="@string/settings_update_username"/>
+        <Preference
+            android:id="@+id/email_update"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:defaultValue="Default value"
+            android:key="email"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/title_update_email"
+            android:summary="@string/settings_update_email"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/account_settings"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:enabled="true"
+        android:showDividers="middle">
+        <Preference
+            android:id="@+id/update_password_preferences"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/title_change_password"
+            android:summary="@string/settings_change_password"/>
+        <Preference
+            android:id="@+id/delete_account_preference"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/title_delete_account"
+            android:summary="@string/setting_delete_account"/>
+    </PreferenceCategory>
+</PreferenceScreen>

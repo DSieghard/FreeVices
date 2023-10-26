@@ -11,6 +11,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FreeVices">
         <activity
+            android:name=".views.SettingsActivity"
+            android:exported="false" />
+        <activity
             android:name=".views.CreateAccountActivity"
             android:exported="false" />
         <activity

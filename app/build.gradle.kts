@@ -52,6 +52,9 @@ dependencies {
     implementation("androidx.navigation:navigation-ui-ktx:2.7.4")
     implementation("com.google.firebase:firebase-firestore-ktx:24.9.0")
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+    implementation("androidx.preference:preference-ktx:1.2.1")
+    implementation("androidx.viewpager2:viewpager2:1.0.0")
+
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
