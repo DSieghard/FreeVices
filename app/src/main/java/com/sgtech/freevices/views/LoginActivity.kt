@@ -1,16 +1,23 @@
 package com.sgtech.freevices.views
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.inputmethod.EditorInfo
 import android.widget.Button
+import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.textfield.TextInputEditText
 import com.sgtech.freevices.R
 import com.sgtech.freevices.utils.FirebaseUtils
+import com.sgtech.freevices.utils.FirebaseUtils.checkIfUserIsLoggedIn
 
 class LoginActivity : AppCompatActivity() {
+
+    override fun onStart() {
+        super.onStart()
+        checkIfUserIsLoggedIn(this)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)

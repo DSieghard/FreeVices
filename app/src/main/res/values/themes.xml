@@ -1,4 +1,4 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
     <!-- Base application theme. -->
     <style name="Base.Theme.FreeVices" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
@@ -7,17 +7,5 @@
 
     <style name="Theme.FreeVices" parent="Base.Theme.FreeVices" />
 
-    <style name="Theme.FreeVices.NoActionBar">
-        <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
-    </style>
 
-    <style name="Theme.FreeVices.Light" parent="Theme.MaterialComponents.Light.NoActionBar">
-        <item name="android:statusBarColor">@android:color/transparent</item>
-    </style>
-
-
-    <style name="Theme.FreeVices.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
-
-    <style name="Theme.FreeVices.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 </resources>

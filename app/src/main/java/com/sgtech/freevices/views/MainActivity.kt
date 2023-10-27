@@ -16,18 +16,12 @@ import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.sgtech.freevices.R
 import com.sgtech.freevices.databinding.ActivityMainBinding
-import com.sgtech.freevices.utils.FirebaseUtils.checkIfUserIsLoggedIn
 import com.sgtech.freevices.utils.ItemsUtils.showAddAlertDialog
 
 class MainActivity : AppCompatActivity(){
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
-
-    override fun onStart() {
-        super.onStart()
-        checkIfUserIsLoggedIn(this)
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -72,6 +66,11 @@ class MainActivity : AppCompatActivity(){
                         }
                         .show()
                 }
+
+                R.id.nav_about -> {
+                    val intent = Intent(this, AboutActivity::class.java)
+                    startActivity(intent)
+                }
                 else -> {
                     navController.navigate(menuItem.itemId)
                 }
@@ -79,6 +78,7 @@ class MainActivity : AppCompatActivity(){
             drawerLayout.closeDrawer(GravityCompat.START)
             true
         }
+
 
     }
     override fun onSupportNavigateUp(): Boolean {

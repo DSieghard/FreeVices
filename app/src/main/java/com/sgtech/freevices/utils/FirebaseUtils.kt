@@ -13,7 +13,6 @@ import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.firestore.FirebaseFirestore
 import com.sgtech.freevices.R
-import com.sgtech.freevices.views.LoginActivity
 import com.sgtech.freevices.views.MainActivity
 
 object FirebaseUtils {
@@ -28,8 +27,6 @@ object FirebaseUtils {
             startActivity(context, intent, null)
         } else {
             Log.d("FirebaseUtils", "User is not logged in")
-            val intent = Intent(context, LoginActivity::class.java)
-            startActivity(context, intent, null)
         }
 
     }
@@ -128,23 +125,48 @@ object FirebaseUtils {
             "email" to email,
             "phone" to phone
         )
+        val userRef = FirebaseFirestore.getInstance().collection("users").document(uid!!)
 
-        val db = FirebaseFirestore.getInstance()
-        val userRef = uid?.let { db.collection("users").document(it) }
+        userRef.set(data).addOnSuccessListener {
 
-        userRef?.set(data)?.addOnSuccessListener {
-            val valuesCollection = userRef.collection("values")
-            val initialValues = mapOf(
-                "tobacco" to 0,
-                "alcohol" to 0,
-                "parties" to 0,
-                "others" to 0
-            )
+            val categoriesCollection = userRef.collection("categories")
 
-            valuesCollection.document("categories")
-                .set(initialValues)
-        }?.addOnFailureListener { e ->
-            Log.d("FirebaseUtils", "createDataOnFirestore:failure", e)
+            val tobaccoData = mapOf("value" to 0)
+            val alcoholData = mapOf("value" to 0)
+            val partiesData = mapOf("value" to 0)
+            val othersData = mapOf("value" to 0)
+
+            categoriesCollection.document("tobacco").set(tobaccoData)
+                .addOnSuccessListener {
+                    Log.d("FirebaseUtils", "Tobacco data created successfully")
+                }
+                .addOnFailureListener { e ->
+                    Log.e("FirebaseUtils", "Failed to create tobacco data: $e")
+                }
+
+            categoriesCollection.document("alcohol").set(alcoholData)
+                .addOnSuccessListener {
+                    Log.d("FirebaseUtils", "Alcohol data created successfully")
+                }
+                .addOnFailureListener { e ->
+                    Log.e("FirebaseUtils", "Failed to create alcohol data: $e")
+                }
+
+            categoriesCollection.document("parties").set(partiesData)
+                .addOnSuccessListener {
+                    Log.d("FirebaseUtils", "Parties data created successfully")
+                }
+                .addOnFailureListener { e ->
+                    Log.e("FirebaseUtils", "Failed to create parties data: $e")
+                }
+
+            categoriesCollection.document("others").set(othersData)
+                .addOnSuccessListener {
+                    Log.d("FirebaseUtils", "Others data created successfully")
+                }
+                .addOnFailureListener { e ->
+                    Log.e("FirebaseUtils", "Failed to create others data: $e")
+                }
         }
     }
 
@@ -156,23 +178,22 @@ object FirebaseUtils {
 
         user?.let {
             val userId = user.uid
-            val valuesCollection = db
-                .collection("users")
-                .document(userId)
+            val categoriesCollection = db.collection("users").document(userId)
                 .collection("categories")
-                .document("values")
+
             val dataList = mutableListOf<Pair<String, Float>>()
 
-            valuesCollection.get()
-                .addOnSuccessListener { documentSnapshot ->
-                    val data = documentSnapshot.data
-                    if (data != null) {
-                        for ((name, value) in data) {
-                            if (value is Number) {
-                                dataList.add(Pair(name, value.toFloat()))
-                            }
+            categoriesCollection.get()
+                .addOnSuccessListener { querySnapshot ->
+                    for (document in querySnapshot.documents) {
+                        val categoryName = document.id
+                        val categoryValue = document.getDouble("value")
+
+                        if (categoryValue != null) {
+                            dataList.add(Pair(categoryName, categoryValue.toFloat()))
                         }
                     }
+
                     onSuccess(dataList)
                 }
                 .addOnFailureListener { exception ->
@@ -180,7 +201,6 @@ object FirebaseUtils {
                 }
         }
     }
-
 
     private fun buildAlertDialog(context: Context, title: String, message: String) {
         MaterialAlertDialogBuilder(context)

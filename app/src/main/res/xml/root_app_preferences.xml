@@ -9,7 +9,6 @@
         android:enabled="true"
         android:showDividers="middle">
         <SwitchPreference
-            android:id="@+id/dark_mode"
             android:key="dark_mode"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -26,7 +25,6 @@
         android:enabled="true"
         android:showDividers="middle">
         <CheckBoxPreference
-            android:id="@+id/notifications"
             android:key="notifications"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -34,7 +32,6 @@
             android:title="@string/title_enable_notifications"
             android:summary="@string/setting_allow_notifications"/>
         <Preference
-            android:id="@+id/reset_notifications"
             android:key="reset_notifications"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

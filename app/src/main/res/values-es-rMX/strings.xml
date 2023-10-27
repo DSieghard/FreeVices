@@ -2,8 +2,6 @@
 <resources>
     <string name="app_name">FreeVices - Control of vices</string>
     <string name="about_title">Sobre nosotros</string>
-    <string name="action_settings">Configuracion</string>
-    <string name="action_sign_out">Cerrar sesión</string>
     <string name="main_activity_title">Inicio</string>
     <string name="menu_home">Inicio</string>
     <string name="menu_history">Historial</string>
@@ -24,8 +22,6 @@
     <string name="sign_in">Iniciar sesión</string>
     <string name="create_account">Crear cuenta</string>
     <string name="welcome">Bienvenido otra vez: %s</string>
-    <string name="invalid_credentials_or_account_not_found">Credenciales inválidas o la cuenta no existe</string>
-    <string name="register">Registrarse</string>
     <string name="phone_optional">Telefono (Opcional)</string>
     <string name="first_name">Nombre</string>
     <string name="last_name">Apellido</string>
@@ -33,17 +29,13 @@
     <string name="username">Nombre de Usuario</string>
     <string name="register_email">Correo</string>
     <string name="back">Volver</string>
-    <string name="error_field_incomplete">Debes llenar todos los campos</string>
-    <string name="account_success">Cuenta creada con éxito</string>
     <string name="ok">Ok</string>
-    <string name="account_create_error">Error Creando cuenta</string>
-    <string name="tobacco_value">Tabaco: %s</string>
-    <string name="parties_value">Fiestas: %s</string>
-    <string name="alcohol_value">Alcohol: %s</string>
-    <string name="others_value">Otros: %s</string>
+    <string name="tobacco_value">Tabaco: $ %d</string>
+    <string name="parties_value">Fiestas: $ %d</string>
+    <string name="alcohol_value">Alcohol: $ %d</string>
+    <string name="others_value">Otros: $ %d</string>
     <string name="total_value">Total (Mensual): %s</string>
     <string name="total_value_ov">Total (Mensual): %s</string>
-    <string name="creating_account">Creando cuenta</string>
     <string name="error_user_already_exists">El usuario ya existe</string>
     <string name="error_invalid_email">Correo inválido</string>
     <string name="passwords_do_not_match">Las contraseñas no coinciden</string>

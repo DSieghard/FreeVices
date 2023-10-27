@@ -8,10 +8,6 @@
     tools:context=".views.CreateAccountActivity"
     tools:ignore="Autofill">
 
-    <!-- Register Text -->
-
-    <!-- Phone Number -->
-
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/fnlnConstraintLayout"
         android:layout_width="wrap_content"

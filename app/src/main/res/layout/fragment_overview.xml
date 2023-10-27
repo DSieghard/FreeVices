@@ -16,7 +16,6 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <com.github.mikephil.charting.charts.PieChart
-        android:id="@+id/alcoholGraph"
         android:layout_width="160dp"
         android:layout_height="160dp"
         android:layout_marginTop="96dp"
@@ -25,7 +24,6 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <com.github.mikephil.charting.charts.PieChart
-        android:id="@+id/partiesGraph"
         android:layout_width="160dp"
         android:layout_height="160dp"
         android:layout_marginTop="40dp"
@@ -34,7 +32,6 @@
         app:layout_constraintTop_toBottomOf="@+id/tobaccoGraph" />
 
     <com.github.mikephil.charting.charts.PieChart
-        android:id="@+id/othersGraph"
         android:layout_width="160dp"
         android:layout_height="160dp"
         android:layout_marginStart="20dp"
@@ -43,7 +40,6 @@
         app:layout_constraintTop_toBottomOf="@+id/tobaccoGraph" />
 
     <TextView
-        android:id="@+id/totalsOverView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="120dp"

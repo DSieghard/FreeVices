@@ -2,7 +2,7 @@
 <androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/drawer_layout"
+    android:id="@+id/drawerLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
@@ -17,16 +17,15 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
-                android:id="@+id/toolbar"
-                style="?attr/collapsingToolbarLayoutLargeStyle"
-                android:background="@android:color/transparent"
-                android:layout_width="match_parent"
-                android:layout_height="?attr/collapsingToolbarLayoutLargeSize"
-                android:minHeight="?attr/actionBarSize"
-                app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
-                app:liftOnScroll="true"
-                app:titleCentered="true"
-                app:statusBarScrim="@android:color/transparent">
+            style="?attr/collapsingToolbarLayoutLargeStyle"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/collapsingToolbarLayoutLargeSize"
+            android:background="@android:color/transparent"
+            android:minHeight="?attr/actionBarSize"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
+            app:liftOnScroll="true"
+            app:statusBarScrim="@android:color/transparent"
+            app:titleCentered="true">
 
         </com.google.android.material.appbar.CollapsingToolbarLayout>
 
@@ -43,7 +42,7 @@
             app:titleCentered="true" />
 
         <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-            android:id="@+id/floating_action_button"
+            android:id="@+id/floatingActionButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
