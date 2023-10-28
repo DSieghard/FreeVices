@@ -17,71 +17,74 @@
         app:layout_constraintVertical_bias="0.0">
 
         <com.github.mikephil.charting.charts.PieChart
-            android:id="@+id/tobaccoGraph"
-            android:layout_width="160dp"
-            android:layout_height="160dp"
-            android:layout_marginStart="40dp"
+            android:id="@+id/overviewGraph"
+            android:layout_width="340dp"
+            android:layout_height="340dp"
             android:layout_marginTop="96dp"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/tobaccoValueText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="25dp"
-            android:layout_marginTop="96dp"
+            android:layout_marginTop="60dp"
             android:text="@string/tobacco_value"
             android:textSize="20sp"
-            app:layout_constraintStart_toEndOf="@+id/tobaccoGraph"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.498"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/overviewGraph" />
 
-        <TextView
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/partiesValueText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="25dp"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="32dp"
             android:text="@string/parties_value"
             android:textSize="20sp"
-            app:layout_constraintStart_toEndOf="@+id/tobaccoGraph"
-            app:layout_constraintTop_toBottomOf="@+id/alcoholValueText" />
-
-        <TextView
-            android:id="@+id/alcoholValueText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="25dp"
-            android:layout_marginTop="12dp"
-            android:text="@string/alcohol_value"
-            android:textSize="20sp"
-            app:layout_constraintStart_toEndOf="@+id/tobaccoGraph"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.502"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tobaccoValueText" />
 
-        <TextView
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/otherValueText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="25dp"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="32dp"
             android:text="@string/others_value"
             android:textSize="20sp"
-            app:layout_constraintStart_toEndOf="@+id/tobaccoGraph"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/alcoholValueText" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/alcoholValueText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:text="@string/alcohol_value"
+            android:textSize="20sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.504"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/partiesValueText" />
 
-        <TextView
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/total_month"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="103dp"
-            android:layout_marginTop="108dp"
+            android:layout_marginTop="128dp"
             android:layout_marginEnd="103dp"
             android:text="@string/total_value"
             android:textSize="24sp"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.488"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/otherValueText" />
-
-
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

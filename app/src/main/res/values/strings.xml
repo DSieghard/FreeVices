@@ -32,11 +32,11 @@
     <string name="register_email">Email Address</string>
     <string name="back">Back</string>
     <string name="ok">OK</string>
-    <string name="tobacco_value">Tobacco: $ %d</string>
-    <string name="parties_value">Parties: $ %d</string>
-    <string name="alcohol_value">Alcohol: $ %d</string>
-    <string name="others_value">Others: $ %d</string>
-    <string name="total_value">Total (Monthly): %d \nWith this you can do: \n%s</string>
+    <string name="tobacco_value">Tobacco: $%d</string>
+    <string name="parties_value">Parties: $%d</string>
+    <string name="alcohol_value">Alcohol: $%d</string>
+    <string name="others_value">Others: $%d</string>
+    <string name="total_value">Total (Monthly): $%d</string>
     <string name="total_value_ov">Totals (Monthly): %d</string>
     <string name="error" translatable="false">Error</string>
     <string name="error_user_already_exists">User already exists</string>

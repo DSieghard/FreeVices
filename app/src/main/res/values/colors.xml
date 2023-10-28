@@ -2,4 +2,8 @@
 <resources>
     <color name="pieChartBackgroundColorDark">#00000000</color>
     <color name="pieChartBackgroundColorLight">#00FFFFFF</color>
+    <color name="tobacco">#754744</color>
+    <color name="alcohol">#677A43</color>
+    <color name="parties">#600194</color>
+    <color name="others">#AF0C00</color>
 </resources>

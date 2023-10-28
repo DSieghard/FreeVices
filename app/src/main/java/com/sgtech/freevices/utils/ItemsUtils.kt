@@ -7,6 +7,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
 import com.sgtech.freevices.R
+import com.sgtech.freevices.utils.FirebaseUtils.addDataToCategory
 
 object ItemsUtils {
     fun showAddAlertDialog(context: Context, rootView: View) {
@@ -50,7 +51,7 @@ object ItemsUtils {
         dialog.show()
     }
 
-    private fun showExpenseDialog(context: Context, option: String, rootView: View) {
+    private fun showExpenseDialog(context: Context, category: String, rootView: View) {
         val builder = MaterialAlertDialogBuilder(context)
         val inflater = LayoutInflater.from(context)
         val dialogView = inflater.inflate(R.layout.dialog_expense, null)
@@ -62,7 +63,18 @@ object ItemsUtils {
         builder.setView(dialogView)
         builder.setPositiveButton("Add") { _, _ ->
             val expenseAmount = editText.text.toString()
-            Snackbar.make(rootView, "Added expense for $option: $ $expenseAmount", Snackbar.LENGTH_SHORT).show()
+            // Convierte el valor ingresado en un entero (puedes validar la entrada antes de esto)
+            val expenseValue = expenseAmount.toIntOrNull() ?: 0
+            // Llama a la función para agregar el valor a la categoría
+            addDataToCategory(context, category, expenseValue, rootView)
+
+            // No necesitas actualizar los datos aquí
+
+            Snackbar.make(
+                rootView,
+                "Added expense for $category: $$expenseAmount",
+                Snackbar.LENGTH_SHORT
+            ).show()
         }
         builder.setNegativeButton("Cancel") { _, _ ->
             Snackbar.make(rootView, "Cancelled", Snackbar.LENGTH_SHORT).show()
@@ -70,4 +82,7 @@ object ItemsUtils {
 
         builder.show()
     }
+
+
+
 }

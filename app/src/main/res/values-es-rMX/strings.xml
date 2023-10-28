@@ -30,11 +30,11 @@
     <string name="register_email">Correo</string>
     <string name="back">Volver</string>
     <string name="ok">Ok</string>
-    <string name="tobacco_value">Tabaco: $ %d</string>
-    <string name="parties_value">Fiestas: $ %d</string>
-    <string name="alcohol_value">Alcohol: $ %d</string>
-    <string name="others_value">Otros: $ %d</string>
-    <string name="total_value">Total (Mensual): %s</string>
+    <string name="tobacco_value">Tabaco: $%d</string>
+    <string name="parties_value">Fiestas: $%d</string>
+    <string name="alcohol_value">Alcohol: $%d</string>
+    <string name="others_value">Otros: $%d</string>
+    <string name="total_value">Total (Mensual): $%d</string>
     <string name="total_value_ov">Total (Mensual): %s</string>
     <string name="error_user_already_exists">El usuario ya existe</string>
     <string name="error_invalid_email">Correo inválido</string>

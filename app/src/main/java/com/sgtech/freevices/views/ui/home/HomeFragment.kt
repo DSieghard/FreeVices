@@ -1,6 +1,5 @@
 package com.sgtech.freevices.views.ui.home
 
-import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -8,19 +7,21 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import com.github.mikephil.charting.animation.Easing
 import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
-import com.github.mikephil.charting.utils.ColorTemplate
 import com.google.android.material.textview.MaterialTextView
 import com.sgtech.freevices.R
 import com.sgtech.freevices.databinding.FragmentHomeBinding
-import com.sgtech.freevices.utils.FirebaseUtils.getDataFromFirestore
+import com.sgtech.freevices.utils.FirebaseUtils.dataHandler
 import com.sgtech.freevices.utils.FirebaseUtils.hideLoadingDialog
 import com.sgtech.freevices.utils.FirebaseUtils.showLoadingDialog
 
-class HomeFragment : Fragment() {
+class HomeFragment : Fragment(), DataUpdateListener {
 
     private var _binding: FragmentHomeBinding? = null
     private lateinit var pieChart: PieChart
@@ -28,26 +29,55 @@ class HomeFragment : Fragment() {
     private lateinit var alcoholDataText: MaterialTextView
     private lateinit var partiesDataText: MaterialTextView
     private lateinit var othersDataText: MaterialTextView
+    private lateinit var totalMonth: MaterialTextView
+    private lateinit var viewModel: HomeViewModel
+
+
 
     private val binding get() = _binding!!
+
+    override fun reloadData() {
+        showLoadingDialog(requireContext())
+        dataHandler(requireContext()) { dataMap ->
+            viewModel.updatePieChartData(dataMap)
+            viewModel.updateTotalData(dataMap)
+        }
+        hideLoadingDialog()
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+
+        viewModel = ViewModelProvider(this).get(HomeViewModel::class.java)
+        viewModel.getPieChartData().observe(viewLifecycleOwner, Observer { newData ->
+            updatePieChart(newData)
+        })
+        viewModel.getTotalData().observe(viewLifecycleOwner, Observer { newData ->
+            totalCalculate(newData)
+        })
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         val root: View = binding.root
         tobaccoDataText = root.findViewById(R.id.tobaccoValueText)
         alcoholDataText = root.findViewById(R.id.alcoholValueText)
         partiesDataText = root.findViewById(R.id.partiesValueText)
         othersDataText = root.findViewById(R.id.otherValueText)
-        pieChart = root.findViewById(R.id.tobaccoGraph)
-        showLoadingDialog(root.context)
-        pieChartHandler()
-        setTextFromDatabase()
-        hideLoadingDialog()
+        pieChart = root.findViewById(R.id.overviewGraph)
+        totalMonth = root.findViewById(R.id.total_month)
+        Log.d("HomeFragment", "onViewCreated")
         return root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        showLoadingDialog(requireContext())
+        dataHandler(requireContext()) { dataMap ->
+            updatePieChart(dataMap)
+            totalCalculate(dataForWeek = dataMap)
+        }
+        hideLoadingDialog()
     }
 
     override fun onDestroyView() {
@@ -55,70 +85,51 @@ class HomeFragment : Fragment() {
         _binding = null
     }
 
-    private fun pieChartHandler() {
-        getDataFromFirestore(
-            onSuccess = { data ->
-                val entries = data.map { (name, value) ->
-                    PieEntry(value, name)
-                }
 
-                val dataSet = PieDataSet(entries, "")
-                dataSet.colors = ColorTemplate.COLORFUL_COLORS.toList()
+    private fun updatePieChart(dataMap: Map<String, Float>) {
+        // Configurar el gráfico de pastel (PieChart) y asignar los datos
+        val pieChart = binding.root.findViewById<PieChart>(R.id.overviewGraph) // Asegúrate de tener la referencia correcta al gráfico
 
-                val pieData = PieData(dataSet)
-                pieChart.data = pieData
+        val entries = mutableListOf<PieEntry>()
+        for ((category, value) in dataMap) {
+            entries.add(PieEntry(value, category))
+        }
 
-                val backgroundColor =
-                    when (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
-                        Configuration.UI_MODE_NIGHT_YES -> {
-                            ContextCompat.getColor(
-                                requireContext(),
-                                R.color.pieChartBackgroundColorDark
-                            )
-                        }
-
-                        else -> {
-                            ContextCompat.getColor(
-                                requireContext(),
-                                R.color.pieChartBackgroundColorLight
-                            )
-                        }
-                    }
-
-                pieChart.setBackgroundColor(backgroundColor)
-                pieChart.invalidate()
-            },
-            onFailure = { exception ->
-                Log.e("TAG", "Error retrieving data: $exception")
-            }
+        val dataSet = PieDataSet(entries, "Categorías")
+        dataSet.colors = listOf(
+            ContextCompat.getColor(requireContext(), R.color.tobacco),
+            ContextCompat.getColor(requireContext(), R.color.alcohol),
+            ContextCompat.getColor(requireContext(), R.color.parties),
+            ContextCompat.getColor(requireContext(), R.color.others)
         )
+        val pieData = PieData(dataSet)
+        pieChart.data = pieData
+
+        // Configurar opciones de visualización
+        pieChart.setUsePercentValues(true)
+        pieChart.centerText = "Categorías"
+        pieChart.animateY(1400, Easing.EaseInOutQuad)
+
+        pieChart.notifyDataSetChanged()
+        pieChart.invalidate()
     }
 
-    private fun setTextFromDatabase() {
-        getDataFromFirestore(
-            onSuccess = { dataList ->
-                val tobaccoValue = dataList.find { it.first == "tobacco" }?.second?.toInt() ?: 0
-                val alcoholValue = dataList.find { it.first == "alcohol" }?.second?.toInt() ?: 0
-                val partiesValue = dataList.find { it.first == "parties" }?.second?.toInt() ?: 0
-                val othersValue = dataList.find { it.first == "others" }?.second?.toInt() ?: 0
 
-                val tobaccoText = getString(R.string.tobacco_value).format(tobaccoValue)
-                val alcoholText = getString(R.string.alcohol_value).format(alcoholValue)
-                val partiesText = getString(R.string.parties_value).format(partiesValue)
-                val othersText = getString(R.string.others_value).format(othersValue)
+    private fun totalCalculate(dataForWeek: Map<String, Float>) {
+        val totalMonth = requireView().findViewById<MaterialTextView>(R.id.total_month)
 
-                tobaccoDataText.text = tobaccoText
-                alcoholDataText.text = alcoholText
-                partiesDataText.text = partiesText
-                othersDataText.text = othersText
+        // Calcula el total y muestra los valores
+        val tobaccoValue = dataForWeek[getString(R.string.tobacco)] ?: 0.0f
+        val alcoholValue = dataForWeek[getString(R.string.alcohol)] ?: 0.0f
+        val partiesValue = dataForWeek[getString(R.string.parties)] ?: 0.0f
+        val othersValue = dataForWeek[getString(R.string.others)] ?: 0.0f
 
-                Log.d("HomeFragment", "Data list size: ${dataList.size}")
-                Log.d("HomeFragment", "Data list: $dataList")
-            },
-            onFailure = { exception ->
-                Log.e("HomeFragment", "Failed to retrieve data: $exception")
-            }
-        )
+        val total = tobaccoValue + alcoholValue + partiesValue + othersValue
 
+        tobaccoDataText.text = getString(R.string.tobacco_value, tobaccoValue.toInt())
+        alcoholDataText.text = getString(R.string.alcohol_value, alcoholValue.toInt())
+        partiesDataText.text = getString(R.string.parties_value, partiesValue.toInt())
+        othersDataText.text = getString(R.string.others_value, othersValue.toInt())
+        totalMonth.text = getString(R.string.total_value, total.toInt())
     }
 }
