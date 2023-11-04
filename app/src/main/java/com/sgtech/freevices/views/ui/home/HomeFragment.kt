@@ -1,5 +1,6 @@
 package com.sgtech.freevices.views.ui.home
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -15,13 +16,13 @@ import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textview.MaterialTextView
 import com.sgtech.freevices.R
 import com.sgtech.freevices.databinding.FragmentHomeBinding
 import com.sgtech.freevices.utils.FirebaseUtils.dataHandler
 import com.sgtech.freevices.utils.FirebaseUtils.hideLoadingDialog
 import com.sgtech.freevices.utils.FirebaseUtils.showLoadingDialog
+import com.sgtech.freevices.utils.ItemsUtils.showExpenseDialog
 
 class HomeFragment : Fragment(), DataUpdateListener {
 
@@ -51,14 +52,6 @@ class HomeFragment : Fragment(), DataUpdateListener {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-
-        viewModel = ViewModelProvider(this)[HomeViewModel::class.java]
-        viewModel.getPieChartData().observe(viewLifecycleOwner) { newData ->
-            updatePieChart(newData)
-        }
-        viewModel.getTotalData().observe(viewLifecycleOwner) { newData ->
-            totalCalculate(newData)
-        }
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         val root: View = binding.root
         tobaccoDataText = root.findViewById(R.id.tobaccoValueText)
@@ -90,10 +83,13 @@ class HomeFragment : Fragment(), DataUpdateListener {
         _binding = null
     }
 
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        viewModel = ViewModelProvider(this)[HomeViewModel::class.java]
+    }
 
     private fun updatePieChart(dataMap: Map<String, Float>) {
-        // Configurar el gráfico de pastel (PieChart) y asignar los datos
-        val pieChart = binding.root.findViewById<PieChart>(R.id.overviewGraph) // Asegúrate de tener la referencia correcta al gráfico
+        val pieChart = binding.root.findViewById<PieChart>(R.id.overviewGraph)
 
         val entries = mutableListOf<PieEntry>()
         for ((category, value) in dataMap) {
@@ -110,20 +106,16 @@ class HomeFragment : Fragment(), DataUpdateListener {
         val pieData = PieData(dataSet)
         pieChart.data = pieData
 
-        // Configurar opciones de visualización
         pieChart.setUsePercentValues(true)
-        pieChart.centerText = "Categorías"
+        pieChart.isDrawHoleEnabled = false
         pieChart.animateY(1400, Easing.EaseInOutQuad)
-
         pieChart.notifyDataSetChanged()
         pieChart.invalidate()
     }
 
-
     private fun totalCalculate(dataForWeek: Map<String, Float>) {
         val totalMonth = requireView().findViewById<MaterialTextView>(R.id.total_month)
 
-        // Calcula el total y muestra los valores
         val tobaccoValue = dataForWeek[getString(R.string.tobacco)] ?: 0.0f
         val alcoholValue = dataForWeek[getString(R.string.alcohol)] ?: 0.0f
         val partiesValue = dataForWeek[getString(R.string.parties)] ?: 0.0f
@@ -145,21 +137,25 @@ class HomeFragment : Fragment(), DataUpdateListener {
         popupMenu.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.alcoholMenu -> {
-                    Snackbar.make( view, "We are working on that, wait.", Snackbar.LENGTH_LONG).show()
+                    showExpenseDialog(requireContext(), getString(R.string.alcohol), view)
+                    viewModel.getAlcoholData(requireContext())
                     return@setOnMenuItemClickListener true
                 }
                 R.id.partiesMenu -> {
-                    Snackbar.make( view, "We are working on that, wait.", Snackbar.LENGTH_LONG).show()
+                    showExpenseDialog(requireContext(), getString(R.string.parties), view)
+                    viewModel.getPartiesData(requireContext())
                     return@setOnMenuItemClickListener true
                 }
 
                 R.id.othersMenu -> {
-                    Snackbar.make( view, "We are working on that, wait.", Snackbar.LENGTH_LONG).show()
+                    showExpenseDialog(requireContext(), getString(R.string.others), view)
+                    viewModel.getOthersData(requireContext())
                     return@setOnMenuItemClickListener true
                 }
 
                 R.id.tobaccoMenu -> {
-                    Snackbar.make( view, "We are working on that, wait.", Snackbar.LENGTH_LONG).show()
+                    showExpenseDialog(requireContext(), getString(R.string.tobacco), view)
+                    viewModel.getTobaccoData(requireContext())
                     return@setOnMenuItemClickListener true
                 }
                 else -> return@setOnMenuItemClickListener false

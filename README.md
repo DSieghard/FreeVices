@@ -12,6 +12,7 @@
 - Home Screen
 - Overview Screen
 - History Screen
+- Settings Screen
 
 ## Reported Issues
 - None yet

@@ -51,7 +51,7 @@ object ItemsUtils {
         dialog.show()
     }
 
-    private fun showExpenseDialog(context: Context, category: String, rootView: View) {
+    fun showExpenseDialog(context: Context, category: String, rootView: View) {
         val builder = MaterialAlertDialogBuilder(context)
         val inflater = LayoutInflater.from(context)
         val dialogView = inflater.inflate(R.layout.dialog_expense, null)

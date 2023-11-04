@@ -260,7 +260,7 @@ object FirebaseUtils {
     }
 
 
-    private fun getDataFromFirestoreForLastWeek(
+    fun getDataFromFirestoreForLastWeek(
         context: Context,
         option: String,
         onSuccess: (List<Pair<String, Float>>) -> Unit,
