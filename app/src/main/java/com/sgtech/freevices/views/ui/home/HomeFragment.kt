@@ -5,15 +5,17 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.PopupMenu
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.github.mikephil.charting.animation.Easing
 import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textview.MaterialTextView
 import com.sgtech.freevices.R
 import com.sgtech.freevices.databinding.FragmentHomeBinding
@@ -31,8 +33,7 @@ class HomeFragment : Fragment(), DataUpdateListener {
     private lateinit var othersDataText: MaterialTextView
     private lateinit var totalMonth: MaterialTextView
     private lateinit var viewModel: HomeViewModel
-
-
+    private lateinit var menuFab: ExtendedFloatingActionButton
 
     private val binding get() = _binding!!
 
@@ -51,13 +52,13 @@ class HomeFragment : Fragment(), DataUpdateListener {
         savedInstanceState: Bundle?
     ): View {
 
-        viewModel = ViewModelProvider(this).get(HomeViewModel::class.java)
-        viewModel.getPieChartData().observe(viewLifecycleOwner, Observer { newData ->
+        viewModel = ViewModelProvider(this)[HomeViewModel::class.java]
+        viewModel.getPieChartData().observe(viewLifecycleOwner) { newData ->
             updatePieChart(newData)
-        })
-        viewModel.getTotalData().observe(viewLifecycleOwner, Observer { newData ->
+        }
+        viewModel.getTotalData().observe(viewLifecycleOwner) { newData ->
             totalCalculate(newData)
-        })
+        }
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         val root: View = binding.root
         tobaccoDataText = root.findViewById(R.id.tobaccoValueText)
@@ -78,6 +79,10 @@ class HomeFragment : Fragment(), DataUpdateListener {
             totalCalculate(dataForWeek = dataMap)
         }
         hideLoadingDialog()
+
+        menuFab = binding.root.findViewById(R.id.menuEFab)
+        menuFab.setOnClickListener { showPopupMenu(it) }
+
     }
 
     override fun onDestroyView() {
@@ -131,5 +136,36 @@ class HomeFragment : Fragment(), DataUpdateListener {
         partiesDataText.text = getString(R.string.parties_value, partiesValue.toInt())
         othersDataText.text = getString(R.string.others_value, othersValue.toInt())
         totalMonth.text = getString(R.string.total_value, total.toInt())
+    }
+
+    private fun showPopupMenu(view: View) {
+        val popupMenu = PopupMenu(requireContext(), view)
+        popupMenu.menuInflater.inflate(R.menu.menu_fab, popupMenu.menu)
+
+        popupMenu.setOnMenuItemClickListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.alcoholMenu -> {
+                    Snackbar.make( view, "We are working on that, wait.", Snackbar.LENGTH_LONG).show()
+                    return@setOnMenuItemClickListener true
+                }
+                R.id.partiesMenu -> {
+                    Snackbar.make( view, "We are working on that, wait.", Snackbar.LENGTH_LONG).show()
+                    return@setOnMenuItemClickListener true
+                }
+
+                R.id.othersMenu -> {
+                    Snackbar.make( view, "We are working on that, wait.", Snackbar.LENGTH_LONG).show()
+                    return@setOnMenuItemClickListener true
+                }
+
+                R.id.tobaccoMenu -> {
+                    Snackbar.make( view, "We are working on that, wait.", Snackbar.LENGTH_LONG).show()
+                    return@setOnMenuItemClickListener true
+                }
+                else -> return@setOnMenuItemClickListener false
+            }
+        }
+
+        popupMenu.show()
     }
 }

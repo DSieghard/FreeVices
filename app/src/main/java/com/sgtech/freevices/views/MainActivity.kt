@@ -16,7 +16,6 @@ import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.sgtech.freevices.R
 import com.sgtech.freevices.databinding.ActivityMainBinding
-import com.sgtech.freevices.utils.ItemsUtils.showAddAlertDialog
 
 class MainActivity : AppCompatActivity(){
 
@@ -29,9 +28,6 @@ class MainActivity : AppCompatActivity(){
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setSupportActionBar(binding.mToolbar)
-        binding.floatingActionButton.setOnClickListener {
-            showAddAlertDialog(this, binding.root)
-        }
 
         val drawerLayout: DrawerLayout = binding.drawerLayout
         val navView: NavigationView = binding.navView
