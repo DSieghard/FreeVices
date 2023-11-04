@@ -78,4 +78,5 @@
     <string name="logout_confirmation">Are you sure you want to logout?</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
+    <string name="login_or_register">Login or Register</string>
 </resources>
