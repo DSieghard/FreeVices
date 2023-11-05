@@ -33,4 +33,13 @@
             android:id="@+id/action_nav_overview_to_nav_history"
             app:destination="@id/nav_history" />
     </fragment>
+
+    <activity
+        android:id="@+id/nav_settings"
+        android:name="com.sgtech.freevices.views.SettingsActivity"
+        android:label="@string/settings"
+        tools:layout="@layout/activity_settings" />
+        <action
+            android:id="@+id/action_nav_settings_to_nav_overview"
+            app:destination="@id/nav_overview" />
 </navigation>

@@ -1,6 +1,7 @@
 package com.sgtech.freevices.views.ui.home
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -31,9 +32,10 @@ class HomeViewModel : ViewModel() {
         return errorData
     }
 
-    fun getDataFromFirestore(context: Context) {
-        FirebaseUtils.getDataFromFirestoreForLastWeek(context, DEFAULT_OPTION, { newData ->
+    fun getDataFromFirestore(context: Context, category: String) {
+        FirebaseUtils.getDataFromFirestoreForLastWeek(context, category, { newData ->
             pieChartData.value = newData.toMap()
+            Log.d("FirebaseUtils", "Pie chart data: $newData")
         }, { e ->
             errorData.value = e
         })

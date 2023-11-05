@@ -7,7 +7,7 @@
         android:enabled="true"
         android:showDividers="middle">
         <Preference
-            android:key="name"
+            android:key="update_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:defaultValue="Default value"
@@ -16,6 +16,7 @@
             android:title="@string/title_update_name"
             android:summary="@string/settings_update_name"/>
         <Preference
+            android:key="update_username"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:defaultValue="Default value"
@@ -24,10 +25,10 @@
             android:title="@string/title_update_username"
             android:summary="@string/settings_update_username"/>
         <Preference
+            android:key="update_email"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:defaultValue="Default value"
-            android:key="email"
             android:selectAllOnFocus="true"
             android:singleLine="true"
             android:title="@string/title_update_email"
@@ -42,6 +43,7 @@
         android:enabled="true"
         android:showDividers="middle">
         <Preference
+            android:key="change_password"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:selectAllOnFocus="true"
@@ -49,6 +51,7 @@
             android:title="@string/title_change_password"
             android:summary="@string/settings_change_password"/>
         <Preference
+            android:key="delete_account"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:selectAllOnFocus="true"

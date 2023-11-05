@@ -25,11 +25,8 @@ import java.util.concurrent.CountDownLatch
 object FirebaseUtils {
     private var loadingDialog: AlertDialog? = null
     fun checkIfUserIsLoggedIn(context: Context) {
-        context.getString(R.string.welcome)
         val currentUser = FirebaseAuth.getInstance().currentUser
         if (currentUser != null) {
-            val welcome = context.getString(R.string.welcome, currentUser.email)
-            Log.d("FirebaseUtils", welcome)
             val intent = Intent(context, MainActivity::class.java)
             startActivity(context, intent, null)
         } else {
@@ -52,19 +49,16 @@ object FirebaseUtils {
                         val title = context.getString(R.string.error)
                         val message = context.getString(R.string.error_user_not_found)
                         buildAlertDialog(context, title, message)
-                        Log.d("FirebaseUtils", "signInWithEmail:failure", e)
                         hideLoadingDialog()
                     } catch (ec: FirebaseAuthActionCodeException) {
                         val title = context.getString(R.string.error)
                         val message = context.getString(R.string.error_invalid_token)
                         buildAlertDialog(context, title, message)
-                        Log.d("FirebaseUtils", "signInWithEmail:failure", ec)
                         hideLoadingDialog()
                     } catch (e: Exception) {
                         val title = context.getString(R.string.error)
                         val message = context.getString(R.string.error_unknown)
                         buildAlertDialog(context, title, message)
-                        Log.d("FirebaseUtils", "signInWithEmail:failure", e)
                         hideLoadingDialog()
                     } finally {
                         hideLoadingDialog()
@@ -73,8 +67,6 @@ object FirebaseUtils {
             }
             .addOnFailureListener { e ->
                 Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
-                Log.d("FirebaseUtils", e.message.toString())
-                Log.d("FirebaseUtils", "signInWithEmail:failure")
             }
     }
 
@@ -159,13 +151,13 @@ object FirebaseUtils {
         }
     }
 
-    fun addDataToCategory(context: Context, option: String, dataValue: Int, rootView: View) {
+    fun addDataToCategory(context: Context, option: String, dataValue: Int, rootView: View, onSuccess: () -> Unit) {
         val subcollectionName = when (option) {
             context.getString(R.string.tobacco) -> "tobacco"
             context.getString(R.string.alcohol) -> "alcohol"
             context.getString(R.string.parties) -> "parties"
             context.getString(R.string.others) -> "others"
-            else -> "default" // Otra opción predeterminada si es necesario
+            else -> "default"
         }
 
         val auth = FirebaseAuth.getInstance()
@@ -173,27 +165,20 @@ object FirebaseUtils {
         val uid = user?.uid
         val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
 
-        // Obtiene una referencia a la colección "categories" para el usuario actual
         val categoriesCollection = FirebaseFirestore.getInstance().collection("users").document(uid!!)
             .collection("categories")
 
-        // Obtiene una referencia a la subcolección "data" de la categoría específica
         val categoryDataCollection = categoriesCollection.document(subcollectionName).collection("data")
 
-        // Obtiene una referencia al documento correspondiente al día actual en la subcolección "data"
         val currentDayDataDocument = categoryDataCollection.document(currentDate)
 
-        // Verifica si el documento ya existe
         currentDayDataDocument.get()
             .addOnSuccessListener { documentSnapshot ->
                 if (documentSnapshot.exists()) {
-                    // El documento ya existe, obtén el valor actual
                     val currentValue = documentSnapshot.getLong("value")?.toInt() ?: 0
 
-                    // Suma el nuevo valor al valor actual
                     val updatedValue = currentValue + dataValue
 
-                    // Actualiza el valor en la base de datos
                     currentDayDataDocument.set(mapOf("value" to updatedValue))
                         .addOnSuccessListener {
                             Snackbar.make(rootView, "Data updated successfully", Snackbar.LENGTH_SHORT).show()
@@ -214,6 +199,7 @@ object FirebaseUtils {
                             Log.e("FirebaseUtils", "Failed to add data to $subcollectionName on $currentDate: $e")
                         }
                 }
+                onSuccess()
             }
             .addOnFailureListener { e ->
                 Log.e("FirebaseUtils", "Error checking for existing data: $e")

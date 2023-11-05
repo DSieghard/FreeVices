@@ -42,11 +42,6 @@ class MainActivity : AppCompatActivity(){
 
         navView.setNavigationItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
-                R.id.nav_settings -> {
-                    val intent = Intent(this, SettingsActivity::class.java)
-                    startActivity(intent)
-                }
-
                 R.id.nav_logout -> {
                     MaterialAlertDialogBuilder(this)
                         .setTitle(getString(R.string.logout))
@@ -88,5 +83,6 @@ class MainActivity : AppCompatActivity(){
         val navView: NavigationView = findViewById(R.id.nav_view)
         navView.menu.findItem(R.id.nav_settings).isChecked = false
     }
+
 
 }
