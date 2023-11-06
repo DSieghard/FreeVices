@@ -245,6 +245,30 @@ object FirebaseUtils {
         }
     }
 
+    fun deleteUserDataFromFirestore() {
+        val db = FirebaseFirestore.getInstance()
+        db.collection("users").document(FirebaseAuth.getInstance().currentUser!!.uid).delete()
+    }
+
+    fun updateEmailOnFirestore(newEmail: String, view: View) {
+        val db = FirebaseFirestore.getInstance()
+        val currentUser = FirebaseAuth.getInstance().currentUser
+
+        if (currentUser != null) {
+            val userDb = db.collection("users").document(currentUser.uid)
+
+            userDb.update("email", newEmail)
+                .addOnSuccessListener {
+                    Snackbar.make(view, "Email updated successfully", Snackbar.LENGTH_LONG).show()
+                }
+                .addOnFailureListener { e ->
+                    val errorMessage = e.message ?: "Error updating email"
+                    Snackbar.make(view, errorMessage, Snackbar.LENGTH_LONG).show()
+                }
+        } else {
+            Snackbar.make(view, "Error updating email", Snackbar.LENGTH_LONG).show()
+        }
+    }
 
     fun getDataFromFirestoreForLastWeek(
         context: Context,
