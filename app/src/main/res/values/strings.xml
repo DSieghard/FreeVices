@@ -87,4 +87,13 @@
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
     <string name="menu_gallery">Gallery</string>
+    <string name="delete_last_30_days_dialog">Delete Last 30 Days</string>
+    <string name="data_updated_successfully">Data updated successfully</string>
+    <string name="error_updating_data">Error updating data</string>
+    <string name="data_added_successfully">Data added successfully</string>
+    <string name="error_adding_data">Error adding data</string>
+    <string name="email_updated_successfully">Email updated successfully</string>
+    <string name="error_updating_email">Error updating email</string>
+    <string name="error_deleting_data">Error deleting data: %1$s</string>
+    <string name="data_deleted">Data deleted</string>
 </resources>

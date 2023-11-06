@@ -76,7 +76,6 @@ object FirebaseUtils {
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    Log.d("FirebaseUtils", "createAccount:success")
                     hideLoadingDialog()
                     onSuccess()
                     startActivity(context, Intent(context, MainActivity::class.java), null)
@@ -85,27 +84,23 @@ object FirebaseUtils {
             .addOnFailureListener { e ->
                 when (e) {
                     is FirebaseAuthUserCollisionException -> {
-                        Log.d("FirebaseUtils", "createAccount: User collision exception")
                         val title = context.getString(R.string.error)
                         val message = context.getString(R.string.error_user_already_exists)
                         buildAlertDialog(context, title, message)
                         hideLoadingDialog()
                     }
                     is FirebaseAuthInvalidUserException -> {
-                        Log.d("FirebaseUtils", "createAccount: Invalid user exception", e)
                         val title = context.getString(R.string.error)
                         val message = context.getString(R.string.error_invalid_email)
                         buildAlertDialog(context, title, message)
                         hideLoadingDialog()
                     }
                     else -> {
-                        Log.d("FirebaseUtils", "createAccount: General exception", e)
                         hideLoadingDialog()
                     }
                 }
             }
-    } // Ok
-
+    }
 
     fun createDataOnFirestore(
         firstName: String,
@@ -152,7 +147,7 @@ object FirebaseUtils {
     }
 
     fun addDataToCategory(context: Context, option: String, dataValue: Int, rootView: View, onSuccess: () -> Unit) {
-        val subcollectionName = when (option) {
+        val subCollectionName = when (option) {
             context.getString(R.string.tobacco) -> "tobacco"
             context.getString(R.string.alcohol) -> "alcohol"
             context.getString(R.string.parties) -> "parties"
@@ -168,7 +163,7 @@ object FirebaseUtils {
         val categoriesCollection = FirebaseFirestore.getInstance().collection("users").document(uid!!)
             .collection("categories")
 
-        val categoryDataCollection = categoriesCollection.document(subcollectionName).collection("data")
+        val categoryDataCollection = categoriesCollection.document(subCollectionName).collection("data")
 
         val currentDayDataDocument = categoryDataCollection.document(currentDate)
 
@@ -181,28 +176,29 @@ object FirebaseUtils {
 
                     currentDayDataDocument.set(mapOf("value" to updatedValue))
                         .addOnSuccessListener {
-                            Snackbar.make(rootView, "Data updated successfully", Snackbar.LENGTH_SHORT).show()
-                            Log.d("FirebaseUtils", "Data updated successfully for $subcollectionName on $currentDate")
+                            Snackbar.make(rootView,
+                                context.getString(R.string.data_updated_successfully), Snackbar.LENGTH_SHORT).show()
                         }
-                        .addOnFailureListener { e ->
-                            Log.e("FirebaseUtils", "Failed to update data for $subcollectionName on $currentDate: $e")
+                        .addOnFailureListener {
+                            Snackbar.make(rootView,
+                                context.getString(R.string.error_updating_data), Snackbar.LENGTH_SHORT).show()
                         }
                 } else {
-                    // El documento no existe, crea uno nuevo con el valor proporcionado
                     val newData = mapOf("value" to dataValue)
                     currentDayDataDocument.set(newData)
                         .addOnSuccessListener {
-                            Snackbar.make(rootView, "Data added successfully", Snackbar.LENGTH_SHORT).show()
-                            Log.d("FirebaseUtils", "Data added successfully to $subcollectionName on $currentDate")
+                            Snackbar.make(rootView,
+                                context.getString(R.string.data_added_successfully), Snackbar.LENGTH_SHORT).show()
                         }
-                        .addOnFailureListener { e ->
-                            Log.e("FirebaseUtils", "Failed to add data to $subcollectionName on $currentDate: $e")
+                        .addOnFailureListener {
+                            Snackbar.make(rootView,
+                                context.getString(R.string.error_adding_data), Snackbar.LENGTH_SHORT).show()
                         }
                 }
                 onSuccess()
             }
-            .addOnFailureListener { e ->
-                Log.e("FirebaseUtils", "Error checking for existing data: $e")
+            .addOnFailureListener {
+                Snackbar.make(rootView, "Error getting data", Snackbar.LENGTH_SHORT).show()
             }
     }
 
@@ -235,8 +231,7 @@ object FirebaseUtils {
                     }
 
                 }
-            ) { exception ->
-                Log.e("TAG", "Error retrieving data for $category: $exception")
+            ) {
                 callbackCountdown.countDown()
                 if (callbackCountdown.count.toInt() == 0) {
                     onSuccess(dataMap)
@@ -250,7 +245,7 @@ object FirebaseUtils {
         db.collection("users").document(FirebaseAuth.getInstance().currentUser!!.uid).delete()
     }
 
-    fun updateEmailOnFirestore(newEmail: String, view: View) {
+    fun updateEmailOnFirestore(newEmail: String, view: View, context: Context) {
         val db = FirebaseFirestore.getInstance()
         val currentUser = FirebaseAuth.getInstance().currentUser
 
@@ -259,14 +254,15 @@ object FirebaseUtils {
 
             userDb.update("email", newEmail)
                 .addOnSuccessListener {
-                    Snackbar.make(view, "Email updated successfully", Snackbar.LENGTH_LONG).show()
+                    Snackbar.make(view,
+                        context.getString(R.string.email_updated_successfully), Snackbar.LENGTH_LONG).show()
                 }
                 .addOnFailureListener { e ->
-                    val errorMessage = e.message ?: "Error updating email"
+                    val errorMessage = e.message ?: context.getString(R.string.error_updating_email)
                     Snackbar.make(view, errorMessage, Snackbar.LENGTH_LONG).show()
                 }
         } else {
-            Snackbar.make(view, "Error updating email", Snackbar.LENGTH_LONG).show()
+            Snackbar.make(view, context.getString(R.string.error_updating_email), Snackbar.LENGTH_LONG).show()
         }
     }
 
@@ -282,8 +278,7 @@ object FirebaseUtils {
 
         user?.let {
             val userId = user.uid
-            Log.d("FirebaseUtils", userId)
-            val subcollectionName = when (option) {
+            val subCollectionName = when (option) {
                 context.getString(R.string.tobacco) -> "tobacco"
                 context.getString(R.string.alcohol) -> "alcohol"
                 context.getString(R.string.parties) -> "parties"
@@ -292,43 +287,149 @@ object FirebaseUtils {
             }
 
             val categoriesCollection = db.collection("users").document(userId)
-                .collection("categories").document(subcollectionName).collection("data")
-
+                .collection("categories").document(subCollectionName).collection("data")
 
             val dataList = mutableListOf<Pair<String, Float>>()
-
             val currentDate = Calendar.getInstance()
             val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
 
             for (i in 0 until 7) {
                 val currentDateStr = dateFormat.format(currentDate.time)
 
-                // Crea una referencia al documento para el día actual
                 val documentRef = categoriesCollection.document(currentDateStr)
-                Log.d("FirebaseUtils", currentDateStr)
-
                 documentRef.get()
                     .addOnSuccessListener { documentSnapshot ->
-                        val categoryName = documentRef.id // El ID del documento es la fecha (currentDateStr)
+                        val categoryName = documentRef.id
                         val categoryValue = documentSnapshot.getDouble("value")?.toFloat() ?: 0.0f
                         dataList.add(Pair(categoryName, categoryValue))
-                        Log.d("FirebaseUtils", "$categoryName: $categoryValue")
-                        Log.d("FirebaseUtils", "$dataList")
 
-                        // Verifica si se han obtenido todos los datos, independientemente del número
                         if (dataList.size == 7) {
                             onSuccess(dataList)
                         }
                     }
                     .addOnFailureListener { exception ->
                         onFailure(exception)
-                        Log.d("FirebaseUtils", "Error retrieving data: $exception")
                     }
 
                 currentDate.add(Calendar.DAY_OF_YEAR, -1)
             }
         }
     }
+
+    private fun deleteHistory30Days(category: String, context: Context, view: View) {
+        val db = FirebaseFirestore.getInstance()
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        val userId = currentUser?.uid ?: return
+
+        val currentDate = Calendar.getInstance().time
+
+        val calendar = Calendar.getInstance()
+        calendar.time = currentDate
+        calendar.add(Calendar.DAY_OF_MONTH, -30)
+        val thirtyDaysAgo = calendar.time
+
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+
+        val categoriesCollection = db.collection("users").document(userId)
+            .collection("categories").document(category).collection("data")
+
+        categoriesCollection
+            .whereGreaterThanOrEqualTo("date", dateFormat.format(thirtyDaysAgo))
+            .get()
+            .addOnSuccessListener { documents ->
+                for (document in documents) {
+                    document.reference.delete()
+                }
+            }
+            .addOnFailureListener { exception ->
+                Snackbar.make(view, context.getString(R.string.error_deleting_data, exception), Snackbar.LENGTH_SHORT).show()
+            }
+    }
+
+    private fun deleteHistory60Days(category: String, context: Context, view: View) {
+        val db = FirebaseFirestore.getInstance()
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        val userId = currentUser?.uid ?: return
+
+        val currentDate = Calendar.getInstance().time
+
+        val calendar = Calendar.getInstance()
+        calendar.time = currentDate
+        calendar.add(Calendar.DAY_OF_MONTH, -60)
+        val sixtyDaysAgo = calendar.time
+
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+
+        val categoriesCollection = db.collection("users").document(userId)
+            .collection("categories").document(category).collection("data")
+
+        categoriesCollection
+            .whereGreaterThanOrEqualTo("date", dateFormat.format(sixtyDaysAgo))
+            .get()
+            .addOnSuccessListener { documents ->
+                for (document in documents) {
+                    document.reference.delete()
+                }
+            }
+            .addOnFailureListener { exception ->
+                Snackbar.make(view, context.getString(R.string.error_deleting_data, exception), Snackbar.LENGTH_SHORT).show()
+            }
+    }
+
+    private fun deleteHistory90Days(category: String, context: Context, view: View) {
+        val db = FirebaseFirestore.getInstance()
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        val userId = currentUser?.uid ?: return
+
+        val currentDate = Calendar.getInstance().time
+
+        val calendar = Calendar.getInstance()
+        calendar.time = currentDate
+        calendar.add(Calendar.DAY_OF_MONTH, -90)
+        val ninetyDaysAgo = calendar.time
+
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+
+        val categoriesCollection = db.collection("users").document(userId)
+            .collection("categories").document(category).collection("data")
+
+        categoriesCollection
+            .whereGreaterThanOrEqualTo("date", dateFormat.format(ninetyDaysAgo))
+            .get()
+            .addOnSuccessListener { documents ->
+                for (document in documents) {
+                    document.reference.delete()
+                }
+            }
+            .addOnFailureListener { exception ->
+                Snackbar.make(view, context.getString(R.string.error_deleting_data, exception), Snackbar.LENGTH_SHORT).show()
+            }
+    }
+
+    fun delete30Days(view: View, context: Context) {
+        deleteHistory30Days("tobacco", context, view)
+        deleteHistory30Days("alcohol", context, view)
+        deleteHistory30Days("parties", context, view)
+        deleteHistory30Days("others", context, view)
+        Snackbar.make(view, context.getString(R.string.data_deleted), Snackbar.LENGTH_SHORT).show()
+    }
+
+    fun delete60Days(view: View, context: Context) {
+        deleteHistory60Days("tobacco", context, view)
+        deleteHistory60Days("alcohol", context, view)
+        deleteHistory60Days("parties", context, view)
+        deleteHistory60Days("others", context, view)
+        Snackbar.make(view, context.getString(R.string.data_deleted), Snackbar.LENGTH_SHORT).show()
+    }
+
+    fun delete90Days(view: View, context: Context) {
+        deleteHistory90Days("tobacco", context, view)
+        deleteHistory90Days("alcohol", context, view)
+        deleteHistory90Days("parties", context, view)
+        deleteHistory90Days("others", context, view)
+        Snackbar.make(view, context.getString(R.string.data_deleted), Snackbar.LENGTH_SHORT).show()
+    }
+
     private fun buildAlertDialog(context: Context, title: String, message: String) {
         MaterialAlertDialogBuilder(context)
             .setTitle(title)
@@ -344,8 +445,10 @@ object FirebaseUtils {
         loadingDialog = builder.create()
         loadingDialog?.show()
     }
+
     fun hideLoadingDialog() {
         loadingDialog?.dismiss()
         loadingDialog = null
     }
+
 }

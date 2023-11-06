@@ -9,24 +9,28 @@
         android:enabled="true"
         android:showDividers="middle">
         <Preference
+            android:key="delete_history_30_days"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:selectAllOnFocus="true"
             android:singleLine="true"
             android:title="@string/delete_last_30_days" />
         <Preference
+            android:key="delete_history_60_days"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:selectAllOnFocus="true"
             android:singleLine="true"
             android:title="@string/delete_last_60_days" />
         <Preference
+            android:key="delete_history_90_days"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:selectAllOnFocus="true"
             android:singleLine="true"
             android:title="@string/delete_last_90_days" />
         <Preference
+            android:key="delete_all_history"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:selectAllOnFocus="true"
