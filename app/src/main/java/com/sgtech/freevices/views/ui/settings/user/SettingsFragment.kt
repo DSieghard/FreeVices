@@ -76,7 +76,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
     private fun updateEmail(email: String) {
         currentUser?.updateEmail(email)
-        updateEmailOnFirestore(email, requireView())
+        updateEmailOnFirestore(email, requireView(), requireContext())
     }
 
     private fun deleteAccount() {

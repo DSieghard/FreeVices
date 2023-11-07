@@ -43,12 +43,20 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         showLoadingDialog(appContext)
         dataHandler(appContext) { dataMap ->
-            updatePieChart(dataMap)
-            totalCalculate(dataForWeek = dataMap)
+            viewModel.updatePieChartData(dataMap)
+            viewModel.updateTotalData(dataMap)
         }
         hideLoadingDialog()
         val menuFab = binding.menuEFab
         menuFab.setOnClickListener { showPopupMenu(it) }
+
+        viewModel.pieChartData.observe(viewLifecycleOwner) { dataMap ->
+            updatePieChart(dataMap)
+        }
+
+        viewModel.totalData.observe(viewLifecycleOwner) { dataMap ->
+            totalCalculate(dataMap)
+        }
     }
 
     override fun onDestroyView() {
@@ -106,50 +114,22 @@ class HomeFragment : Fragment() {
             when (menuItem.itemId) {
 
                 R.id.alcoholMenu -> {
-                    showExpenseDialog(appContext, getString(R.string.alcohol), view, onSuccess = {
-                        showLoadingDialog(appContext)
-                        dataHandler(appContext) { dataMap ->
-                            updatePieChart(dataMap)
-                            totalCalculate(dataForWeek = dataMap)
-                        }
-                        hideLoadingDialog()
-                    })
+                    showExpenseDialog(appContext, getString(R.string.alcohol), view)
                     return@setOnMenuItemClickListener true
                 }
 
                 R.id.partiesMenu -> {
-                    showExpenseDialog(appContext, getString(R.string.parties), view, onSuccess = {
-                        showLoadingDialog(appContext)
-                        dataHandler(appContext) { dataMap ->
-                            updatePieChart(dataMap)
-                            totalCalculate(dataForWeek = dataMap)
-                        }
-                        hideLoadingDialog()
-                    })
+                    showExpenseDialog(appContext, getString(R.string.parties), view)
                     return@setOnMenuItemClickListener true
                 }
 
                 R.id.othersMenu -> {
-                    showExpenseDialog(appContext, getString(R.string.others), view, onSuccess = {
-                        showLoadingDialog(appContext)
-                        dataHandler(appContext) { dataMap ->
-                            updatePieChart(dataMap)
-                            totalCalculate(dataForWeek = dataMap)
-                        }
-                        hideLoadingDialog()
-                    })
+                    showExpenseDialog(appContext, getString(R.string.others), view)
                     return@setOnMenuItemClickListener true
                 }
 
                 R.id.tobaccoMenu -> {
-                    showExpenseDialog(appContext, getString(R.string.tobacco), view, onSuccess = {
-                        showLoadingDialog(appContext)
-                        dataHandler(appContext) { dataMap ->
-                            updatePieChart(dataMap)
-                            totalCalculate(dataForWeek = dataMap)
-                        }
-                        hideLoadingDialog()
-                    })
+                    showExpenseDialog(appContext, getString(R.string.tobacco), view)
                     return@setOnMenuItemClickListener true
                 }
 
@@ -159,7 +139,7 @@ class HomeFragment : Fragment() {
         popupMenu.show()
     }
 
-    private fun showExpenseDialog(context: Context, category: String, rootView: View, onSuccess : () -> Unit = {}) {
+    private fun showExpenseDialog(context: Context, category: String, rootView: View) {
         val builder = MaterialAlertDialogBuilder(context)
         val inflater = LayoutInflater.from(context)
         val dialogView = inflater.inflate(R.layout.dialog_expense, null)
@@ -169,7 +149,7 @@ class HomeFragment : Fragment() {
 
         builder.setTitle(context.getString(R.string.how_many))
         builder.setView(dialogView)
-        builder.setPositiveButton("Add") { _, _ ->
+        builder.setPositiveButton(context.getString(R.string.add)) { _, _ ->
             val expenseAmount = editText.text.toString()
             val expenseValue = expenseAmount.toIntOrNull() ?: 0
 
@@ -178,13 +158,13 @@ class HomeFragment : Fragment() {
                 dataHandler(context) { dataMap ->
                     viewModel.updatePieChartData(dataMap)
                     viewModel.updateTotalData(dataMap)
+                    hideLoadingDialog()
                 }
             })
-            onSuccess()
-            hideLoadingDialog()
         }
-        builder.setNegativeButton("Cancel") { _, _ ->
-            Snackbar.make(rootView, "Cancelled", Snackbar.LENGTH_SHORT).show()
+
+        builder.setNegativeButton(context.getString(R.string.cancel)) { _, _ ->
+            Snackbar.make(rootView, context.getString(R.string.cancelled), Snackbar.LENGTH_SHORT).show()
         }
         builder.show()
     }

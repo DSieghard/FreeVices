@@ -84,5 +84,4 @@ class MainActivity : AppCompatActivity(){
         navView.menu.findItem(R.id.nav_settings).isChecked = false
     }
 
-
 }

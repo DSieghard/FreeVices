@@ -96,4 +96,9 @@
     <string name="error_updating_email">Error updating email</string>
     <string name="error_deleting_data">Error deleting data: %1$s</string>
     <string name="data_deleted">Data deleted</string>
+    <string name="fcm_permission_denied">Notifications is disabled for the app</string>
+    <string name="about_notifications">About notifications</string>
+    <string name="about_notifications_message">Notifications are a great way to keep track of your expenses, since we will remind you to add it, you can not accept it, and you will have to add the data manually when you enter the App. Or you can activate the permission, and we will send a notification to remind you.</string>
+    <string name="cancel">Cancel</string>
+    <string name="cancelled">Cancelled</string>
 </resources>

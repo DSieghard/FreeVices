@@ -25,7 +25,7 @@
         android:enabled="true"
         android:showDividers="middle">
         <CheckBoxPreference
-            android:key="notifications"
+            android:key="enable_notifications"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:defaultValue="false"

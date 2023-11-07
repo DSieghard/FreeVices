@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.snackbar.Snackbar
 import com.sgtech.freevices.R
 import com.sgtech.freevices.utils.FirebaseUtils
 
@@ -66,6 +67,7 @@ class HistorySettingsFragment : PreferenceFragmentCompat() {
                     FirebaseUtils.delete90Days(requireView(), requireContext())
                 }
                 getString(R.string.delete_all) -> {
+                    Snackbar.make(requireView(), "We are working on that", Snackbar.LENGTH_SHORT).show()
                 }
             }
         }
