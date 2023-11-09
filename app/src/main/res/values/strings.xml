@@ -101,4 +101,11 @@
     <string name="about_notifications_message">Notifications are a great way to keep track of your expenses, since we will remind you to add it, you can not accept it, and you will have to add the data manually when you enter the App. Or you can activate the permission, and we will send a notification to remind you.</string>
     <string name="cancel">Cancel</string>
     <string name="cancelled">Cancelled</string>
+    <string name="expenses_in_the_current_month">Expenses in the current month</string>
+    <string name="title_activity_overview">OverviewActivity</string>
+    <string name="total">Total</string>
+    <string name="enter_password">Enter password</string>
+    <string name="show_password">Show password</string>
+    <string name="hide_password">Hide password</string>
+    <string name="sign_up">Sign Up</string>
 </resources>

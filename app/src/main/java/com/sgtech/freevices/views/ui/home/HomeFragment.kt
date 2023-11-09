@@ -19,7 +19,7 @@ import com.google.android.material.textfield.TextInputEditText
 import com.sgtech.freevices.R
 import com.sgtech.freevices.databinding.FragmentHomeBinding
 import com.sgtech.freevices.utils.FirebaseUtils
-import com.sgtech.freevices.utils.FirebaseUtils.dataHandler
+import com.sgtech.freevices.utils.FirebaseUtils.dataHandlerForWeek
 import com.sgtech.freevices.utils.FirebaseUtils.hideLoadingDialog
 import com.sgtech.freevices.utils.FirebaseUtils.showLoadingDialog
 
@@ -41,14 +41,13 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         showLoadingDialog(appContext)
-        dataHandler(appContext) { dataMap ->
+        dataHandlerForWeek(appContext) { dataMap ->
             viewModel.updatePieChartData(dataMap)
             viewModel.updateTotalData(dataMap)
         }
         hideLoadingDialog()
-        val menuFab = binding.menuEFab
-        menuFab.setOnClickListener { showPopupMenu(it) }
 
         viewModel.pieChartData.observe(viewLifecycleOwner) { dataMap ->
             updatePieChart(dataMap)
@@ -57,6 +56,9 @@ class HomeFragment : Fragment() {
         viewModel.totalData.observe(viewLifecycleOwner) { dataMap ->
             totalCalculate(dataMap)
         }
+
+        val menuFab = binding.menuEFab
+        menuFab.setOnClickListener { showPopupMenu(it) }
     }
 
     override fun onDestroyView() {
@@ -84,6 +86,7 @@ class HomeFragment : Fragment() {
 
         pieChart.setUsePercentValues(true)
         pieChart.isDrawHoleEnabled = false
+        pieChart.description.isEnabled = false
         pieChart.animateY(1400, Easing.EaseInOutQuad)
         pieChart.notifyDataSetChanged()
         pieChart.invalidate()
@@ -155,7 +158,7 @@ class HomeFragment : Fragment() {
 
             showLoadingDialog(context)
             FirebaseUtils.addDataToCategory(context, category, expenseValue, rootView, onSuccess = {
-                dataHandler(context) { dataMap ->
+                dataHandlerForWeek(context) { dataMap ->
                     viewModel.updatePieChartData(dataMap)
                     viewModel.updateTotalData(dataMap)
                     hideLoadingDialog()

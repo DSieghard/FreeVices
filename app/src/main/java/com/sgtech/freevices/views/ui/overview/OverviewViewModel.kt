@@ -1,13 +1,21 @@
 package com.sgtech.freevices.views.ui.overview
 
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
 class OverviewViewModel : ViewModel() {
+    val pieChartData = MutableLiveData<Map<String, Float>>()
+    val totalData = MutableLiveData<Map<String, Float>>()
 
-    private val _text = MutableLiveData<String>().apply {
-        value = "This is slideshow Fragment"
+    fun updatePieChartData(newData: Map<String, Float>) {
+        pieChartData.value = newData
     }
-    val text: LiveData<String> = _text
+
+    fun updateTotalData(newData: Map<String, Float>) {
+        totalData.value = newData
+    }
+
+    fun getTobaccoValue(tobaccoValue: Float): Float {
+        return tobaccoValue
+    }
 }

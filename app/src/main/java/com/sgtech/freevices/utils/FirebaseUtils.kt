@@ -67,6 +67,7 @@ object FirebaseUtils {
             }
             .addOnFailureListener { e ->
                 Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
+                hideLoadingDialog()
             }
     }
 
@@ -202,7 +203,7 @@ object FirebaseUtils {
             }
     }
 
-    fun dataHandler(context: Context, onSuccess: (Map<String, Float>) -> Unit) {
+    fun dataHandlerForWeek(context: Context, onSuccess: (Map<String, Float>) -> Unit) {
         val categories = listOf(
             context.getString(R.string.tobacco),
             context.getString(R.string.alcohol),
@@ -240,6 +241,46 @@ object FirebaseUtils {
         }
     }
 
+    fun dataHandlerCurrentMonth(context: Context, onSuccess: (Map<String, Float>) -> Unit) {
+        val categories = listOf(
+            context.getString(R.string.tobacco),
+            context.getString(R.string.alcohol),
+            context.getString(R.string.parties),
+            context.getString(R.string.others)
+        )
+
+        val dataMap = mutableMapOf<String, Float>()
+        val callbackCountdown = CountDownLatch(categories.size)
+
+        for (category in categories) {
+            getDataFromFirestoreForCurrentMonth(
+                context = context,
+                option = category,
+                onSuccess = { data ->
+                    if (data.isNotEmpty()) {
+                        val totalValue = data.map { it.second }.sum()
+                        dataMap[category] = totalValue
+                    } else {
+                        dataMap[category] = 0.0f
+                    }
+
+                    callbackCountdown.countDown()
+                    if (callbackCountdown.count.toInt() == 0) {
+                        Log.d("FirebaseUtils: dataHandlerCurrentMonth/onSuccess", dataMap.toString())
+                        onSuccess(dataMap)
+                    }
+
+                }
+            ) {
+                callbackCountdown.countDown()
+                if (callbackCountdown.count.toInt() == 0) {
+                    Log.d("FirebaseUtils: dataHandlerCurrentMonth/onFailure", dataMap.toString())
+                    onSuccess(dataMap)
+                }
+            }
+        }
+    }
+
     fun deleteUserDataFromFirestore() {
         val db = FirebaseFirestore.getInstance()
         db.collection("users").document(FirebaseAuth.getInstance().currentUser!!.uid).delete()
@@ -266,7 +307,7 @@ object FirebaseUtils {
         }
     }
 
-    fun getDataFromFirestoreForLastWeek(
+    private fun getDataFromFirestoreForLastWeek(
         context: Context,
         option: String,
         onSuccess: (List<Pair<String, Float>>) -> Unit,
@@ -315,6 +356,67 @@ object FirebaseUtils {
             }
         }
     }
+
+    private fun getDataFromFirestoreForCurrentMonth(
+        context: Context,
+        option: String,
+        onSuccess: (List<Pair<String, Float>>) -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        val auth = FirebaseAuth.getInstance()
+        val user = auth.currentUser
+        val db = FirebaseFirestore.getInstance()
+
+        user?.let {
+            val userId = user.uid
+            val subCollectionName = when (option) {
+                context.getString(R.string.tobacco) -> "tobacco"
+                context.getString(R.string.alcohol) -> "alcohol"
+                context.getString(R.string.parties) -> "parties"
+                context.getString(R.string.others) -> "others"
+                else -> "default"
+            }
+
+            val categoriesCollection = db.collection("users").document(userId)
+                .collection("categories").document(subCollectionName).collection("data")
+            // db route: /users/{userId}/categories/{category}/data/ -> That's right
+
+            val dataList = mutableListOf<Pair<String, Float>>()
+            val currentDate = Calendar.getInstance()
+            currentDate.set(Calendar.DAY_OF_MONTH, currentDate.getActualMaximum(Calendar.DAY_OF_MONTH)) // Same format as week
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+
+            for (i in 0 until currentDate.getActualMaximum(Calendar.DAY_OF_MONTH)) {
+                val currentDateStr = dateFormat.format(currentDate.time) // Works as expected
+
+                val documentRef = categoriesCollection.document(currentDateStr) // All right here
+                documentRef.get()
+                    //This block is not running
+                    .addOnSuccessListener { documentSnapshot ->
+                        val categoryName = documentRef.id
+                        val categoryValue = documentSnapshot.getDouble("value")?.toFloat() ?: 0.0f
+                        dataList.add(Pair(categoryName, categoryValue))
+                        try {
+                            onSuccess(dataList)
+                        } catch (e: Exception) {
+                            onFailure(Exception())
+                        } finally {
+                            onSuccess(dataList)
+                        }
+
+                    }
+                    // Nor this
+                    .addOnFailureListener { e ->
+                        onFailure(e)
+                        Log.d("FirebaseUtils: dataHandlerCurrentMonth/onFailure", e.toString())
+                    }
+
+                currentDate.add(Calendar.DAY_OF_YEAR, -1)
+            }
+        }
+    }
+
+
 
     private fun deleteHistory30Days(category: String, context: Context, view: View) {
         val db = FirebaseFirestore.getInstance()

@@ -1,17 +1,35 @@
 package com.sgtech.freevices.views
 
-import android.content.Intent
 import android.os.Bundle
-import android.util.Log
-import android.view.inputmethod.EditorInfo
-import android.widget.Button
+import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.material.textfield.TextInputEditText
-import com.sgtech.freevices.R
-import com.sgtech.freevices.utils.FirebaseUtils
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.Surface
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.sgtech.freevices.utils.FirebaseUtils.checkIfUserIsLoggedIn
+import com.sgtech.freevices.views.ui.EmailEditText
+import com.sgtech.freevices.views.ui.LoginButton
+import com.sgtech.freevices.views.ui.LoginText
+import com.sgtech.freevices.views.ui.PasswordEditText
+import com.sgtech.freevices.views.ui.SignUpButton
+import com.sgtech.freevices.views.ui.overview.ui.theme.FreeVicesTheme
 
 class LoginActivity : AppCompatActivity() {
+
+
+
 
     override fun onStart() {
         super.onStart()
@@ -20,35 +38,31 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_login)
+        setContent {
+            var email by remember { mutableStateOf("") }
+            var password by remember { mutableStateOf("") }
+            FreeVicesTheme {
+                Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+                    Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                        LoginText()
+                        Spacer(modifier = Modifier.size(240.dp))
+                        EmailEditText(email) { newValue -> email = newValue }
+                        Spacer(modifier = Modifier.size(48.dp))
+                        PasswordEditText(password) { newValue -> password = newValue }
+                    }
+                    Spacer(modifier = Modifier.size(128.dp))
+                    Column(modifier = Modifier.padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = androidx.compose.foundation.layout.Arrangement.Bottom)
+                    {
 
-        val signInButton = findViewById<Button>(R.id.signUpButton)
-        val createAccountButton = findViewById<Button>(R.id.createAccountButton)
-        val emailEditText = findViewById<TextInputEditText>(R.id.signInEmailEditText)
-        val passwordEditText = findViewById<TextInputEditText>(R.id.signInPasswordEditText)
+                            LoginButton(email, password)
+                            Spacer(modifier = Modifier.size(24.dp))
+                            SignUpButton()
 
-        passwordEditText.setOnEditorActionListener() { _, actionId, _ ->
-            if (actionId == EditorInfo.IME_ACTION_DONE) {
-                signInButton.performClick()
-                true
-            } else {
-                false
+                    }
+                }
             }
-        }
-
-        signInButton.setOnClickListener {
-            val email = emailEditText.text.toString().trim()
-            val password = passwordEditText.text.toString().trim()
-
-            Log.d("FirebaseUtils", "$email $password")
-            if (email.isNotEmpty() && password.isNotEmpty()) {
-                FirebaseUtils.signInWithEmail(this, email, password)
-            }
-        }
-
-        createAccountButton.setOnClickListener{
-            val intent = Intent(this, CreateAccountActivity::class.java)
-            startActivity(intent)
         }
     }
 }

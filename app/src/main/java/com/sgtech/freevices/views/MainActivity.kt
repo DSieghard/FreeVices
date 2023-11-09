@@ -17,6 +17,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.sgtech.freevices.R
 import com.sgtech.freevices.databinding.ActivityMainBinding
 
+
 class MainActivity : AppCompatActivity(){
 
     private lateinit var appBarConfiguration: AppBarConfiguration

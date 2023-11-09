@@ -32,4 +32,5 @@ class HistoryFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
+
 }
