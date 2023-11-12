@@ -1,4 +1,4 @@
-package com.sgtech.freevices.views.ui.overview.ui.theme
+package com.sgtech.freevices.views.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

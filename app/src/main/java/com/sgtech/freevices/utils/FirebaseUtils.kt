@@ -15,7 +15,8 @@ import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.firestore.FirebaseFirestore
 import com.sgtech.freevices.R
-import com.sgtech.freevices.views.MainActivity
+import com.sgtech.freevices.views.ui.LoginActivity
+import com.sgtech.freevices.views.ui.NewMainActivity
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -27,7 +28,7 @@ object FirebaseUtils {
     fun checkIfUserIsLoggedIn(context: Context) {
         val currentUser = FirebaseAuth.getInstance().currentUser
         if (currentUser != null) {
-            val intent = Intent(context, MainActivity::class.java)
+            val intent = Intent(context, NewMainActivity::class.java)
             startActivity(context, intent, null)
         } else {
             Log.d("FirebaseUtils", "User is not logged in")
@@ -36,38 +37,30 @@ object FirebaseUtils {
     }
     fun signInWithEmail(context: Context, email: String, password: String) {
         val auth = FirebaseAuth.getInstance()
-        showLoadingDialog(context)
         auth.signInWithEmailAndPassword(email.trim(), password.trim())
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     try {
                         checkIfUserIsLoggedIn(context)
-                        val intent = Intent(context, MainActivity::class.java)
+                        val intent = Intent(context, NewMainActivity::class.java)
                         startActivity(context, intent, null)
-                        hideLoadingDialog()
                     } catch (e: FirebaseAuthInvalidUserException) {
                         val title = context.getString(R.string.error)
                         val message = context.getString(R.string.error_user_not_found)
                         buildAlertDialog(context, title, message)
-                        hideLoadingDialog()
                     } catch (ec: FirebaseAuthActionCodeException) {
                         val title = context.getString(R.string.error)
                         val message = context.getString(R.string.error_invalid_token)
                         buildAlertDialog(context, title, message)
-                        hideLoadingDialog()
                     } catch (e: Exception) {
                         val title = context.getString(R.string.error)
                         val message = context.getString(R.string.error_unknown)
                         buildAlertDialog(context, title, message)
-                        hideLoadingDialog()
-                    } finally {
-                        hideLoadingDialog()
                     }
                 }
             }
             .addOnFailureListener { e ->
                 Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
-                hideLoadingDialog()
             }
     }
 
@@ -79,7 +72,7 @@ object FirebaseUtils {
                 if (task.isSuccessful) {
                     hideLoadingDialog()
                     onSuccess()
-                    startActivity(context, Intent(context, MainActivity::class.java), null)
+                    startActivity(context, Intent(context, NewMainActivity::class.java), null)
                 }
             }
             .addOnFailureListener { e ->
@@ -147,8 +140,14 @@ object FirebaseUtils {
         }
     }
 
-    fun addDataToCategory(context: Context, option: String, dataValue: Int, rootView: View, onSuccess: () -> Unit) {
-        val subCollectionName = when (option) {
+    fun addDataToCategory(
+        context: Context,
+        category: String,
+        amount: Int,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    )  {
+        val subCollectionName = when (category) {
             context.getString(R.string.tobacco) -> "tobacco"
             context.getString(R.string.alcohol) -> "alcohol"
             context.getString(R.string.parties) -> "parties"
@@ -173,37 +172,39 @@ object FirebaseUtils {
                 if (documentSnapshot.exists()) {
                     val currentValue = documentSnapshot.getLong("value")?.toInt() ?: 0
 
-                    val updatedValue = currentValue + dataValue
+                    val updatedValue = currentValue + amount.toFloat()
 
                     currentDayDataDocument.set(mapOf("value" to updatedValue))
                         .addOnSuccessListener {
-                            Snackbar.make(rootView,
-                                context.getString(R.string.data_updated_successfully), Snackbar.LENGTH_SHORT).show()
+                            Log.d("FirebaseUtils", "Data updated successfully")
+                            onSuccess()
                         }
                         .addOnFailureListener {
-                            Snackbar.make(rootView,
-                                context.getString(R.string.error_updating_data), Snackbar.LENGTH_SHORT).show()
+                            Log.d("FirebaseUtils", "Error updating data")
                         }
                 } else {
-                    val newData = mapOf("value" to dataValue)
+                    val newData = mapOf("value" to amount.toFloat())
                     currentDayDataDocument.set(newData)
                         .addOnSuccessListener {
-                            Snackbar.make(rootView,
-                                context.getString(R.string.data_added_successfully), Snackbar.LENGTH_SHORT).show()
+                            Log.d("FirebaseUtils", "Data added successfully")
                         }
                         .addOnFailureListener {
-                            Snackbar.make(rootView,
-                                context.getString(R.string.error_adding_data), Snackbar.LENGTH_SHORT).show()
+                            Log.d("FirebaseUtils", "Error adding data")
                         }
                 }
                 onSuccess()
             }
             .addOnFailureListener {
-                Snackbar.make(rootView, "Error getting data", Snackbar.LENGTH_SHORT).show()
+                Log.d("FirebaseUtils", "Error getting data")
+                onFailure(it)
             }
     }
 
-    fun dataHandlerForWeek(context: Context, onSuccess: (Map<String, Float>) -> Unit) {
+    fun dataHandlerForWeek(
+        context: Context,
+        onSuccess: (Map<String, Float>) -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
         val categories = listOf(
             context.getString(R.string.tobacco),
             context.getString(R.string.alcohol),
@@ -212,34 +213,26 @@ object FirebaseUtils {
         )
 
         val dataMap = mutableMapOf<String, Float>()
-        val callbackCountdown = CountDownLatch(categories.size)
 
         for (category in categories) {
             getDataFromFirestoreForLastWeek(
                 context = context,
                 option = category,
                 onSuccess = { data ->
-                    if (data.isNotEmpty()) {
-                        val totalValue = data.map { it.second }.sum()
-                        dataMap[category] = totalValue
-                    } else {
-                        dataMap[category] = 0.0f
-                    }
+                    val totalValue = data.map { it.second }.sum()
+                    dataMap[category] = totalValue
 
-                    callbackCountdown.countDown()
-                    if (callbackCountdown.count.toInt() == 0) {
+                    if (dataMap.size == categories.size) {
                         onSuccess(dataMap)
                     }
-
+                },
+                onFailure = { exception ->
+                    onFailure(exception)
                 }
-            ) {
-                callbackCountdown.countDown()
-                if (callbackCountdown.count.toInt() == 0) {
-                    onSuccess(dataMap)
-                }
-            }
+            )
         }
     }
+
 
     fun dataHandlerCurrentMonth(context: Context, onSuccess: (Map<String, Float>) -> Unit) {
         val categories = listOf(
@@ -551,6 +544,12 @@ object FirebaseUtils {
     fun hideLoadingDialog() {
         loadingDialog?.dismiss()
         loadingDialog = null
+    }
+
+    fun signOut(context: Context){
+        FirebaseAuth.getInstance().signOut()
+        val intent = Intent(context, LoginActivity::class.java)
+        startActivity(context, intent, null)
     }
 
 }

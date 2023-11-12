@@ -1,4 +1,4 @@
-package com.sgtech.freevices.views.ui.overview.ui.theme
+package com.sgtech.freevices.views.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -75,9 +75,10 @@ private val DarkColors = darkColorScheme(
 @Composable
 fun FreeVicesTheme(
   useDarkTheme: Boolean = isSystemInDarkTheme(),
-  content: @Composable() () -> Unit
+  content: @Composable () -> Unit
 ) {
-  val colors = if (!useDarkTheme) {
+
+    val colors = if (!useDarkTheme) {
     LightColors
   } else {
     DarkColors

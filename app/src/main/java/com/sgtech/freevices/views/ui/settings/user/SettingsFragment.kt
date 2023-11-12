@@ -14,7 +14,7 @@ import com.google.firebase.auth.UserProfileChangeRequest
 import com.sgtech.freevices.R
 import com.sgtech.freevices.utils.FirebaseUtils.deleteUserDataFromFirestore
 import com.sgtech.freevices.utils.FirebaseUtils.updateEmailOnFirestore
-import com.sgtech.freevices.views.LoginActivity
+import com.sgtech.freevices.views.ui.LoginActivity
 
 class SettingsFragment : PreferenceFragmentCompat() {
 

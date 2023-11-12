@@ -11,6 +11,7 @@ import com.google.android.material.textfield.TextInputEditText
 import com.sgtech.freevices.R
 import com.sgtech.freevices.utils.FirebaseUtils
 import com.sgtech.freevices.utils.FirebaseUtils.createAccount
+import com.sgtech.freevices.views.ui.LoginActivity
 
 class CreateAccountActivity : AppCompatActivity() {
 
