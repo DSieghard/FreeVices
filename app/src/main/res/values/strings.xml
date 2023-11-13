@@ -117,4 +117,7 @@
     <string name="expended_in_category">Expended in %1$s</string>
     <string name="title_activity_new_main" translatable="false">NewMainActivity</string>
     <string name="week_spend">Spend this Week: $%1$d</string>
+    <string name="register_on_freevices">Register on FreeVices</string>
+    <string name="fill_all_the_fields">Fill all the fields</string>
+    <string name="passwords_don_t_match">Passwords don\'t match</string>
 </resources>

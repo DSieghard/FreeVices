@@ -21,7 +21,6 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
-import java.util.concurrent.CountDownLatch
 
 object FirebaseUtils {
     private var loadingDialog: AlertDialog? = null
@@ -35,7 +34,7 @@ object FirebaseUtils {
         }
 
     }
-    fun signInWithEmail(context: Context, email: String, password: String) {
+    fun signInWithEmail(context: Context, email: String, password: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
         val auth = FirebaseAuth.getInstance()
         auth.signInWithEmailAndPassword(email.trim(), password.trim())
             .addOnCompleteListener { task ->
@@ -44,23 +43,28 @@ object FirebaseUtils {
                         checkIfUserIsLoggedIn(context)
                         val intent = Intent(context, NewMainActivity::class.java)
                         startActivity(context, intent, null)
+                        onSuccess()
                     } catch (e: FirebaseAuthInvalidUserException) {
                         val title = context.getString(R.string.error)
                         val message = context.getString(R.string.error_user_not_found)
                         buildAlertDialog(context, title, message)
+                        onFailure(e)
                     } catch (ec: FirebaseAuthActionCodeException) {
                         val title = context.getString(R.string.error)
                         val message = context.getString(R.string.error_invalid_token)
                         buildAlertDialog(context, title, message)
+                        onFailure(ec)
                     } catch (e: Exception) {
                         val title = context.getString(R.string.error)
                         val message = context.getString(R.string.error_unknown)
                         buildAlertDialog(context, title, message)
+                        onFailure(e)
                     }
                 }
             }
             .addOnFailureListener { e ->
                 Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
+                onFailure(e)
             }
     }
 
@@ -99,9 +103,7 @@ object FirebaseUtils {
     fun createDataOnFirestore(
         firstName: String,
         lastName: String,
-        username: String,
-        email: String,
-        phone: Int
+        email: String
     ) {
         val auth = FirebaseAuth.getInstance()
         val user = auth.currentUser
@@ -109,9 +111,7 @@ object FirebaseUtils {
         val data = hashMapOf(
             "firstName" to firstName,
             "lastName" to lastName,
-            "username" to username,
-            "email" to email,
-            "phone" to phone
+            "email" to email
         )
         val userRef = FirebaseFirestore.getInstance().collection("users").document(uid!!)
 
@@ -200,8 +200,9 @@ object FirebaseUtils {
             }
     }
 
-    fun dataHandlerForWeek(
+    fun dataHandler(
         context: Context,
+        days: Int,
         onSuccess: (Map<String, Float>) -> Unit,
         onFailure: (Exception) -> Unit
     ) {
@@ -215,9 +216,10 @@ object FirebaseUtils {
         val dataMap = mutableMapOf<String, Float>()
 
         for (category in categories) {
-            getDataFromFirestoreForLastWeek(
+            getDataFromFirestore(
                 context = context,
                 option = category,
+                daysCount = days,
                 onSuccess = { data ->
                     val totalValue = data.map { it.second }.sum()
                     dataMap[category] = totalValue
@@ -233,43 +235,53 @@ object FirebaseUtils {
         }
     }
 
+    private fun getDataFromFirestore(
+        context: Context,
+        option: String,
+        daysCount: Int,
+        onSuccess: (List<Pair<String, Float>>) -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        val auth = FirebaseAuth.getInstance()
+        val user = auth.currentUser
+        val db = FirebaseFirestore.getInstance()
 
-    fun dataHandlerCurrentMonth(context: Context, onSuccess: (Map<String, Float>) -> Unit) {
-        val categories = listOf(
-            context.getString(R.string.tobacco),
-            context.getString(R.string.alcohol),
-            context.getString(R.string.parties),
-            context.getString(R.string.others)
-        )
+        user?.let {
+            val userId = user.uid
+            val subCollectionName = when (option) {
+                context.getString(R.string.tobacco) -> "tobacco"
+                context.getString(R.string.alcohol) -> "alcohol"
+                context.getString(R.string.parties) -> "parties"
+                context.getString(R.string.others) -> "others"
+                else -> "default"
+            }
 
-        val dataMap = mutableMapOf<String, Float>()
-        val callbackCountdown = CountDownLatch(categories.size)
+            val categoriesCollection = db.collection("users").document(userId)
+                .collection("categories").document(subCollectionName).collection("data")
 
-        for (category in categories) {
-            getDataFromFirestoreForCurrentMonth(
-                context = context,
-                option = category,
-                onSuccess = { data ->
-                    if (data.isNotEmpty()) {
-                        val totalValue = data.map { it.second }.sum()
-                        dataMap[category] = totalValue
-                    } else {
-                        dataMap[category] = 0.0f
+            val dataList = mutableListOf<Pair<String, Float>>()
+            val currentDate = Calendar.getInstance()
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+
+            for (i in 0 until daysCount) {
+                val currentDateStr = dateFormat.format(currentDate.time)
+
+                val documentRef = categoriesCollection.document(currentDateStr)
+                documentRef.get()
+                    .addOnSuccessListener { documentSnapshot ->
+                        val categoryName = documentRef.id
+                        val categoryValue = documentSnapshot.getDouble("value")?.toFloat() ?: 0.0f
+                        dataList.add(Pair(categoryName, categoryValue))
+
+                        if (dataList.size == daysCount) {
+                            onSuccess(dataList)
+                        }
+                    }
+                    .addOnFailureListener { exception ->
+                        onFailure(exception)
                     }
 
-                    callbackCountdown.countDown()
-                    if (callbackCountdown.count.toInt() == 0) {
-                        Log.d("FirebaseUtils: dataHandlerCurrentMonth/onSuccess", dataMap.toString())
-                        onSuccess(dataMap)
-                    }
-
-                }
-            ) {
-                callbackCountdown.countDown()
-                if (callbackCountdown.count.toInt() == 0) {
-                    Log.d("FirebaseUtils: dataHandlerCurrentMonth/onFailure", dataMap.toString())
-                    onSuccess(dataMap)
-                }
+                currentDate.add(Calendar.DAY_OF_YEAR, -1)
             }
         }
     }
@@ -297,115 +309,6 @@ object FirebaseUtils {
                 }
         } else {
             Snackbar.make(view, context.getString(R.string.error_updating_email), Snackbar.LENGTH_LONG).show()
-        }
-    }
-
-    private fun getDataFromFirestoreForLastWeek(
-        context: Context,
-        option: String,
-        onSuccess: (List<Pair<String, Float>>) -> Unit,
-        onFailure: (Exception) -> Unit
-    ) {
-        val auth = FirebaseAuth.getInstance()
-        val user = auth.currentUser
-        val db = FirebaseFirestore.getInstance()
-
-        user?.let {
-            val userId = user.uid
-            val subCollectionName = when (option) {
-                context.getString(R.string.tobacco) -> "tobacco"
-                context.getString(R.string.alcohol) -> "alcohol"
-                context.getString(R.string.parties) -> "parties"
-                context.getString(R.string.others) -> "others"
-                else -> "default"
-            }
-
-            val categoriesCollection = db.collection("users").document(userId)
-                .collection("categories").document(subCollectionName).collection("data")
-
-            val dataList = mutableListOf<Pair<String, Float>>()
-            val currentDate = Calendar.getInstance()
-            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-
-            for (i in 0 until 7) {
-                val currentDateStr = dateFormat.format(currentDate.time)
-
-                val documentRef = categoriesCollection.document(currentDateStr)
-                documentRef.get()
-                    .addOnSuccessListener { documentSnapshot ->
-                        val categoryName = documentRef.id
-                        val categoryValue = documentSnapshot.getDouble("value")?.toFloat() ?: 0.0f
-                        dataList.add(Pair(categoryName, categoryValue))
-
-                        if (dataList.size == 7) {
-                            onSuccess(dataList)
-                        }
-                    }
-                    .addOnFailureListener { exception ->
-                        onFailure(exception)
-                    }
-
-                currentDate.add(Calendar.DAY_OF_YEAR, -1)
-            }
-        }
-    }
-
-    private fun getDataFromFirestoreForCurrentMonth(
-        context: Context,
-        option: String,
-        onSuccess: (List<Pair<String, Float>>) -> Unit,
-        onFailure: (Exception) -> Unit
-    ) {
-        val auth = FirebaseAuth.getInstance()
-        val user = auth.currentUser
-        val db = FirebaseFirestore.getInstance()
-
-        user?.let {
-            val userId = user.uid
-            val subCollectionName = when (option) {
-                context.getString(R.string.tobacco) -> "tobacco"
-                context.getString(R.string.alcohol) -> "alcohol"
-                context.getString(R.string.parties) -> "parties"
-                context.getString(R.string.others) -> "others"
-                else -> "default"
-            }
-
-            val categoriesCollection = db.collection("users").document(userId)
-                .collection("categories").document(subCollectionName).collection("data")
-            // db route: /users/{userId}/categories/{category}/data/ -> That's right
-
-            val dataList = mutableListOf<Pair<String, Float>>()
-            val currentDate = Calendar.getInstance()
-            currentDate.set(Calendar.DAY_OF_MONTH, currentDate.getActualMaximum(Calendar.DAY_OF_MONTH)) // Same format as week
-            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-
-            for (i in 0 until currentDate.getActualMaximum(Calendar.DAY_OF_MONTH)) {
-                val currentDateStr = dateFormat.format(currentDate.time) // Works as expected
-
-                val documentRef = categoriesCollection.document(currentDateStr) // All right here
-                documentRef.get()
-                    //This block is not running
-                    .addOnSuccessListener { documentSnapshot ->
-                        val categoryName = documentRef.id
-                        val categoryValue = documentSnapshot.getDouble("value")?.toFloat() ?: 0.0f
-                        dataList.add(Pair(categoryName, categoryValue))
-                        try {
-                            onSuccess(dataList)
-                        } catch (e: Exception) {
-                            onFailure(Exception())
-                        } finally {
-                            onSuccess(dataList)
-                        }
-
-                    }
-                    // Nor this
-                    .addOnFailureListener { e ->
-                        onFailure(e)
-                        Log.d("FirebaseUtils: dataHandlerCurrentMonth/onFailure", e.toString())
-                    }
-
-                currentDate.add(Calendar.DAY_OF_YEAR, -1)
-            }
         }
     }
 

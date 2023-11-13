@@ -15,11 +15,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.sgtech.freevices.R
 import com.sgtech.freevices.views.ui.theme.FreeVicesTheme
 
 
@@ -58,46 +56,12 @@ fun CategoryCard(value: Int, category: String){
 
     if (isDialogOpen) {
         DetailsExtendedDialog(
-            onDismissRequest = { isDialogOpen = false }, 0, 0, 0
+            onDismissRequest = { isDialogOpen = false }, category
         )
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-    @Composable
-    fun TotalCardForMonth(value: Int){
-        ElevatedCard (
-            elevation = CardDefaults.cardElevation(
-                defaultElevation = 6.dp
-            ),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.tertiaryContainer
-            ),
-            modifier = Modifier
-                .size(width = 360.dp, height = 120.dp),
-        )
-        {
-            Text(
-                text = stringResource(R.string.total),
-                modifier = Modifier
-                    .padding(16.dp),
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onTertiaryContainer
-            )
-            Text(
-                text = "$$value",
-                modifier = Modifier
-                    .padding(16.dp),
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onTertiaryContainer
-            )
-        }
-    }
-
-
-    @Preview
+@Preview
     @Composable
     fun PreviewCards() {
 
@@ -116,7 +80,6 @@ fun CategoryCard(value: Int, category: String){
                 Spacer(modifier = Modifier.padding(16.dp))
                 CategoryCard(0, "Others")
                 Spacer(modifier = Modifier.padding(32.dp))
-                TotalCardForMonth(0)
             }
         }
     }

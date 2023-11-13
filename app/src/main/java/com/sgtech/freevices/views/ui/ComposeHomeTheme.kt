@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -16,7 +15,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -25,12 +23,16 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,8 +43,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.core.content.ContextCompat.getString
 import com.sgtech.freevices.R
 import com.sgtech.freevices.utils.FirebaseUtils
+import kotlinx.coroutines.launch
 
 @Composable
 fun HomeFab() {
@@ -62,7 +66,28 @@ fun HomeFab() {
 }
 
 @Composable
-fun DetailsExtendedDialog(onDismissRequest: () -> Unit, weekValue: Int, twoWeekValue: Int, monthValue: Int) {
+fun DetailsExtendedDialog(
+    onDismissRequest: () -> Unit,
+    category: String
+) {
+    val viewModel = ViewModelProvider.provideMainViewModel()
+    LocalContext.current
+    val tobaccoData by viewModel.tobaccoLiveData.observeAsState(initial = 0f)
+    val alcoholData by viewModel.alcoholLiveData.observeAsState(initial = 0f)
+    val partiesData by viewModel.partiesLiveData.observeAsState(initial = 0f)
+    val othersData by viewModel.othersLiveData.observeAsState(initial = 0f)
+    val tobaccoData2Weeks by viewModel.tobaccoTwoWeekData.observeAsState(initial = 0f)
+    val alcoholData2Weeks by viewModel.alcoholTwoWeekData.observeAsState(initial = 0f)
+    val partiesData2Weeks by viewModel.partiesTwoWeekData.observeAsState(initial = 0f)
+    val othersData2Weeks by viewModel.othersTwoWeekData.observeAsState(initial = 0f)
+    val tobaccoDataOneMonth by viewModel.tobaccoOneMonthData.observeAsState(initial = 0f)
+    val alcoholDataOneMonth by viewModel.alcoholOneMonthData.observeAsState(initial = 0f)
+    val partiesDataOneMonth by viewModel.partiesOneMonthData.observeAsState(initial = 0f)
+    val othersDataOneMonth by viewModel.othersOneMonthData.observeAsState(initial = 0f)
+    val totalWeek = tobaccoData + alcoholData + partiesData + othersData
+    val total2Weeks = tobaccoData2Weeks + alcoholData2Weeks + partiesData2Weeks + othersData2Weeks
+    val totalOneMonth = tobaccoDataOneMonth + alcoholDataOneMonth + partiesDataOneMonth + othersDataOneMonth
+
     Dialog(
         onDismissRequest = { onDismissRequest() },
         properties = DialogProperties(
@@ -70,6 +95,34 @@ fun DetailsExtendedDialog(onDismissRequest: () -> Unit, weekValue: Int, twoWeekV
             dismissOnClickOutside = true
         )
     ) {
+        when (category) {
+            stringResource(id = R.string.tobacco) -> {
+                ElevatedCardForCategory(onDismissRequest, tobaccoData.toInt(), tobaccoData2Weeks.toInt(), tobaccoDataOneMonth.toInt())
+            }
+            stringResource(id = R.string.alcohol) -> {
+                ElevatedCardForCategory(onDismissRequest, alcoholData.toInt(), alcoholData2Weeks.toInt(), alcoholDataOneMonth.toInt())
+            }
+            stringResource(id = R.string.parties) -> {
+                ElevatedCardForCategory(onDismissRequest, partiesData.toInt(), partiesData2Weeks.toInt(), partiesDataOneMonth.toInt())
+            }
+            stringResource(id = R.string.others) -> {
+                ElevatedCardForCategory(onDismissRequest, othersData.toInt(), othersData2Weeks.toInt(), othersDataOneMonth.toInt())
+            }
+            "totals" -> {
+                ElevatedCardForCategory(onDismissRequest, totalWeek.toInt(), total2Weeks.toInt(), totalOneMonth.toInt())
+            }
+        }
+
+    }
+}
+
+@Composable
+fun ElevatedCardForCategory(
+    onDismissRequest: () -> Unit,
+    weekValue: Int,
+    twoWeekValue: Int,
+    oneMonthValue: Int
+) {
         ElevatedCard(
             modifier = Modifier.padding(8.dp),
             shape = RoundedCornerShape(16.dp)
@@ -80,42 +133,58 @@ fun DetailsExtendedDialog(onDismissRequest: () -> Unit, weekValue: Int, twoWeekV
                 verticalArrangement = Arrangement.Center
             ) {
                 Spacer(modifier = Modifier.padding(24.dp))
-                Card(modifier = Modifier.padding(8.dp),
-                    shape = RoundedCornerShape(24.dp)){
-                    Text(text = stringResource(
-                        R.string.your_spending_in_the_last_week_is,
-                        weekValue
-                    ),
+                Card(
+                    modifier = Modifier.padding(8.dp),
+                    shape = RoundedCornerShape(24.dp)
+                ) {
+                    Text(
+                        text = stringResource(
+                            R.string.your_spending_in_the_last_week_is,
+                            weekValue
+                        ),
                         textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(8.dp))
+                        modifier = Modifier.padding(8.dp)
+                    )
                 }
                 Spacer(modifier = Modifier.padding(16.dp))
-                Card(modifier = Modifier.padding(8.dp),
-                    shape = RoundedCornerShape(24.dp)){
-                    Text(text = stringResource(
-                        R.string.your_spending_in_the_last_2_weeks_is,
-                        twoWeekValue
-                    ),
+                Card(
+                    modifier = Modifier.padding(8.dp),
+                    shape = RoundedCornerShape(24.dp)
+                ) {
+                    Text(
+                        text = stringResource(
+                            R.string.your_spending_in_the_last_2_weeks_is,
+                            twoWeekValue
+                        ),
                         textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(8.dp))
+                        modifier = Modifier.padding(8.dp)
+                    )
                 }
                 Spacer(modifier = Modifier.padding(16.dp))
-                Card(modifier = Modifier.padding(8.dp),
-                    shape = RoundedCornerShape(24.dp)){
-                    Text(text = stringResource(
-                        R.string.your_spending_in_the_last_month_is,
-                        monthValue
-                    ),
+                Card(
+                    modifier = Modifier.padding(8.dp),
+                    shape = RoundedCornerShape(24.dp)
+                ) {
+                    Text(
+                        text = stringResource(
+                            R.string.your_spending_in_the_last_month_is,
+                            oneMonthValue
+                        ),
                         textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(8.dp))
+                        modifier = Modifier.padding(8.dp)
+                    )
                 }
 
                 Spacer(modifier = Modifier.padding(32.dp))
-                Card(modifier = Modifier.padding(8.dp),
-                    shape = RoundedCornerShape(24.dp)){
-                    Text(text = stringResource(R.string.this_could_be_savings_for_your_vacation_or_to_fulfill_that_dream_you_have_pending),
+                Card(
+                    modifier = Modifier.padding(8.dp),
+                    shape = RoundedCornerShape(24.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.this_could_be_savings_for_your_vacation_or_to_fulfill_that_dream_you_have_pending),
                         textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(8.dp))
+                        modifier = Modifier.padding(8.dp)
+                    )
                 }
                 Row(
                     modifier = Modifier
@@ -131,7 +200,7 @@ fun DetailsExtendedDialog(onDismissRequest: () -> Unit, weekValue: Int, twoWeekV
             }
         }
     }
-}
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -142,6 +211,8 @@ fun ExpenseDialog(
     val viewModel = ViewModelProvider.provideMainViewModel()
     var expenseAmount by remember { mutableIntStateOf(0) }
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     Dialog(
         onDismissRequest = onCancel
@@ -184,20 +255,37 @@ fun ExpenseDialog(
                             category = category,
                             amount = expenseAmount,
                             onSuccess = {
-                                FirebaseUtils.dataHandlerForWeek(
+                                FirebaseUtils.dataHandler(
                                 context = context,
+                                    days = 7,
                                 onSuccess = { data ->
                                     viewModel.updateLiveDataValues(context, data)
                                     onCancel()
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar(
+                                            message = getString(context, R.string.data_updated_successfully),
+                                            duration = SnackbarDuration.Short
+                                        )
+                                    }
                                 },
-                                onFailure = {
-                                    //Create Snackbar with error
 
+                                onFailure = {
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar(
+                                            message = getString(context, R.string.error_updating_data),
+                                            duration = SnackbarDuration.Short
+                                        )
+                                    }
                                 }
                             )
                             },
                             onFailure = {
-                                //Create Snackbar with error
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = getString(context, R.string.error_updating_data),
+                                        duration = SnackbarDuration.Short
+                                    )
+                                }
                             }
                         )
                     }) {
@@ -355,16 +443,5 @@ fun SignOutDialog(onDismissRequest: () -> Unit, onSignOutConfirmed: () -> Unit, 
                 }
             }
         }
-    }
-}
-
-@Composable
-fun LoadingDialog() {
-    Row {
-        Text(text = "Loading...", modifier = Modifier.align(Alignment.CenterVertically))
-        CircularProgressIndicator(
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.primary,
-        )
     }
 }

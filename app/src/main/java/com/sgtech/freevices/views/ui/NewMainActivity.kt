@@ -28,6 +28,8 @@ import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
@@ -57,11 +59,34 @@ class NewMainActivity : ComponentActivity() {
     private val viewModel = ViewModelProvider.provideMainViewModel()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        FirebaseUtils.dataHandlerForWeek(
+        FirebaseUtils.dataHandler(
             context = applicationContext,
+            days = 7,
             onSuccess = { data ->
                 viewModel.updateLiveDataValues(this, data)
-                Log.d("MainActivityResolver", "Data obtained $data")
+                Log.d("MainActivityResolver", "Data obtained: $data")
+            },
+            onFailure = {
+                Log.d("MainActivityResolver", "Error getting data: $it")
+            }
+        )
+        FirebaseUtils.dataHandler(
+            context = applicationContext,
+            days = 14,
+            onSuccess = { data ->
+                viewModel.updateTwoWeekLiveDataValues(this, data)
+                Log.d("MainActivityResolver", "Data obtained: $data")
+            },
+            onFailure = {
+                Log.d("MainActivityResolver", "Error getting data: $it")
+            }
+        )
+        FirebaseUtils.dataHandler(
+            context = applicationContext,
+            days = 30,
+            onSuccess = { data ->
+                viewModel.updateOneMonthLiveDataValues(this, data)
+                Log.d("MainActivityResolver", "Data obtained: $data")
             },
             onFailure = {
                 Log.d("MainActivityResolver", "Error getting data: $it")
@@ -73,13 +98,14 @@ class NewMainActivity : ComponentActivity() {
             val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
             val scope = rememberCoroutineScope()
             val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
+            val snackbarHostState = remember { SnackbarHostState() }
             var signOutRequest by remember { mutableStateOf(false) }
             val tobaccoData by viewModel.tobaccoLiveData.observeAsState(initial = 0f)
             val alcoholData by viewModel.alcoholLiveData.observeAsState(initial = 0f)
             val partiesData by viewModel.partiesLiveData.observeAsState(initial = 0f)
             val othersData by viewModel.othersLiveData.observeAsState(initial = 0f)
+            var isDialogOpen by remember { mutableStateOf(false) }
             val totals = tobaccoData + alcoholData + partiesData + othersData
-            val totalsInt = totals.toInt()
 
             if (signOutRequest) {
                 FreeVicesTheme {
@@ -165,6 +191,7 @@ class NewMainActivity : ComponentActivity() {
                         })
 
                     },
+                    snackbarHost =  { SnackbarHost(snackbarHostState) },
                     content = { innerPadding ->
                         Column(
                             modifier = Modifier
@@ -185,8 +212,10 @@ class NewMainActivity : ComponentActivity() {
                     bottomBar = {
                         BottomAppBar(
                             actions = {
-                                TextButton(onClick = { /*TODO*/ }) {
-                                    Text(text = getString(R.string.week_spend, totalsInt),
+                                TextButton(onClick = {
+                                    isDialogOpen = true
+                                }) {
+                                    Text(text = stringResource(R.string.week_spend, totals.toInt()),
                                         style = MaterialTheme.typography.bodyLarge)
                                 }
                             },
@@ -194,6 +223,13 @@ class NewMainActivity : ComponentActivity() {
                                 HomeFab()
                             }
                         )
+
+                        if (isDialogOpen) {
+                            DetailsExtendedDialog(
+                                onDismissRequest = { isDialogOpen = false },
+                                "totals"
+                            )
+                        }
                     }
                 )
             }
@@ -208,6 +244,7 @@ class NewMainActivity : ComponentActivity() {
 
         val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
         var isNavigationMenuEnabled by remember { mutableStateOf(false) }
+        var isDialogOpen by remember { mutableStateOf(false) }
         val tobaccoData = 1
         val alcoholData = 2
         val partiesData = 3
@@ -255,8 +292,10 @@ class NewMainActivity : ComponentActivity() {
                 bottomBar = {
                     BottomAppBar(
                         actions = {
-                            TextButton(onClick = { /*TODO*/ }) {
-                                Text(text = "Spends this week: $totals",
+                            TextButton(onClick = {
+                                isDialogOpen = true
+                            }) {
+                                Text(text = stringResource(R.string.week_spend, totals),
                                     style = MaterialTheme.typography.bodyLarge)
                             }
                         },
@@ -264,6 +303,12 @@ class NewMainActivity : ComponentActivity() {
                             HomeFab()
                         }
                     )
+
+                    if (isDialogOpen) {
+                        DetailsExtendedDialog(
+                            onDismissRequest = { isDialogOpen = false }, "totals"
+                        )
+                    }
                 }
             )
         }

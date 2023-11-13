@@ -107,4 +107,7 @@
     <string name="add_expense_button">Botón añadir gasto</string>
     <string name="expended_in_category">Gastado en %1$s</string>
     <string name="week_spend">Gastado esta semana: $%1$d</string>
+    <string name="register_on_freevices">Registrate en FreeVices</string>
+    <string name="fill_all_the_fields">Ingresa todos los campos</string>
+    <string name="passwords_don_t_match">Contraseña no coincide</string>
 </resources>
