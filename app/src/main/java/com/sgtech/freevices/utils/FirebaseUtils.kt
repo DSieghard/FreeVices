@@ -13,6 +13,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthActionCodeException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
 import com.sgtech.freevices.R
 import com.sgtech.freevices.views.ui.LoginActivity
@@ -66,6 +67,10 @@ object FirebaseUtils {
                 Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
                 onFailure(e)
             }
+    }
+
+    fun getCurrentUser(): FirebaseUser? {
+        return FirebaseAuth.getInstance().currentUser
     }
 
     fun createAccount(context: Context, email: String, password: String, onSuccess: () -> Unit) {

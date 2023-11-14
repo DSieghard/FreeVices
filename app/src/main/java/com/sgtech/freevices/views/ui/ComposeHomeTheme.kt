@@ -80,13 +80,13 @@ fun DetailsExtendedDialog(
     val alcoholData2Weeks by viewModel.alcoholTwoWeekData.observeAsState(initial = 0f)
     val partiesData2Weeks by viewModel.partiesTwoWeekData.observeAsState(initial = 0f)
     val othersData2Weeks by viewModel.othersTwoWeekData.observeAsState(initial = 0f)
-    val tobaccoDataOneMonth by viewModel.tobaccoOneMonthData.observeAsState(initial = 0f)
-    val alcoholDataOneMonth by viewModel.alcoholOneMonthData.observeAsState(initial = 0f)
-    val partiesDataOneMonth by viewModel.partiesOneMonthData.observeAsState(initial = 0f)
-    val othersDataOneMonth by viewModel.othersOneMonthData.observeAsState(initial = 0f)
+    val tobaccoDataThirtyDays by viewModel.tobaccoThirtyDaysData.observeAsState(initial = 0f)
+    val alcoholDataThirtyDays by viewModel.alcoholThirtyDaysData.observeAsState(initial = 0f)
+    val partiesDataThirtyDays by viewModel.partiesThirtyDaysData.observeAsState(initial = 0f)
+    val othersDataThirtyDays by viewModel.othersThirtyDaysData.observeAsState(initial = 0f)
     val totalWeek = tobaccoData + alcoholData + partiesData + othersData
     val total2Weeks = tobaccoData2Weeks + alcoholData2Weeks + partiesData2Weeks + othersData2Weeks
-    val totalOneMonth = tobaccoDataOneMonth + alcoholDataOneMonth + partiesDataOneMonth + othersDataOneMonth
+    val totalThirtyDays = tobaccoDataThirtyDays + alcoholDataThirtyDays + partiesDataThirtyDays + othersDataThirtyDays
 
     Dialog(
         onDismissRequest = { onDismissRequest() },
@@ -97,19 +97,19 @@ fun DetailsExtendedDialog(
     ) {
         when (category) {
             stringResource(id = R.string.tobacco) -> {
-                ElevatedCardForCategory(onDismissRequest, tobaccoData.toInt(), tobaccoData2Weeks.toInt(), tobaccoDataOneMonth.toInt())
+                ElevatedCardForCategory(onDismissRequest, tobaccoData.toInt(), tobaccoData2Weeks.toInt(), tobaccoDataThirtyDays.toInt())
             }
             stringResource(id = R.string.alcohol) -> {
-                ElevatedCardForCategory(onDismissRequest, alcoholData.toInt(), alcoholData2Weeks.toInt(), alcoholDataOneMonth.toInt())
+                ElevatedCardForCategory(onDismissRequest, alcoholData.toInt(), alcoholData2Weeks.toInt(), alcoholDataThirtyDays.toInt())
             }
             stringResource(id = R.string.parties) -> {
-                ElevatedCardForCategory(onDismissRequest, partiesData.toInt(), partiesData2Weeks.toInt(), partiesDataOneMonth.toInt())
+                ElevatedCardForCategory(onDismissRequest, partiesData.toInt(), partiesData2Weeks.toInt(), partiesDataThirtyDays.toInt())
             }
             stringResource(id = R.string.others) -> {
-                ElevatedCardForCategory(onDismissRequest, othersData.toInt(), othersData2Weeks.toInt(), othersDataOneMonth.toInt())
+                ElevatedCardForCategory(onDismissRequest, othersData.toInt(), othersData2Weeks.toInt(), othersDataThirtyDays.toInt())
             }
             "totals" -> {
-                ElevatedCardForCategory(onDismissRequest, totalWeek.toInt(), total2Weeks.toInt(), totalOneMonth.toInt())
+                ElevatedCardForCategory(onDismissRequest, totalWeek.toInt(), total2Weeks.toInt(), totalThirtyDays.toInt())
             }
         }
 
@@ -121,7 +121,7 @@ fun ElevatedCardForCategory(
     onDismissRequest: () -> Unit,
     weekValue: Int,
     twoWeekValue: Int,
-    oneMonthValue: Int
+    thirtyDaysValue: Int
 ) {
         ElevatedCard(
             modifier = Modifier.padding(8.dp),
@@ -168,7 +168,7 @@ fun ElevatedCardForCategory(
                     Text(
                         text = stringResource(
                             R.string.your_spending_in_the_last_month_is,
-                            oneMonthValue
+                            thirtyDaysValue
                         ),
                         textAlign = TextAlign.Center,
                         modifier = Modifier.padding(8.dp)

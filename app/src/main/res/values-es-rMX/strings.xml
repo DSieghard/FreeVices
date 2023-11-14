@@ -110,4 +110,9 @@
     <string name="register_on_freevices">Registrate en FreeVices</string>
     <string name="fill_all_the_fields">Ingresa todos los campos</string>
     <string name="passwords_don_t_match">Contraseña no coincide</string>
+    <string name="your_total_expense_in_the_last_days_is">Tus gastos total en los últimos %1$s días es: \n\n $%2$s</string>
+    <string name="tobacco_expense">\nGastos en Tabaco: \n\n $%1$s \n</string>
+    <string name="alcohol_expense">\nGastos en Alcohol: \n\n $%1$s \n</string>
+    <string name="parties_expense">\nGastos en Fiestas: \n\n $%1$s \n</string>
+    <string name="others_expense">\nGastos en Otros: \n\n $%1$s \n</string>
 </resources>

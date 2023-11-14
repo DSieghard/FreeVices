@@ -23,6 +23,9 @@
             android:name=".views.CreateAccountActivity"
             android:exported="false" />
         <activity
+            android:name=".views.ui.HistoryActivity"
+            android:exported="false"/>
+        <activity
             android:name=".views.ui.LoginActivity"
             android:exported="true">
             <intent-filter>

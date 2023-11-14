@@ -120,4 +120,9 @@
     <string name="register_on_freevices">Register on FreeVices</string>
     <string name="fill_all_the_fields">Fill all the fields</string>
     <string name="passwords_don_t_match">Passwords don\'t match</string>
+    <string name="your_total_expense_in_the_last_days_is">Your total expense in the last %1$s days is: \n\n $%2$s</string>
+    <string name="tobacco_expense">\nTobacco Expense: \n\n $%1$s \n</string>
+    <string name="alcohol_expense">\nAlcohol Expense: \n\n $%1$s \n</string>
+    <string name="parties_expense">\nParties Expense: \n\n $%1$s \n</string>
+    <string name="others_expense">\nOthers Expense: \n\n $%1$s \n</string>
 </resources>

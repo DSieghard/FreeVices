@@ -41,24 +41,74 @@ class NewMainViewModel {
         _othersTwoWeekData.value = dataMap[context.getString(R.string.others)] ?: 0f
     }
 
-    private val _tobaccoOneMonthData = MutableLiveData<Float>()
-    private val _alcoholOneMonthData = MutableLiveData<Float>()
-    private val _partiesOneMonthData = MutableLiveData<Float>()
-    private val _othersOneMonthData = MutableLiveData<Float>()
+    private val _tobaccoThirtyDaysData = MutableLiveData<Float>()
+    private val _alcoholThirtyDaysData = MutableLiveData<Float>()
+    private val _partiesThirtyDaysData = MutableLiveData<Float>()
+    private val _othersThirtyDaysData = MutableLiveData<Float>()
 
-    val tobaccoOneMonthData: LiveData<Float> get() = _tobaccoOneMonthData
-    val alcoholOneMonthData: LiveData<Float> get() = _alcoholOneMonthData
-    val partiesOneMonthData: LiveData<Float> get() = _partiesOneMonthData
-    val othersOneMonthData: LiveData<Float> get() = _othersOneMonthData
+    val tobaccoThirtyDaysData: LiveData<Float> get() = _tobaccoThirtyDaysData
+    val alcoholThirtyDaysData: LiveData<Float> get() = _alcoholThirtyDaysData
+    val partiesThirtyDaysData: LiveData<Float> get() = _partiesThirtyDaysData
+    val othersThirtyDaysData: LiveData<Float> get() = _othersThirtyDaysData
 
-    fun updateOneMonthLiveDataValues(context: Context, dataMap: Map<String, Float>) {
-        _tobaccoOneMonthData.value = dataMap[context.getString(R.string.tobacco)] ?: 0f
-        _alcoholOneMonthData.value = dataMap[context.getString(R.string.alcohol)] ?: 0f
-        _partiesOneMonthData.value = dataMap[context.getString(R.string.parties)] ?: 0f
-        _othersOneMonthData.value = dataMap[context.getString(R.string.others)] ?: 0f
+    fun updateThirtyDaysLiveDataValues(context: Context, dataMap: Map<String, Float>) {
+        _tobaccoThirtyDaysData.value = dataMap[context.getString(R.string.tobacco)] ?: 0f
+        _alcoholThirtyDaysData.value = dataMap[context.getString(R.string.alcohol)] ?: 0f
+        _partiesThirtyDaysData.value = dataMap[context.getString(R.string.parties)] ?: 0f
+        _othersThirtyDaysData.value = dataMap[context.getString(R.string.others)] ?: 0f
     }
-
-
+    
+    private val _tobaccoSixtyDaysData = MutableLiveData<Float>()
+    private val _alcoholSixtyDaysData = MutableLiveData<Float>()
+    private val _partiesSixtyDaysData = MutableLiveData<Float>()
+    private val _othersSixtyDaysData = MutableLiveData<Float>()
+    
+    val tobaccoSixtyDaysData: LiveData<Float> get() = _tobaccoSixtyDaysData
+    val alcoholSixtyDaysData: LiveData<Float> get() = _alcoholSixtyDaysData
+    val partiesSixtyDaysData: LiveData<Float> get() = _partiesSixtyDaysData
+    val othersSixtyDaysData: LiveData<Float> get() = _othersSixtyDaysData
+    
+    fun updateSixtyDaysLiveDataValues(context: Context, dataMap: Map<String, Float>) {
+        _tobaccoSixtyDaysData.value = dataMap[context.getString(R.string.tobacco)] ?: 0f
+        _alcoholSixtyDaysData.value = dataMap[context.getString(R.string.alcohol)] ?: 0f
+        _partiesSixtyDaysData.value = dataMap[context.getString(R.string.parties)] ?: 0f
+        _othersSixtyDaysData.value = dataMap[context.getString(R.string.others)] ?: 0f
+    }
+    
+    private val _tobaccoThreeMonthsData = MutableLiveData<Float>()
+    private val _alcoholThreeMonthsData = MutableLiveData<Float>()
+    private val _partiesThreeMonthsData = MutableLiveData<Float>()
+    private val _othersThreeMonthsData = MutableLiveData<Float>()
+    
+    val tobaccoThreeMonthsData: LiveData<Float> get() = _tobaccoThreeMonthsData
+    val alcoholThreeMonthsData: LiveData<Float> get() = _alcoholThreeMonthsData
+    val partiesThreeMonthsData: LiveData<Float> get() = _partiesThreeMonthsData
+    val othersThreeMonthsData: LiveData<Float> get() = _othersThreeMonthsData
+    
+    fun updateThreeMonthsLiveDataValues(context: Context, dataMap: Map<String, Float>) {
+        _tobaccoThreeMonthsData.value = dataMap[context.getString(R.string.tobacco)] ?: 0f
+        _alcoholThreeMonthsData.value = dataMap[context.getString(R.string.alcohol)] ?: 0f
+        _partiesThreeMonthsData.value = dataMap[context.getString(R.string.parties)] ?: 0f
+        _othersThreeMonthsData.value = dataMap[context.getString(R.string.others)] ?: 0f
+    }
+    
+    private val _tobaccoSixMonthData = MutableLiveData<Float>()
+    private val _alcoholSixMonthData = MutableLiveData<Float>()
+    private val _partiesSixMonthData = MutableLiveData<Float>()
+    private val _othersSixMonthData = MutableLiveData<Float>()
+    
+    val tobaccoSixMonthData: LiveData<Float> get() = _tobaccoSixMonthData
+    val alcoholSixMonthData: LiveData<Float> get() = _alcoholSixMonthData
+    val partiesSixMonthData: LiveData<Float> get() = _partiesSixMonthData
+    val othersSixMonthData: LiveData<Float> get() = _othersSixMonthData
+    
+    fun updateSixMonthLiveDataValues(context: Context, dataMap: Map<String, Float>) {
+        _tobaccoSixMonthData.value = dataMap[context.getString(R.string.tobacco)] ?: 0f
+        _alcoholSixMonthData.value = dataMap[context.getString(R.string.alcohol)] ?: 0f
+        _partiesSixMonthData.value = dataMap[context.getString(R.string.parties)] ?: 0f
+        _othersSixMonthData.value = dataMap[context.getString(R.string.others)] ?: 0f
+    }
+    
 }
 
 object ViewModelProvider {
