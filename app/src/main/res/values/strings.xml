@@ -3,7 +3,6 @@
     <string name="about_title">About us</string>
     <string name="main_activity_title">Home</string>
     <string name="menu_home">Home</string>
-    <string name="menu_slideshow" translatable="false">Slideshow</string>
     <string name="menu_history">History</string>
     <string name="menu_overview">Overview</string>
     <string name="app_name_short" translatable="false">FreeVices</string>
@@ -38,7 +37,7 @@
     <string name="others_value">Others: $%d</string>
     <string name="total_value">Total (Monthly): $%d</string>
     <string name="total_value_ov">Totals (Monthly): %d</string>
-    <string name="error" translatable="false">Error</string>
+    <string name="error">Error</string>
     <string name="error_user_already_exists">User already exists</string>
     <string name="error_invalid_email">Invalid Email Address</string>
     <string name="passwords_do_not_match">Passwords do not match</string>
@@ -79,14 +78,10 @@
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="login_or_register">Login or Register</string>
-    <string name="title_activity_todelete" translatable="false">TODELETE</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="nav_header_title" translatable="false">Android Studio</string>
-    <string name="nav_header_subtitle" translatable="false">android.studio@android.com</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
-    <string name="menu_gallery" translatable="false">Gallery</string>
     <string name="delete_last_30_days_dialog">Delete Last 30 Days</string>
     <string name="data_updated_successfully">Data updated successfully</string>
     <string name="error_updating_data">Error updating data</string>
@@ -102,8 +97,7 @@
     <string name="cancel">Cancel</string>
     <string name="cancelled">Cancelled</string>
     <string name="expenses_in_the_current_month">Expenses in the current month</string>
-    <string name="title_activity_overview" translatable="false">OverviewActivity</string>
-    <string name="total" translatable="false">Total</string>
+    <string name="total">Total</string>
     <string name="enter_password">Enter password</string>
     <string name="show_password">Show password</string>
     <string name="hide_password">Hide password</string>
@@ -163,8 +157,6 @@
     <string name="error_deleting_history">Error deleting history: %1$s</string>
     <string name="delete_all_history">Are you sure you want to delete all your history. This action cannot be undone</string>
     <string name="app_settings_help">Here you can modify settings related to the application. As it improves, new settings will be added.</string>
-    <string name="dark_mode">Dark Mode</string>
-    <string name="enable_dark_mode">Enable Dark Mode</string>
     <string name="write_a_review">Write a review</string>
     <string name="tell_us_what_you_think">Tell us what you think</string>
     <string name="contact_us">Contact Us</string>
@@ -173,6 +165,6 @@
     <string name="error_14_days">A error has occurred getting data for 14 days</string>
     <string name="error_7_days">A error has occurred getting data for 7 days</string>
     <string name="email_title">Commentaries about Freevices</string>
-    <string name="dev_email_address">admin@dsieghard.xyz</string>
+    <string name="dev_email_address" translatable="false">admin@dsieghard.xyz</string>
     <string name="welcome_to_freevices">Welcome to FreeVices</string>
 </resources>
