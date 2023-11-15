@@ -1,7 +1,9 @@
 package com.sgtech.freevices.views.ui
 
 import android.os.Bundle
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Spacer
@@ -25,6 +27,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -50,13 +53,21 @@ class LoginActivity : AppCompatActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.light(Color.Transparent.hashCode(), Color.Transparent.hashCode()),
+            navigationBarStyle = SystemBarStyle.light(Color.Transparent.hashCode(), Color.Transparent.hashCode()),
+        )
         setContent {
             val context = LocalContext.current
             var email by remember { mutableStateOf("") }
             var password by remember { mutableStateOf("") }
-            val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
+            val scrollBehavior =
+                TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
             val scope = rememberCoroutineScope()
             var isLoading by remember { mutableStateOf(false) }
+            if (isLoading) {
+                DialogForLoad { isLoading = false }
+            }
 
             FreeVicesTheme {
                 Scaffold(
@@ -65,7 +76,7 @@ class LoginActivity : AppCompatActivity() {
                         LargeTopAppBar(
                             title = {
                                 Text(
-                                    "Welcome to FreeVices",
+                                    getString(R.string.welcome_to_freevices),
                                     style = MaterialTheme.typography.headlineLarge,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis
@@ -95,10 +106,16 @@ class LoginActivity : AppCompatActivity() {
                             actions = {
                                 TextButton(onClick = {
                                     val intent =
-                                        android.content.Intent(context, CreateAccountActivity::class.java)
+                                        android.content.Intent(
+                                            context,
+                                            CreateAccountActivity::class.java
+                                        )
                                     context.startActivity(intent)
                                 }) {
-                                    Text(text = stringResource(R.string.sign_up), style = MaterialTheme.typography.bodyLarge)
+                                    Text(
+                                        text = stringResource(R.string.sign_up),
+                                        style = MaterialTheme.typography.bodyLarge
+                                    )
                                 }
                             },
                             floatingActionButton = {
@@ -111,20 +128,18 @@ class LoginActivity : AppCompatActivity() {
                                             {
                                                 isLoading = false
                                             })
-                                        isLoading = false
                                     }
                                 }) {
-                                    Text(text = stringResource(R.string.sign_in), style = MaterialTheme.typography.bodyLarge)
+                                    Text(
+                                        text = stringResource(R.string.sign_in),
+                                        style = MaterialTheme.typography.bodyLarge
+                                    )
                                 }
                             }
                         )
                     }
                 )
             }
-            if (isLoading) {
-               LoadingDialog()
-            }
-
         }
     }
 }

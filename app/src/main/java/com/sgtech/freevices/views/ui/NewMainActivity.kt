@@ -2,7 +2,9 @@ package com.sgtech.freevices.views.ui
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -34,9 +36,11 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -55,7 +59,11 @@ class NewMainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        dataHandlerForActivity()
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.light(Color.Transparent.hashCode(), Color.Transparent.hashCode()),
+            navigationBarStyle = SystemBarStyle.light(Color.Transparent.hashCode(), Color.Transparent.hashCode()),
+        )
+
         setContent {
             NewMainScreen()
             ErrorDialog {}
@@ -74,7 +82,9 @@ class NewMainActivity : ComponentActivity() {
         val partiesData by viewModel.partiesLiveData.observeAsState(initial = 0f)
         val othersData by viewModel.othersLiveData.observeAsState(initial = 0f)
         var isDialogOpen by remember { mutableStateOf(false) }
+        var isLoadingDialogVisible by rememberSaveable { mutableStateOf(false) }
         val totals = tobaccoData + alcoholData + partiesData + othersData
+        dataHandlerForActivity{isVisible -> isLoadingDialogVisible = isVisible}
 
         FreeVicesTheme {
             ModalNavigationDrawer(
@@ -142,6 +152,9 @@ class NewMainActivity : ComponentActivity() {
                     },
                     snackbarHost = { SnackbarHost(snackbarHostState) },
                     content = { padding ->
+                        if (isLoadingDialogVisible) {
+                            DialogForLoad { isLoadingDialogVisible = false }
+                        }
                         LazyColumn(
                             modifier = Modifier
                                 .fillMaxSize()
@@ -192,14 +205,20 @@ class NewMainActivity : ComponentActivity() {
         }
     }
 
-    private fun dataHandlerForActivity(){
+    private fun dataHandlerForActivity(
+        onLoadingVisibilityChange: (Boolean) -> Unit) {
+        onLoadingVisibilityChange(true)
+
         FirebaseUtils.dataHandler(
             context = applicationContext,
             days = SEVEN_DAYS,
             onSuccess = { data ->
                 viewModel.updateLiveDataValues(this, data)
             },
-            onFailure = { errorCode = SEVEN_DAYS }
+            onFailure = {
+                errorCode = SEVEN_DAYS
+                onLoadingVisibilityChange(false)
+            }
         )
 
         FirebaseUtils.dataHandler(
@@ -208,17 +227,28 @@ class NewMainActivity : ComponentActivity() {
             onSuccess = { data ->
                 viewModel.updateTwoWeekLiveDataValues(this, data)
             },
-            onFailure = { errorCode = FOURTEEN_DAYS }
+            onFailure = {
+                errorCode = FOURTEEN_DAYS
+                onLoadingVisibilityChange(false)
+            }
         )
+
         FirebaseUtils.dataHandler(
             context = applicationContext,
             days = THIRTY_DAYS,
             onSuccess = { data ->
                 viewModel.updateThirtyDaysLiveDataValues(this, data)
             },
-            onFailure = { errorCode = THIRTY_DAYS }
+            onFailure = {
+                errorCode = THIRTY_DAYS
+                onLoadingVisibilityChange(false)
+            }
         )
+
+
+        onLoadingVisibilityChange(false)
     }
+
 
     @Composable
     fun ErrorDialog(onDismissRequest: () -> Unit) {

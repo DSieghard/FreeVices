@@ -1,7 +1,13 @@
 package com.sgtech.freevices.views.ui.settings
 
+import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.ActivityNotFoundException
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -42,7 +48,6 @@ import com.sgtech.freevices.views.ui.theme.FreeVicesTheme
 class NewAppSettingsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.light(Color.Transparent.hashCode(),Color.Transparent.hashCode()),
             navigationBarStyle = SystemBarStyle.light(Color.Transparent.hashCode(),Color.Transparent.hashCode()),
@@ -98,17 +103,62 @@ fun AppSettingsView() {
                         subtitle = { Text(text = stringResource(R.string.tell_us_what_you_think)) },
                         icon = { Icon(imageVector = Icons.Filled.Reviews, contentDescription = null) },
                         onClick = {
-
+                            openPlayStoreForRating(context)
                         })
                     SettingsMenuLink(title = { Text(text = stringResource(R.string.contact_us))},
                         subtitle = { Text(text = stringResource(R.string.send_us_an_email)) },
                         icon = { Icon(imageVector = Icons.Filled.Mail, contentDescription = null) },
                         onClick = {
-
+                            sendEmail(context)
                         })
                 }
             }
         )
     }
+}
 
+private fun openPlayStoreForRating(context: Context) {
+    val packageName = context.packageName
+
+    try {
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$packageName"))
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        context.startActivity(intent)
+    } catch (e: ActivityNotFoundException) {
+        val intent = Intent(
+            Intent.ACTION_VIEW,
+            Uri.parse("https://play.google.com/store/apps/details?id=$packageName")
+        )
+        context.startActivity(intent)
+    }
+}
+
+@SuppressLint("QueryPermissionsNeeded")
+private fun sendEmail(context: Context) {
+    val emailSubject = context.getString(R.string.email_title)
+    val emailAddress = context.getString(R.string.dev_email_address) //
+
+    try {
+        val intent = Intent(Intent.ACTION_SENDTO).apply {
+            data = Uri.parse("mailto:")
+            putExtra(Intent.EXTRA_EMAIL, arrayOf(emailAddress))
+            putExtra(Intent.EXTRA_SUBJECT, emailSubject)
+        }
+
+        if (intent.resolveActivity(context.packageManager) != null) {
+            context.startActivity(intent)
+        } else {
+            Toast.makeText(
+                context,
+                "No hay aplicación de correo instalada",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    } catch (e: ActivityNotFoundException) {
+        Toast.makeText(
+            context,
+            "No se pudo abrir la aplicación de correo",
+            Toast.LENGTH_SHORT
+        ).show()
+    }
 }

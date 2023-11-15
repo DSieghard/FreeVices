@@ -172,4 +172,7 @@
     <string name="error_30_days">A error has occurred getting data for 30 days</string>
     <string name="error_14_days">A error has occurred getting data for 14 days</string>
     <string name="error_7_days">A error has occurred getting data for 7 days</string>
+    <string name="email_title">Commentaries about Freevices</string>
+    <string name="dev_email_address">admin@dsieghard.xyz</string>
+    <string name="welcome_to_freevices">Welcome to FreeVices</string>
 </resources>

@@ -1,6 +1,7 @@
 package com.sgtech.freevices.views.ui
 
 import android.app.Activity
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,6 +13,7 @@ import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -29,8 +31,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.sgtech.freevices.R
 import com.sgtech.freevices.utils.FirebaseUtils
 import com.sgtech.freevices.views.ui.NewMainActivity.*
@@ -170,4 +175,35 @@ fun HelpDialog(onDismissRequest: () -> Unit, text: String) {
             }
         }
     )
+}
+
+@Composable
+fun DialogForLoad(onDismiss: () -> Unit) {
+
+    FreeVicesTheme{
+        Dialog(
+            onDismissRequest = { onDismiss() },
+            properties = DialogProperties(
+                dismissOnBackPress = false,
+                dismissOnClickOutside = false
+            )
+        ) {
+            ElevatedCard(
+                modifier = Modifier
+                    .padding(16.dp),
+                shape = MaterialTheme.shapes.large
+            ) {
+                Row(
+                    modifier = Modifier
+                        .padding(16.dp, 16.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ){
+                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                    Spacer(modifier = Modifier.padding(8.dp))
+                    Text(text = stringResource(R.string.loading))
+                }
+            }
+        }
+    }
 }
