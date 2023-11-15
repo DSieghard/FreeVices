@@ -162,4 +162,14 @@
     <string name="history_deleted">History deleted for %1$d days.</string>
     <string name="error_deleting_history">Error deleting history: %1$s</string>
     <string name="delete_all_history">Are you sure you want to delete all your history. This action cannot be undone</string>
+    <string name="app_settings_help">Here you can modify settings related to the application. As it improves, new settings will be added.</string>
+    <string name="dark_mode">Dark Mode</string>
+    <string name="enable_dark_mode">Enable Dark Mode</string>
+    <string name="write_a_review">Write a review</string>
+    <string name="tell_us_what_you_think">Tell us what you think</string>
+    <string name="contact_us">Contact Us</string>
+    <string name="send_us_an_email">Send us an email</string>
+    <string name="error_30_days">A error has occurred getting data for 30 days</string>
+    <string name="error_14_days">A error has occurred getting data for 14 days</string>
+    <string name="error_7_days">A error has occurred getting data for 7 days</string>
 </resources>

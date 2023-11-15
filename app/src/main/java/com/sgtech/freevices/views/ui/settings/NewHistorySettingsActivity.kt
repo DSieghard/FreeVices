@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Help
 import androidx.compose.material.icons.filled.HelpOutline
 import androidx.compose.material.icons.filled.ManageHistory
 import androidx.compose.material3.AlertDialog
@@ -40,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import com.alorma.compose.settings.ui.SettingsMenuLink
 import com.sgtech.freevices.R
 import com.sgtech.freevices.utils.FirebaseUtils
+import com.sgtech.freevices.views.ui.HelpDialog
 import com.sgtech.freevices.views.ui.theme.FreeVicesTheme
 import kotlinx.coroutines.launch
 
@@ -61,9 +61,9 @@ fun HistorySettingsView() {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     var isHelpPressed by remember { mutableStateOf(false) }
     if (isHelpPressed) {
-        HelpDialog {
-            isHelpPressed = false
-        }
+        HelpDialog( onDismissRequest = { isHelpPressed = false },
+            stringResource(id = R.string.history_settings_help)
+        )
     }
     var isDeleteButtonPressed by remember { mutableStateOf(false) }
     if (isDeleteButtonPressed) {
@@ -158,29 +158,6 @@ fun HistorySettingsView() {
                     })
             }
         }
-    }
-}
-
-@Composable
-fun HelpDialog(onDismissRequest : () -> Unit) {
-    FreeVicesTheme {
-        AlertDialog(onDismissRequest = { onDismissRequest()},
-            icon = { Icon(Icons.Filled.Help, contentDescription = null) },
-            title = {
-                Text(text = stringResource(R.string.help))
-            },
-            text = {
-                Text(stringResource(R.string.history_settings_help), style = MaterialTheme.typography.bodyLarge)
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        onDismissRequest()
-                    }
-                ) {
-                    Text(stringResource(R.string.close))
-                }
-            })
     }
 }
 

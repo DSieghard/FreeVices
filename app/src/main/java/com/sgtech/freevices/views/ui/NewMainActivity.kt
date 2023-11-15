@@ -1,7 +1,6 @@
 package com.sgtech.freevices.views.ui
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Spacer
@@ -12,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -51,51 +51,20 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 class NewMainActivity : ComponentActivity() {
     private val viewModel = ViewModelProvider.provideMainViewModel()
+    private var errorCode = ZERO
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        FirebaseUtils.dataHandler(
-            context = applicationContext,
-            days = 7,
-            onSuccess = { data ->
-                viewModel.updateLiveDataValues(this, data)
-                Log.d("MainActivityResolver", "Data obtained: $data")
-            },
-            onFailure = {
-                Log.d("MainActivityResolver", "Error getting data: $it")
-            }
-        )
-        FirebaseUtils.dataHandler(
-            context = applicationContext,
-            days = 14,
-            onSuccess = { data ->
-                viewModel.updateTwoWeekLiveDataValues(this, data)
-                Log.d("MainActivityResolver", "Data obtained: $data")
-            },
-            onFailure = {
-                Log.d("MainActivityResolver", "Error getting data: $it")
-            }
-        )
-        FirebaseUtils.dataHandler(
-            context = applicationContext,
-            days = 30,
-            onSuccess = { data ->
-                viewModel.updateThirtyDaysLiveDataValues(this, data)
-                Log.d("MainActivityResolver", "Data obtained: $data")
-            },
-            onFailure = {
-                Log.d("MainActivityResolver", "Error getting data: $it")
-            }
-        )
+        dataHandlerForActivity()
         setContent {
             NewMainScreen()
+            ErrorDialog {}
         }
     }
 
     @Composable
     fun NewMainScreen() {
         val context = LocalContext.current
-        val viewModel = ViewModelProvider.provideMainViewModel()
         val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
         val scope = rememberCoroutineScope()
         val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
@@ -222,7 +191,84 @@ class NewMainActivity : ComponentActivity() {
             }
         }
     }
+
+    private fun dataHandlerForActivity(){
+        FirebaseUtils.dataHandler(
+            context = applicationContext,
+            days = SEVEN_DAYS,
+            onSuccess = { data ->
+                viewModel.updateLiveDataValues(this, data)
+            },
+            onFailure = { errorCode = SEVEN_DAYS }
+        )
+
+        FirebaseUtils.dataHandler(
+            context = applicationContext,
+            days = FOURTEEN_DAYS,
+            onSuccess = { data ->
+                viewModel.updateTwoWeekLiveDataValues(this, data)
+            },
+            onFailure = { errorCode = FOURTEEN_DAYS }
+        )
+        FirebaseUtils.dataHandler(
+            context = applicationContext,
+            days = THIRTY_DAYS,
+            onSuccess = { data ->
+                viewModel.updateThirtyDaysLiveDataValues(this, data)
+            },
+            onFailure = { errorCode = THIRTY_DAYS }
+        )
+    }
+
+    @Composable
+    fun ErrorDialog(onDismissRequest: () -> Unit) {
+        when(errorCode) {
+            THIRTY_DAYS -> {
+                AlertDialog(onDismissRequest = { onDismissRequest() },
+                    title = { Text(text = stringResource(R.string.error)) },
+                    text = { Text(text = stringResource(R.string.error_30_days)) },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            onDismissRequest()
+                        }) {
+                            Text(text = stringResource(R.string.close))
+                        }
+                    })
+            }
+            FOURTEEN_DAYS -> {
+                AlertDialog(onDismissRequest = { onDismissRequest() },
+                    title = { Text(text = stringResource(R.string.error)) },
+                    text = { Text(text = stringResource(R.string.error_14_days)) },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            onDismissRequest()
+                        }) {
+                            Text(text = stringResource(R.string.close))
+                        }
+                    })
+            }
+            SEVEN_DAYS -> {
+                AlertDialog(onDismissRequest = { onDismissRequest() },
+                    title = { Text(text = stringResource(R.string.error)) },
+                    text = { Text(text = stringResource(R.string.error_7_days)) },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            onDismissRequest()
+                        }) {
+                            Text(text = stringResource(R.string.close))
+                        }
+                    })
+            }
+            ZERO -> {
+
+            }
+        }
+    }
+
+    companion object {
+        private const val THIRTY_DAYS = 30
+        private const val FOURTEEN_DAYS = 14
+        private const val SEVEN_DAYS = 7
+        private const val ZERO = 0
+    }
 }
-
-
-
