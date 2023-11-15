@@ -1,4 +1,4 @@
-package com.sgtech.freevices.views
+package com.sgtech.freevices.views.ui
 
 import android.content.Intent
 import android.os.Bundle
@@ -40,7 +40,6 @@ import com.sgtech.freevices.views.ui.ComposeSignupTheme.EmailEditText
 import com.sgtech.freevices.views.ui.ComposeSignupTheme.LastNameEditText
 import com.sgtech.freevices.views.ui.ComposeSignupTheme.NameEditText
 import com.sgtech.freevices.views.ui.ComposeSignupTheme.PasswordEditText
-import com.sgtech.freevices.views.ui.NewMainActivity
 import com.sgtech.freevices.views.ui.theme.FreeVicesTheme
 import kotlinx.coroutines.launch
 

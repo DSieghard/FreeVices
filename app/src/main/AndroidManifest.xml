@@ -17,7 +17,7 @@
             android:theme="@style/Theme.FreeVices">
         </activity>
         <activity
-            android:name=".views.CreateAccountActivity"
+            android:name=".views.ui.CreateAccountActivity"
             android:exported="false" />
         <activity
             android:name=".views.ui.HistoryActivity"

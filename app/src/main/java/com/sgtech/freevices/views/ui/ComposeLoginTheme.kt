@@ -43,7 +43,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.sgtech.freevices.R
 import com.sgtech.freevices.utils.FirebaseUtils
-import com.sgtech.freevices.views.CreateAccountActivity
 import com.sgtech.freevices.views.ui.theme.FreeVicesTheme
 import kotlinx.coroutines.launch
 
