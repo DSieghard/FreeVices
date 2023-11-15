@@ -93,7 +93,7 @@
     <string name="data_added_successfully">Data added successfully</string>
     <string name="error_adding_data">Error adding data</string>
     <string name="email_updated_successfully">Email updated successfully</string>
-    <string name="error_updating_email">Error updating email</string>
+    <string name="error_updating_email">Error updating email: %1$s</string>
     <string name="error_deleting_data">Error deleting data: %1$s</string>
     <string name="data_deleted">Data deleted</string>
     <string name="fcm_permission_denied">Notifications is disabled for the app</string>
@@ -125,4 +125,27 @@
     <string name="alcohol_expense">\nAlcohol Expense: \n\n $%1$s \n</string>
     <string name="parties_expense">\nParties Expense: \n\n $%1$s \n</string>
     <string name="others_expense">\nOthers Expense: \n\n $%1$s \n</string>
+    <string name="user_settings">User Settings</string>
+    <string name="change_display_name">Change Display Name</string>
+    <string name="change_your_display_name">Change your display name</string>
+    <string name="change_password">Change Password</string>
+    <string name="require_your_current_password">Require your current password</string>
+    <string name="change_email_address">Change Email Address</string>
+    <string name="update_your_email_address_require_your_current_password">Update your email address \nRequire your current password</string>
+    <string name="delete_account">Delete Account</string>
+    <string name="delete_your_account_and_all_associated_data_this_cannot_be_undone">Delete your account and all associated data \nThis cannot be undone</string>
+    <string name="user_settings_help">On this screen you can modify your account settings, such as your name, your password, your email, or delete your account if you wish.</string>
+    <string name="help">Help</string>
+    <string name="confirm">Confirm</string>
+    <string name="new_display_name">New Display Name</string>
+    <string name="new_password">New Password</string>
+    <string name="confirm_new_password">Confirm New Password</string>
+    <string name="password_changed_successfully">Password changed successfully</string>
+    <string name="error_updating_password">"Error updating password: %1$s"</string>
+    <string name="email_changed_successfully">Email changed successfully</string>
+    <string name="new_email">New email</string>
+    <string name="delete_account_warning">Are you sure you want to delete your account and all its associated data?\nThis action is irreversible</string>
+    <string name="delete">Delete</string>
+    <string name="account_deleted">Account deleted successfully</string>
+    <string name="error_deleting_account">Error deleting account: %1$s</string>
 </resources>

@@ -32,6 +32,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.sgtech.freevices.utils.FirebaseUtils
 import com.sgtech.freevices.views.ui.NewMainActivity.*
+import com.sgtech.freevices.views.ui.settings.NewUserSettingsActivity
 import com.sgtech.freevices.views.ui.theme.FreeVicesTheme
 
 
@@ -77,7 +78,6 @@ fun CategoryCard(value: Int, category: String){
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
 fun MainNavigationDrawer(){
@@ -112,7 +112,7 @@ fun MainNavigationDrawer(){
         Spacer(modifier = Modifier.padding(8.dp))
 
         Text(
-            "Account: ${currentUser?.email}",
+            "Account: ${currentUser?.displayName}",
             modifier = Modifier.padding(24.dp),
             style = MaterialTheme.typography.titleLarge
         )
@@ -127,7 +127,11 @@ fun MainNavigationDrawer(){
             label = { Text(text = "Account Settings") },
             icon = { Icon(Icons.Filled.Settings, contentDescription = "Settings") },
             selected = false,
-            onClick = { /*TODO: Open Account Settings (Explicit Intent)*/ }
+            onClick = {
+                val intent = android.content.Intent(context,
+                    NewUserSettingsActivity::class.java)
+                context.startActivity(intent)
+            }
         )
         NavigationDrawerItem(
             label = { Text(text = "Send feedback") },

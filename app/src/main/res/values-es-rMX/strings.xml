@@ -86,7 +86,7 @@
     <string name="data_added_successfully">Datos agregados con éxito</string>
     <string name="error_adding_data">Error agregando datos</string>
     <string name="email_updated_successfully">Correo actualizado con éxito</string>
-    <string name="error_updating_email">Error actualizando correo</string>
+    <string name="error_updating_email">Error actualizando correo: %1$s</string>
     <string name="error_deleting_data">Error borrando datos: %1$s</string>
     <string name="data_deleted">Datos eliminados</string>
     <string name="fcm_permission_denied">Notificaciones desactivadas para la aplicación</string>

@@ -33,6 +33,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,7 +51,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun HomeFab() {
-    var isMenuVisible by remember { mutableStateOf(false) }
+    var isMenuVisible by rememberSaveable { mutableStateOf(false) }
 
     if (isMenuVisible) {
         DeployMenu(onDismissRequest = { isMenuVisible = false })

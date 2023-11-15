@@ -1,6 +1,7 @@
 package com.sgtech.freevices.views.ui
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Arrangement
@@ -33,7 +34,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,6 +44,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.lifecycle.lifecycleScope
 import com.sgtech.freevices.R
 import com.sgtech.freevices.utils.FirebaseUtils
 import com.sgtech.freevices.views.SettingsActivity
@@ -54,48 +56,29 @@ class HistoryActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         val viewModel = ViewModelProvider.provideMainViewModel()
         super.onCreate(savedInstanceState)
-        FirebaseUtils.dataHandler(
-            context = applicationContext,
-            days = 30,
-            onSuccess = { data ->
-                viewModel.updateThirtyDaysLiveDataValues(this, data)
-            },
-            onFailure = {
-            }
-        )
-        FirebaseUtils.dataHandler(
-            context = applicationContext,
-            days = 60,
-            onSuccess = { data ->
-                viewModel.updateSixtyDaysLiveDataValues(this, data)
-            },
-            onFailure = {
-                
-            }
-        )
-        FirebaseUtils.dataHandler(
-            context = applicationContext,
-            days = 90,
-            onSuccess = { data ->
-                viewModel.updateThreeMonthsLiveDataValues(this, data)
-            },
-            onFailure = {
-                
-            }
-        )
-        FirebaseUtils.dataHandler(
-            context = applicationContext,
-            days = 180,
-            onSuccess = { data ->
-                viewModel.updateSixMonthLiveDataValues(this, data)
-            },
-            onFailure = {
-                
-            }
-        )
+        val daysList = listOf(30, 60, 90, 180)
+        daysList.forEach { days ->
+            FirebaseUtils.dataHandler(
+                context = applicationContext,
+                days = days,
+                onSuccess = { data ->
+                    when(days)
+                    {
+                        30 -> viewModel.updateThirtyDaysLiveDataValues(this, data)
+                        60 -> viewModel.updateSixtyDaysLiveDataValues(this, data)
+                        90 -> viewModel.updateThreeMonthsLiveDataValues(this, data)
+                        180 -> viewModel.updateSixMonthLiveDataValues(this, data)
+                    }
+                },
+                onFailure = {
+                    Log.d("History/FirebaseUtils", "Error getting data, $it")
+                }
+            )
+        }
+
         setContent {
             val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-            val scope = rememberCoroutineScope()
+            val scope = lifecycleScope
             val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
             val context = LocalContext.current
             val tobaccoDataThirtyDays by viewModel.tobaccoThirtyDaysData.observeAsState(initial = 0f)
@@ -192,7 +175,7 @@ class HistoryActivity : AppCompatActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun HistoryCard(days: Int, value: Int) {
-        var isDialogPressed by remember { mutableStateOf(false) }
+        var isDialogPressed by rememberSaveable { mutableStateOf(false) }
         if (isDialogPressed) {
             ExpandedHistoryCard({isDialogPressed = false}, days)
         }

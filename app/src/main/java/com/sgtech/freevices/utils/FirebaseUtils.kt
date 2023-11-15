@@ -14,6 +14,7 @@ import com.google.firebase.auth.FirebaseAuthActionCodeException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
 import com.sgtech.freevices.R
 import com.sgtech.freevices.views.ui.LoginActivity
@@ -35,7 +36,14 @@ object FirebaseUtils {
         }
 
     }
-    fun signInWithEmail(context: Context, email: String, password: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+
+    fun signInWithEmail(
+        context: Context,
+        email: String,
+        password: String,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
         val auth = FirebaseAuth.getInstance()
         auth.signInWithEmailAndPassword(email.trim(), password.trim())
             .addOnCompleteListener { task ->
@@ -73,6 +81,28 @@ object FirebaseUtils {
         return FirebaseAuth.getInstance().currentUser
     }
 
+    fun configDisplayNameOnAuth(name: String) {
+        val user = FirebaseAuth.getInstance().currentUser
+        val profileUpdates = UserProfileChangeRequest.Builder()
+            .setDisplayName(name)
+            .build()
+        user!!.updateProfile(profileUpdates)
+    }
+
+    fun updateDisplayNameOnFirestore(firstName: String, lastName: String) {
+        val auth = FirebaseAuth.getInstance()
+        val user = auth.currentUser
+        val db = FirebaseFirestore.getInstance()
+        val userId = user?.uid
+
+        if (userId != null) {
+            val userDb = db.collection("users").document(userId)
+            userDb.update("firstName", firstName)
+            userDb.update("lastName", lastName)
+        }
+    }
+
+
     fun createAccount(context: Context, email: String, password: String, onSuccess: () -> Unit) {
         val auth = FirebaseAuth.getInstance()
         showLoadingDialog(context)
@@ -92,12 +122,14 @@ object FirebaseUtils {
                         buildAlertDialog(context, title, message)
                         hideLoadingDialog()
                     }
+
                     is FirebaseAuthInvalidUserException -> {
                         val title = context.getString(R.string.error)
                         val message = context.getString(R.string.error_invalid_email)
                         buildAlertDialog(context, title, message)
                         hideLoadingDialog()
                     }
+
                     else -> {
                         hideLoadingDialog()
                     }
@@ -121,6 +153,9 @@ object FirebaseUtils {
         val userRef = FirebaseFirestore.getInstance().collection("users").document(uid!!)
 
         userRef.set(data).addOnSuccessListener {
+
+            configDisplayNameOnAuth(name = "$firstName $lastName")
+
             val categoriesCollection = userRef.collection("categories")
 
             val tobaccoDataCollection = categoriesCollection.document("tobacco").collection("data")
@@ -151,7 +186,7 @@ object FirebaseUtils {
         amount: Int,
         onSuccess: () -> Unit,
         onFailure: (Exception) -> Unit
-    )  {
+    ) {
         val subCollectionName = when (category) {
             context.getString(R.string.tobacco) -> "tobacco"
             context.getString(R.string.alcohol) -> "alcohol"
@@ -165,10 +200,12 @@ object FirebaseUtils {
         val uid = user?.uid
         val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
 
-        val categoriesCollection = FirebaseFirestore.getInstance().collection("users").document(uid!!)
-            .collection("categories")
+        val categoriesCollection =
+            FirebaseFirestore.getInstance().collection("users").document(uid!!)
+                .collection("categories")
 
-        val categoryDataCollection = categoriesCollection.document(subCollectionName).collection("data")
+        val categoryDataCollection =
+            categoriesCollection.document(subCollectionName).collection("data")
 
         val currentDayDataDocument = categoryDataCollection.document(currentDate)
 
@@ -296,27 +333,18 @@ object FirebaseUtils {
         db.collection("users").document(FirebaseAuth.getInstance().currentUser!!.uid).delete()
     }
 
-    fun updateEmailOnFirestore(newEmail: String, view: View, context: Context) {
+    fun updateEmailOnFirestore(newEmail: String, onFailure: (Exception) -> Unit) {
         val db = FirebaseFirestore.getInstance()
         val currentUser = FirebaseAuth.getInstance().currentUser
 
         if (currentUser != null) {
             val userDb = db.collection("users").document(currentUser.uid)
-
             userDb.update("email", newEmail)
-                .addOnSuccessListener {
-                    Snackbar.make(view,
-                        context.getString(R.string.email_updated_successfully), Snackbar.LENGTH_LONG).show()
-                }
-                .addOnFailureListener { e ->
-                    val errorMessage = e.message ?: context.getString(R.string.error_updating_email)
-                    Snackbar.make(view, errorMessage, Snackbar.LENGTH_LONG).show()
-                }
         } else {
-            Snackbar.make(view, context.getString(R.string.error_updating_email), Snackbar.LENGTH_LONG).show()
+            onFailure(Exception("User is not logged in"))
+
         }
     }
-
 
 
     private fun deleteHistory30Days(category: String, context: Context, view: View) {
@@ -345,7 +373,11 @@ object FirebaseUtils {
                 }
             }
             .addOnFailureListener { exception ->
-                Snackbar.make(view, context.getString(R.string.error_deleting_data, exception), Snackbar.LENGTH_SHORT).show()
+                Snackbar.make(
+                    view,
+                    context.getString(R.string.error_deleting_data, exception),
+                    Snackbar.LENGTH_SHORT
+                ).show()
             }
     }
 
@@ -375,7 +407,11 @@ object FirebaseUtils {
                 }
             }
             .addOnFailureListener { exception ->
-                Snackbar.make(view, context.getString(R.string.error_deleting_data, exception), Snackbar.LENGTH_SHORT).show()
+                Snackbar.make(
+                    view,
+                    context.getString(R.string.error_deleting_data, exception),
+                    Snackbar.LENGTH_SHORT
+                ).show()
             }
     }
 
@@ -405,7 +441,11 @@ object FirebaseUtils {
                 }
             }
             .addOnFailureListener { exception ->
-                Snackbar.make(view, context.getString(R.string.error_deleting_data, exception), Snackbar.LENGTH_SHORT).show()
+                Snackbar.make(
+                    view,
+                    context.getString(R.string.error_deleting_data, exception),
+                    Snackbar.LENGTH_SHORT
+                ).show()
             }
     }
 
@@ -454,10 +494,45 @@ object FirebaseUtils {
         loadingDialog = null
     }
 
-    fun signOut(context: Context){
+    fun signOut(context: Context) {
         FirebaseAuth.getInstance().signOut()
         val intent = Intent(context, LoginActivity::class.java)
         startActivity(context, intent, null)
     }
 
+    fun configPasswordOnAuth(newPassword: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        currentUser?.updatePassword(newPassword)
+            ?.addOnCompleteListener {
+                onSuccess()
+            }
+            ?.addOnFailureListener { e ->
+                onFailure(e)
+            }
+
+    }
+
+    fun configEmailOnAuth(newEmail: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        currentUser?.updateEmail(newEmail)
+            ?.addOnCompleteListener {
+                updateEmailOnFirestore(newEmail, onFailure = { e -> onFailure(e) })
+                onSuccess()
+            }
+            ?.addOnFailureListener { e ->
+                onFailure(e)
+            }
+    }
+
+    fun deleteAccount(onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        deleteUserDataFromFirestore()
+        currentUser?.delete()
+            ?.addOnCompleteListener {
+                onSuccess()
+            }
+            ?.addOnFailureListener { e ->
+                onFailure(e)
+            }
+    }
 }
