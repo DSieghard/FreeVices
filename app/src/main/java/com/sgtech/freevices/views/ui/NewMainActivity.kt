@@ -44,7 +44,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.sgtech.freevices.R
 import com.sgtech.freevices.utils.FirebaseUtils
-import com.sgtech.freevices.views.SettingsActivity
+import com.sgtech.freevices.views.ui.settings.NewAppSettingsActivity
 import com.sgtech.freevices.views.ui.theme.FreeVicesTheme
 import kotlinx.coroutines.launch
 
@@ -145,7 +145,7 @@ class NewMainActivity : ComponentActivity() {
                                 IconButton(onClick = {
                                     scope.launch {
                                         val intent = android.content.Intent(
-                                            context, SettingsActivity::class.java
+                                            context, NewAppSettingsActivity::class.java
                                         )
                                         context.startActivity(intent)
                                     }

@@ -148,4 +148,18 @@
     <string name="delete">Delete</string>
     <string name="account_deleted">Account deleted successfully</string>
     <string name="error_deleting_account">Error deleting account: %1$s</string>
+    <string name="history_settings_help">Here you can manage your history, delete the last 30, 60, 120 and 180 days. As well as all the history we have.\nThis action is irreversible.</string>
+    <string name="clear_last_30_days">Clear last 30 days</string>
+    <string name="delete_last_30_days_from_history_this_action_cannot_be_undone">Delete last 30 days from history. This action cannot be undone</string>
+    <string name="clear_last_60_days">Clear last 60 days</string>
+    <string name="delete_last_60_days_from_history_this_action_cannot_be_undone">Delete last 60 days from history. This action cannot be undone</string>
+    <string name="clear_last_90_days">Clear last 90 days</string>
+    <string name="delete_last_90_days_from_history_this_action_cannot_be_undone">Delete last 90 days from history. This action cannot be undone</string>
+    <string name="clear_all_history">Clear all history</string>
+    <string name="delete_all_history_this_action_cannot_be_undone">Delete all history. This action cannot be undone</string>
+    <string name="delete_history">Delete History</string>
+    <string name="delete_history_text">Are you sure you want to delete your history for %1$d days?</string>
+    <string name="history_deleted">History deleted for %1$d days.</string>
+    <string name="error_deleting_history">Error deleting history: %1$s</string>
+    <string name="delete_all_history">Are you sure you want to delete all your history. This action cannot be undone</string>
 </resources>

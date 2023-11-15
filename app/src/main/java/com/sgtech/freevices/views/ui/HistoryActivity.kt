@@ -47,7 +47,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.lifecycleScope
 import com.sgtech.freevices.R
 import com.sgtech.freevices.utils.FirebaseUtils
-import com.sgtech.freevices.views.SettingsActivity
+import com.sgtech.freevices.views.ui.settings.NewHistorySettingsActivity
 import com.sgtech.freevices.views.ui.theme.FreeVicesTheme
 import kotlinx.coroutines.launch
 
@@ -138,7 +138,7 @@ class HistoryActivity : AppCompatActivity() {
                                             val intent =
                                                 android.content.Intent(
                                                     context,
-                                                    SettingsActivity::class.java
+                                                    NewHistorySettingsActivity::class.java
                                                 )
                                             context.startActivity(intent)
                                         }

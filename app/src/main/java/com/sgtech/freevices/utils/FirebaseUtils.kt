@@ -3,12 +3,10 @@ package com.sgtech.freevices.utils
 import android.content.Context
 import android.content.Intent
 import android.util.Log
-import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat.startActivity
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthActionCodeException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
@@ -328,12 +326,12 @@ object FirebaseUtils {
         }
     }
 
-    fun deleteUserDataFromFirestore() {
+    private fun deleteUserDataFromFirestore() {
         val db = FirebaseFirestore.getInstance()
         db.collection("users").document(FirebaseAuth.getInstance().currentUser!!.uid).delete()
     }
 
-    fun updateEmailOnFirestore(newEmail: String, onFailure: (Exception) -> Unit) {
+    private fun updateEmailOnFirestore(newEmail: String, onFailure: (Exception) -> Unit) {
         val db = FirebaseFirestore.getInstance()
         val currentUser = FirebaseAuth.getInstance().currentUser
 
@@ -346,132 +344,6 @@ object FirebaseUtils {
         }
     }
 
-
-    private fun deleteHistory30Days(category: String, context: Context, view: View) {
-        val db = FirebaseFirestore.getInstance()
-        val currentUser = FirebaseAuth.getInstance().currentUser
-        val userId = currentUser?.uid ?: return
-
-        val currentDate = Calendar.getInstance().time
-
-        val calendar = Calendar.getInstance()
-        calendar.time = currentDate
-        calendar.add(Calendar.DAY_OF_MONTH, -30)
-        val thirtyDaysAgo = calendar.time
-
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-
-        val categoriesCollection = db.collection("users").document(userId)
-            .collection("categories").document(category).collection("data")
-
-        categoriesCollection
-            .whereGreaterThanOrEqualTo("date", dateFormat.format(thirtyDaysAgo))
-            .get()
-            .addOnSuccessListener { documents ->
-                for (document in documents) {
-                    document.reference.delete()
-                }
-            }
-            .addOnFailureListener { exception ->
-                Snackbar.make(
-                    view,
-                    context.getString(R.string.error_deleting_data, exception),
-                    Snackbar.LENGTH_SHORT
-                ).show()
-            }
-    }
-
-    private fun deleteHistory60Days(category: String, context: Context, view: View) {
-        val db = FirebaseFirestore.getInstance()
-        val currentUser = FirebaseAuth.getInstance().currentUser
-        val userId = currentUser?.uid ?: return
-
-        val currentDate = Calendar.getInstance().time
-
-        val calendar = Calendar.getInstance()
-        calendar.time = currentDate
-        calendar.add(Calendar.DAY_OF_MONTH, -60)
-        val sixtyDaysAgo = calendar.time
-
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-
-        val categoriesCollection = db.collection("users").document(userId)
-            .collection("categories").document(category).collection("data")
-
-        categoriesCollection
-            .whereGreaterThanOrEqualTo("date", dateFormat.format(sixtyDaysAgo))
-            .get()
-            .addOnSuccessListener { documents ->
-                for (document in documents) {
-                    document.reference.delete()
-                }
-            }
-            .addOnFailureListener { exception ->
-                Snackbar.make(
-                    view,
-                    context.getString(R.string.error_deleting_data, exception),
-                    Snackbar.LENGTH_SHORT
-                ).show()
-            }
-    }
-
-    private fun deleteHistory90Days(category: String, context: Context, view: View) {
-        val db = FirebaseFirestore.getInstance()
-        val currentUser = FirebaseAuth.getInstance().currentUser
-        val userId = currentUser?.uid ?: return
-
-        val currentDate = Calendar.getInstance().time
-
-        val calendar = Calendar.getInstance()
-        calendar.time = currentDate
-        calendar.add(Calendar.DAY_OF_MONTH, -90)
-        val ninetyDaysAgo = calendar.time
-
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-
-        val categoriesCollection = db.collection("users").document(userId)
-            .collection("categories").document(category).collection("data")
-
-        categoriesCollection
-            .whereGreaterThanOrEqualTo("date", dateFormat.format(ninetyDaysAgo))
-            .get()
-            .addOnSuccessListener { documents ->
-                for (document in documents) {
-                    document.reference.delete()
-                }
-            }
-            .addOnFailureListener { exception ->
-                Snackbar.make(
-                    view,
-                    context.getString(R.string.error_deleting_data, exception),
-                    Snackbar.LENGTH_SHORT
-                ).show()
-            }
-    }
-
-    fun delete30Days(view: View, context: Context) {
-        deleteHistory30Days("tobacco", context, view)
-        deleteHistory30Days("alcohol", context, view)
-        deleteHistory30Days("parties", context, view)
-        deleteHistory30Days("others", context, view)
-        Snackbar.make(view, context.getString(R.string.data_deleted), Snackbar.LENGTH_SHORT).show()
-    }
-
-    fun delete60Days(view: View, context: Context) {
-        deleteHistory60Days("tobacco", context, view)
-        deleteHistory60Days("alcohol", context, view)
-        deleteHistory60Days("parties", context, view)
-        deleteHistory60Days("others", context, view)
-        Snackbar.make(view, context.getString(R.string.data_deleted), Snackbar.LENGTH_SHORT).show()
-    }
-
-    fun delete90Days(view: View, context: Context) {
-        deleteHistory90Days("tobacco", context, view)
-        deleteHistory90Days("alcohol", context, view)
-        deleteHistory90Days("parties", context, view)
-        deleteHistory90Days("others", context, view)
-        Snackbar.make(view, context.getString(R.string.data_deleted), Snackbar.LENGTH_SHORT).show()
-    }
 
     private fun buildAlertDialog(context: Context, title: String, message: String) {
         MaterialAlertDialogBuilder(context)
@@ -535,4 +407,50 @@ object FirebaseUtils {
                 onFailure(e)
             }
     }
+
+    fun deleteHistory(days: Int, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+        val db = FirebaseFirestore.getInstance()
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        val userId = currentUser?.uid ?: return
+
+        val calendar = Calendar.getInstance()
+        calendar.add(Calendar.DAY_OF_MONTH, -days)
+        val currentDate = calendar.time
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+
+        val batch = db.batch()
+
+        val categories = listOf(
+            "tobacco",
+            "alcohol",
+            "parties",
+            "others"
+        )
+
+        for (category in categories) {
+            val categoryCollection = db.collection("users").document(userId)
+                .collection("categories").document(category).collection("data")
+
+            categoryCollection
+                .whereGreaterThanOrEqualTo("date", dateFormat.format(currentDate))
+                .get()
+                .addOnSuccessListener { documents ->
+                    for (document in documents) {
+                        batch.delete(document.reference)
+                    }
+                }
+                .addOnFailureListener { e ->
+                    onFailure(e)
+                }
+        }
+
+        batch.commit()
+            .addOnSuccessListener {
+                onSuccess()
+            }
+            .addOnFailureListener { e ->
+                onFailure(e)
+            }
+    }
+
 }
