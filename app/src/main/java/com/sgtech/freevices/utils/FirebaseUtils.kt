@@ -3,40 +3,28 @@ package com.sgtech.freevices.utils
 import android.content.Context
 import android.content.Intent
 import android.util.Log
-import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat.startActivity
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthActionCodeException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
-import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
 import com.sgtech.freevices.R
 import com.sgtech.freevices.views.ui.LoginActivity
-import com.sgtech.freevices.views.ui.NewMainActivity
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
 object FirebaseUtils {
-    private var loadingDialog: AlertDialog? = null
-    fun checkIfUserIsLoggedIn(context: Context) {
+    fun isUserLoggedIn(): Boolean {
         val currentUser = FirebaseAuth.getInstance().currentUser
-        if (currentUser != null) {
-            val intent = Intent(context, NewMainActivity::class.java)
-            startActivity(context, intent, null)
-        } else {
-            Log.d("FirebaseUtils", "User is not logged in")
-        }
-
+        return currentUser != null
     }
 
+
     fun signInWithEmail(
-        context: Context,
         email: String,
         password: String,
         onSuccess: () -> Unit,
@@ -47,30 +35,17 @@ object FirebaseUtils {
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     try {
-                        checkIfUserIsLoggedIn(context)
-                        val intent = Intent(context, NewMainActivity::class.java)
-                        startActivity(context, intent, null)
                         onSuccess()
-                    } catch (e: FirebaseAuthInvalidUserException) {
-                        val title = context.getString(R.string.error)
-                        val message = context.getString(R.string.error_user_not_found)
-                        buildAlertDialog(context, title, message)
-                        onFailure(e)
-                    } catch (ec: FirebaseAuthActionCodeException) {
-                        val title = context.getString(R.string.error)
-                        val message = context.getString(R.string.error_invalid_token)
-                        buildAlertDialog(context, title, message)
-                        onFailure(ec)
+                    } catch (eiu: FirebaseAuthInvalidUserException) {
+                        onFailure(eiu)
+                    } catch (eac: FirebaseAuthActionCodeException) {
+                        onFailure(eac)
                     } catch (e: Exception) {
-                        val title = context.getString(R.string.error)
-                        val message = context.getString(R.string.error_unknown)
-                        buildAlertDialog(context, title, message)
                         onFailure(e)
                     }
                 }
             }
             .addOnFailureListener { e ->
-                Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
                 onFailure(e)
             }
     }
@@ -101,37 +76,21 @@ object FirebaseUtils {
     }
 
 
-    fun createAccount(context: Context, email: String, password: String, onSuccess: () -> Unit) {
+    fun createAccount(
+        email: String,
+        password: String,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
         val auth = FirebaseAuth.getInstance()
-        showLoadingDialog(context)
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    hideLoadingDialog()
                     onSuccess()
-                    startActivity(context, Intent(context, NewMainActivity::class.java), null)
                 }
             }
             .addOnFailureListener { e ->
-                when (e) {
-                    is FirebaseAuthUserCollisionException -> {
-                        val title = context.getString(R.string.error)
-                        val message = context.getString(R.string.error_user_already_exists)
-                        buildAlertDialog(context, title, message)
-                        hideLoadingDialog()
-                    }
-
-                    is FirebaseAuthInvalidUserException -> {
-                        val title = context.getString(R.string.error)
-                        val message = context.getString(R.string.error_invalid_email)
-                        buildAlertDialog(context, title, message)
-                        hideLoadingDialog()
-                    }
-
-                    else -> {
-                        hideLoadingDialog()
-                    }
-                }
+                onFailure(e)
             }
     }
 
@@ -150,32 +109,26 @@ object FirebaseUtils {
         )
         val userRef = FirebaseFirestore.getInstance().collection("users").document(uid!!)
 
-        userRef.set(data).addOnSuccessListener {
+        userRef.set(data)
+            .addOnSuccessListener {
+                configDisplayNameOnAuth(name = "$firstName $lastName")
 
-            configDisplayNameOnAuth(name = "$firstName $lastName")
+                val categoriesCollection = userRef.collection("categories")
 
-            val categoriesCollection = userRef.collection("categories")
-
-            val tobaccoDataCollection = categoriesCollection.document("tobacco").collection("data")
-            val alcoholDataCollection = categoriesCollection.document("alcohol").collection("data")
-            val partiesDataCollection = categoriesCollection.document("parties").collection("data")
-            val othersDataCollection = categoriesCollection.document("others").collection("data")
-
-            val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
-
-            val tobaccoData = mapOf("value" to 0)
-            tobaccoDataCollection.document(currentDate).set(tobaccoData)
-
-            val alcoholData = mapOf("value" to 0)
-            alcoholDataCollection.document(currentDate).set(alcoholData)
-
-            val partiesData = mapOf("value" to 0)
-            partiesDataCollection.document(currentDate).set(partiesData)
-
-            val othersData = mapOf("value" to 0)
-            othersDataCollection.document(currentDate).set(othersData)
-
-        }
+                val tobaccoDataCollection = categoriesCollection.document("tobacco").collection("data")
+                val alcoholDataCollection = categoriesCollection.document("alcohol").collection("data")
+                val partiesDataCollection = categoriesCollection.document("parties").collection("data")
+                val othersDataCollection = categoriesCollection.document("others").collection("data")
+                val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+                val tobaccoData = mapOf("value" to 0)
+                tobaccoDataCollection.document(currentDate).set(tobaccoData)
+                val alcoholData = mapOf("value" to 0)
+                alcoholDataCollection.document(currentDate).set(alcoholData)
+                val partiesData = mapOf("value" to 0)
+                partiesDataCollection.document(currentDate).set(partiesData)
+                val othersData = mapOf("value" to 0)
+                othersDataCollection.document(currentDate).set(othersData)
+            }
     }
 
     fun addDataToCategory(
@@ -344,27 +297,6 @@ object FirebaseUtils {
         }
     }
 
-
-    private fun buildAlertDialog(context: Context, title: String, message: String) {
-        MaterialAlertDialogBuilder(context)
-            .setTitle(title)
-            .setMessage(message)
-            .setPositiveButton(context.getString(R.string.ok)) { _, _ -> }
-            .show()
-    }
-
-    fun showLoadingDialog(context: Context) {
-        val builder = MaterialAlertDialogBuilder(context)
-        builder.setView(R.layout.loading_dialog)
-        builder.setCancelable(false)
-        loadingDialog = builder.create()
-        loadingDialog?.show()
-    }
-
-    fun hideLoadingDialog() {
-        loadingDialog?.dismiss()
-        loadingDialog = null
-    }
 
     fun signOut(context: Context) {
         FirebaseAuth.getInstance().signOut()

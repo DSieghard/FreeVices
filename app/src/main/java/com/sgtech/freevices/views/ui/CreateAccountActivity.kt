@@ -117,16 +117,23 @@ class CreateAccountActivity : AppCompatActivity() {
                                             )
                                         }
                                     } else {
-                                        FirebaseUtils.createAccount(context, email, password) {
+                                        FirebaseUtils.createAccount(email, password, onSuccess = {
                                             FirebaseUtils.createDataOnFirestore(name, lastName, email)
-                                            FirebaseUtils.signInWithEmail(context, email, password,
-                                                onSuccess = {},
-                                                onFailure = {})
+                                            FirebaseUtils.signInWithEmail(email, password, onSuccess = {}
+                                            ) {}
                                             val user = FirebaseAuth.getInstance().currentUser
                                             if (user != null) {
                                                 val intent = Intent(context, NewMainActivity::class.java)
                                                 context.startActivity(intent)
                                             }
+                                        }) {
+                                            scope.launch {
+                                                snackbarHostState.showSnackbar(
+                                                    message = it.toString(),
+                                                    duration = SnackbarDuration.Short
+                                                )
+                                            }
+
                                         }
                                     }
                                 }) {
