@@ -105,32 +105,28 @@ fun MainNavigationDrawer(){
         val currentScreen = remember { mutableStateOf(NewMainActivity()) } // Store the current screen
 
         Text(
-            "FreeVices",
+            stringResource(id = R.string.app_name_short),
             modifier = Modifier.padding(24.dp),
             style = MaterialTheme.typography.displayMedium
         )
         Text(
-            "Awakening awareness of the price of your vices",
+            stringResource(R.string.awakening_awareness_of_the_price_of_your_vices),
             modifier = Modifier.padding(24.dp, 12.dp, 24.dp, 16.dp),
             style = MaterialTheme.typography.titleMedium
         )
         Divider()
         Spacer(modifier = Modifier.padding(8.dp))
-
         Text(
-            "Account: ${currentUser?.displayName}",
+            stringResource(R.string.account, currentUser?.displayName ?: "User"),
             modifier = Modifier.padding(24.dp),
             style = MaterialTheme.typography.titleLarge
         )
-
-
-
         Spacer(modifier = Modifier.padding(8.dp))
         Divider()
         Spacer(modifier = Modifier.padding(8.dp))
 
         NavigationDrawerItem(
-            label = { Text(text = "Account Settings") },
+            label = { Text(text = stringResource(id = R.string.account_settings)) },
             icon = { Icon(Icons.Filled.Settings, contentDescription = "Settings") },
             selected = false,
             onClick = {
@@ -140,7 +136,7 @@ fun MainNavigationDrawer(){
             }
         )
         NavigationDrawerItem(
-            label = { Text(text = "Send feedback") },
+            label = { Text(text = stringResource(R.string.send_feedback)) },
             icon = { Icon(Icons.Filled.Feedback, contentDescription = "Feedback") },
             selected = false,
             onClick = { /*TODO: Open Feedback (Explicit Intent)*/ }
@@ -149,7 +145,7 @@ fun MainNavigationDrawer(){
         Row(modifier = Modifier.fillMaxSize(),
             verticalAlignment = Alignment.Bottom) {
             NavigationDrawerItem(
-                label = { Text(text = "Logout") },
+                label = { Text(text = stringResource(R.string.sign_out)) },
                 icon = { Icon(Icons.Filled.Logout, contentDescription = "Logout") },
                 selected = false,
                 onClick = { signOutRequest = true }

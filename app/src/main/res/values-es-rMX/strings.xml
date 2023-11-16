@@ -40,7 +40,7 @@
     <string name="error_invalid_email">Correo inválido</string>
     <string name="passwords_do_not_match">Las contraseñas no coinciden</string>
     <string name="personal">Usuario</string>
-    <string name="app_settings">App</string>
+    <string name="app_settings">Ajustes de la app</string>
     <string name="history_settings">Historial</string>
     <string name="settings">Configuración</string>
     <string name="settings_dark_mode">Modo Oscuro</string>
@@ -164,4 +164,14 @@
     <string name="error">Error</string>
     <string name="total">Total</string>
     <string name="welcome_to_freevices">Bienvenido a FreeVices</string>
+    <string name="choose_category">Elige una categoría</string>
+    <string name="add_expense">Añadir gasto</string>
+    <string name="use_dynamic_colors">Usar colores dinámicos</string>
+    <string name="change_the_theme_based_on_your_wallpaper">Cambia el tema basado en tu fondo de pantalla</string>
+    <string name="there_is_no_email_client_installed">No hay cliente de correo instalado</string>
+    <string name="unable_to_open_email_app">No se puede abrir la app de correo</string>
+    <string name="awakening_awareness_of_the_price_of_your_vices">Despertando consciencia del precio de tus vicios</string>
+    <string name="account">Cuenta: %1$s</string>
+    <string name="send_feedback">Envíar comentarios</string>
+    <string name="sign_out">Cerrar sesión</string>
 </resources>

@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ColorLens
 import androidx.compose.material.icons.filled.HelpOutline
 import androidx.compose.material.icons.filled.Mail
 import androidx.compose.material.icons.filled.Reviews
@@ -40,43 +41,64 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.alorma.compose.settings.storage.base.rememberBooleanSettingState
 import com.alorma.compose.settings.ui.SettingsMenuLink
+import com.alorma.compose.settings.ui.SettingsSwitch
 import com.sgtech.freevices.R
 import com.sgtech.freevices.views.ui.HelpDialog
+import com.sgtech.freevices.views.ui.ViewModelProvider
 import com.sgtech.freevices.views.ui.theme.FreeVicesTheme
 
 class NewAppSettingsActivity : AppCompatActivity() {
+    private val themeViewModel = ViewModelProvider.provideThemeViewModel()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+
         enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.light(Color.Transparent.hashCode(),Color.Transparent.hashCode()),
-            navigationBarStyle = SystemBarStyle.light(Color.Transparent.hashCode(),Color.Transparent.hashCode()),
+            statusBarStyle = SystemBarStyle.light(
+                Color.Transparent.hashCode(),
+                Color.Transparent.hashCode()
+            ),
+            navigationBarStyle = SystemBarStyle.light(
+                Color.Transparent.hashCode(),
+                Color.Transparent.hashCode()
+            ),
         )
         setContent {
-            AppSettingsView()
+            FreeVicesTheme(useDynamicColors = themeViewModel.isDynamicColor.value) {
+                AppSettingsView()
+            }
         }
     }
-}
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun AppSettingsView() {
-    val snackbarHostState = remember { SnackbarHostState() }
-    val activity = Activity()
-    val context = LocalContext.current
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
-    var isHelpPressed by remember { mutableStateOf(false) }
-    if (isHelpPressed){
-        HelpDialog(onDismissRequest = {
-            isHelpPressed = false
-        },
-            text = context.getString(R.string.app_settings_help))
-    }
 
-    FreeVicesTheme{
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    fun AppSettingsView() {
+        val state = rememberBooleanSettingState(defaultValue = themeViewModel.isDynamicColor.value)
+        val snackbarHostState = remember { SnackbarHostState() }
+        val activity = Activity()
+        val context = LocalContext.current
+        val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
+        var isHelpPressed by remember { mutableStateOf(false) }
+        if (isHelpPressed) {
+            HelpDialog(
+                onDismissRequest = {
+                    isHelpPressed = false
+                },
+                text = context.getString(R.string.app_settings_help)
+            )
+        }
+        if (state.value) {
+            themeViewModel.setDynamicColor(true)
+        } else {
+            themeViewModel.setDynamicColor(false)
+        }
+
         Scaffold(
             topBar = {
-                MediumTopAppBar(title = { Text(text = "App Settings") },
+                MediumTopAppBar(title = { Text(text = stringResource(R.string.app_settings)) },
                     scrollBehavior = scrollBehavior,
                     navigationIcon = {
                         IconButton(onClick = {
@@ -96,16 +118,28 @@ fun AppSettingsView() {
             snackbarHost = {
                 SnackbarHost(hostState = snackbarHostState)
             },
-            content = { it ->
+            content = {
                 Column(modifier = Modifier.padding(it)) {
+                    SettingsSwitch(
+                        title = { Text(text = stringResource(R.string.use_dynamic_colors)) },
+                        subtitle = { Text(text = stringResource(R.string.change_the_theme_based_on_your_wallpaper)) },
+                        icon = { Icon(imageVector = Icons.Filled.ColorLens, contentDescription = null) },
+                        enabled = true,
+                        state = state
+                    )
                     Divider(modifier = Modifier.padding(16.dp))
                     SettingsMenuLink(title = { Text(text = stringResource(R.string.write_a_review)) },
                         subtitle = { Text(text = stringResource(R.string.tell_us_what_you_think)) },
-                        icon = { Icon(imageVector = Icons.Filled.Reviews, contentDescription = null) },
+                        icon = {
+                            Icon(
+                                imageVector = Icons.Filled.Reviews,
+                                contentDescription = null
+                            )
+                        },
                         onClick = {
                             openPlayStoreForRating(context)
                         })
-                    SettingsMenuLink(title = { Text(text = stringResource(R.string.contact_us))},
+                    SettingsMenuLink(title = { Text(text = stringResource(R.string.contact_us)) },
                         subtitle = { Text(text = stringResource(R.string.send_us_an_email)) },
                         icon = { Icon(imageVector = Icons.Filled.Mail, contentDescription = null) },
                         onClick = {
@@ -115,50 +149,50 @@ fun AppSettingsView() {
             }
         )
     }
-}
 
-private fun openPlayStoreForRating(context: Context) {
-    val packageName = context.packageName
+    private fun openPlayStoreForRating(context: Context) {
+        val packageName = context.packageName
 
-    try {
-        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$packageName"))
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        context.startActivity(intent)
-    } catch (e: ActivityNotFoundException) {
-        val intent = Intent(
-            Intent.ACTION_VIEW,
-            Uri.parse("https://play.google.com/store/apps/details?id=$packageName")
-        )
-        context.startActivity(intent)
-    }
-}
-
-@SuppressLint("QueryPermissionsNeeded")
-private fun sendEmail(context: Context) {
-    val emailSubject = context.getString(R.string.email_title)
-    val emailAddress = context.getString(R.string.dev_email_address) //
-
-    try {
-        val intent = Intent(Intent.ACTION_SENDTO).apply {
-            data = Uri.parse("mailto:")
-            putExtra(Intent.EXTRA_EMAIL, arrayOf(emailAddress))
-            putExtra(Intent.EXTRA_SUBJECT, emailSubject)
-        }
-
-        if (intent.resolveActivity(context.packageManager) != null) {
+        try {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$packageName"))
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             context.startActivity(intent)
-        } else {
+        } catch (e: ActivityNotFoundException) {
+            val intent = Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse("https://play.google.com/store/apps/details?id=$packageName")
+            )
+            context.startActivity(intent)
+        }
+    }
+
+    @SuppressLint("QueryPermissionsNeeded")
+    private fun sendEmail(context: Context) {
+        val emailSubject = context.getString(R.string.email_title)
+        val emailAddress = context.getString(R.string.dev_email_address) //
+
+        try {
+            val intent = Intent(Intent.ACTION_SENDTO).apply {
+                data = Uri.parse("mailto:")
+                putExtra(Intent.EXTRA_EMAIL, arrayOf(emailAddress))
+                putExtra(Intent.EXTRA_SUBJECT, emailSubject)
+            }
+
+            if (intent.resolveActivity(context.packageManager) != null) {
+                context.startActivity(intent)
+            } else {
+                Toast.makeText(
+                    context,
+                    getString(R.string.there_is_no_email_client_installed),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        } catch (e: ActivityNotFoundException) {
             Toast.makeText(
                 context,
-                "No hay aplicación de correo instalada",
+                getString(R.string.unable_to_open_email_app),
                 Toast.LENGTH_SHORT
             ).show()
         }
-    } catch (e: ActivityNotFoundException) {
-        Toast.makeText(
-            context,
-            "No se pudo abrir la aplicación de correo",
-            Toast.LENGTH_SHORT
-        ).show()
     }
 }

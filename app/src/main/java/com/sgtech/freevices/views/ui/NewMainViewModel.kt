@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.sgtech.freevices.R
+import com.sgtech.freevices.views.ui.theme.ThemeViewModel
 
 class NewMainViewModel {
 
@@ -113,11 +114,19 @@ class NewMainViewModel {
 
 object ViewModelProvider {
     private var newMainViewModel: NewMainViewModel? = null
+    private var themeViewModel: ThemeViewModel? = null
 
     fun provideMainViewModel(): NewMainViewModel {
         if (newMainViewModel == null) {
             newMainViewModel = NewMainViewModel()
         }
         return newMainViewModel!!
+    }
+
+    fun provideThemeViewModel(): ThemeViewModel {
+        if (themeViewModel == null) {
+            themeViewModel = ThemeViewModel()
+        }
+        return themeViewModel!!
     }
 }
