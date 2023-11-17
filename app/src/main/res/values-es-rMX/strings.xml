@@ -175,4 +175,10 @@
     <string name="send_feedback">Envíar comentarios</string>
     <string name="sign_out">Cerrar sesión</string>
     <string name="welcome_card_first_text">Todos tenemos vicios, sean las fiestas, o vicios más dañinos como el alcohol, el tabaco, o incluso otro tipo. FreeVices nace en respuesta a eso, una interfaz simple, que cumple con cada lineamiento de Material3, incluso esta pantalla de bienvenida! (Tranqui@, solo lo verás una vez)\n\nLa idea detrás de FreeVices es hacer consciencia de esos gastos hormiga, y demostrar que esos gastos, que día a día se sienten suaves, son un consumo considerable de dinero.\n\nGracias a la interfaz simple, puedes llevar un control de gastos fácil de comprender, y aún más fácil de usar.</string>
+    <string name="welcome_text">Bienvenido</string>
+    <string name="about_freevices">Acerca de FreeVices</string>
+    <string name="about_text">FreeVices nace con 2 motivos principales:\n\n1: Diferenciarse de las apps comunes con mil gráficos, e información que satura al usuario y termina cansado y sin usar la app.\n\n2: Fue un desafío personal, que nació como un proyecto de portafolio y quise poner a disposición de los usuarios.</string>
+    <string name="press_any_card_to_get_info">Pulsa cualquier tarjeta para ver más</string>
+    <string name="about_the_developers">Acerca del desarrollador</string>
+    <string name="about_developer_text">Soy un desarrollador independiente, quien como trabajo para su portafolio profesional decidió crear una aplicación simple, cumpliendo estándares de calidad y guías de diseño puestas por Google para entregar un producto fácil de usar, y con un diseño elegante, cumpliendo con MaterialYou.\n\nFue un desafío debido a que mi enfoque como desarrollador fue netamente de back-end, y ponerme al frente del diseño de la interfaz significó no solo una mejora en mis habilidades si no que algo divertido de realizar.\n\nEspero de todo corazón que disfrutes de mi app, y espero poder ayudar a más gente con este y otros proyectos.\n\n-L. Felipe</string>
 </resources>

@@ -72,6 +72,8 @@ class WelcomeActivity: AppCompatActivity() {
     fun WelcomeScreenView() {
         var openFirstBottomSheet by rememberSaveable { mutableStateOf(false) }
         var openSecondBottomSheet by rememberSaveable { mutableStateOf(false) }
+        var openThirdBottomSheet by rememberSaveable { mutableStateOf(false) }
+
         val context = LocalContext.current
         Scaffold(
             bottomBar = {
@@ -94,13 +96,8 @@ class WelcomeActivity: AppCompatActivity() {
                     },
                     floatingActionButton = {
                         TextButton(onClick = {
-                            val intent =
-                                Intent(
-                                    context,
-                                    LoginActivity::class.java
-                                )
+                            val intent = Intent(context, LoginActivity::class.java)
                             context.startActivity(intent)
-
                         }) {
                             Text(
                                 text = stringResource(R.string.sign_in),
@@ -113,59 +110,107 @@ class WelcomeActivity: AppCompatActivity() {
         ) { contentPadding ->
             Surface(modifier = Modifier.padding(contentPadding),
                 color = MaterialTheme.colorScheme.background) {
-                Column(modifier = Modifier.padding(contentPadding)
-                    .fillMaxSize()) {
-                        ElevatedCard(
-                            colors = CardDefaults.elevatedCardColors(
-                                containerColor = MaterialTheme.colorScheme.primary
-                            ),
-                            onClick = { openFirstBottomSheet = true }
-                        ) {
-                            Spacer(modifier = Modifier.padding(16.dp))
-                            Text(
-                                text = "Welcome",
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                textAlign = TextAlign.Center,
-                                style = MaterialTheme.typography.titleLarge
-                            )
-                            Spacer(modifier = Modifier.padding(16.dp))
-
-                            if (openFirstBottomSheet) {
-                                ModalSheetBuilder(text = stringResource(R.string.welcome_card_first_text),
-                                    onClose = { openFirstBottomSheet = false })
-                            }
-                        }
+                Column(modifier = Modifier
+                    .padding(contentPadding)
+                    .fillMaxSize()
+                    .padding(24.dp),
+                    verticalArrangement = Arrangement.Center
+                )
+                {
+                    ElevatedCard(
+                        colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.primary),
+                        onClick = { openFirstBottomSheet = true }
+                    ) {
                         Spacer(modifier = Modifier.padding(16.dp))
-                        ElevatedCard(
-                            colors = CardDefaults.elevatedCardColors(
-                                containerColor = MaterialTheme.colorScheme.primary
-                            ),
-                            onClick = { openSecondBottomSheet = true }
-                        ) {
-                            Spacer(modifier = Modifier.padding(16.dp))
-                            Text(
-                                text = "About FreeVices",
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                textAlign = TextAlign.Center,
-                                style = MaterialTheme.typography.titleLarge
-                            )
-                            Spacer(modifier = Modifier.padding(16.dp))
+                        Text(
+                            text = stringResource(R.string.welcome_text),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            textAlign = TextAlign.Center,
+                            style = MaterialTheme.typography.titleLarge
+                        )
+                        Spacer(modifier = Modifier.padding(16.dp))
 
-                            if (openSecondBottomSheet) {
-                                ModalSheetBuilder(text = "FreeVices nace con 2 motivos principales:\n\n1: Diferenciarse de las apps comunes con mil gráficos, e información que satura al usuario y termina cansado y sin usar la app.\n\n2: Fue un desafío personal, que nació como un proyecto de portafolio y quise poner a disposición de los usuarios.",
-                                    onClose = {
-                                        openSecondBottomSheet = false
-                                    })
+                        if (openFirstBottomSheet) {
+                            ModalSheetBuilder(text = stringResource(R.string.welcome_card_first_text),
+                                onClose = { openFirstBottomSheet = false })
+                        }
+                    }
+                    Spacer(modifier = Modifier.padding(16.dp))
+                    ElevatedCard(
+                        colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.onPrimary),
+                        onClick = { openSecondBottomSheet = true }
+                    ) {
+                        Spacer(modifier = Modifier.padding(16.dp))
+                        Text(
+                            text = stringResource(R.string.about_freevices),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            textAlign = TextAlign.Center,
+                            style = MaterialTheme.typography.titleLarge
+                        )
+                        Spacer(modifier = Modifier.padding(16.dp))
+
+                        if (openSecondBottomSheet) {
+                            ModalSheetBuilder(text = stringResource(R.string.about_text),
+                                onClose = {
+                                    openSecondBottomSheet = false
+                                }
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.padding(16.dp))
+                    ElevatedCard(
+                        colors = CardDefaults.elevatedCardColors(
+                            containerColor = MaterialTheme.colorScheme.secondary
+                        ),
+                        onClick = {
+                            openThirdBottomSheet = true
+                        }
+                    ) {
+                        Spacer(modifier = Modifier.padding(16.dp))
+                        Text(
+                            text = stringResource(R.string.about_the_developers),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            textAlign = TextAlign.Center,
+                            style = MaterialTheme.typography.titleLarge
+                        )
+                        Spacer(modifier = Modifier.padding(16.dp))
+
+                        if (openThirdBottomSheet) {
+                            ModalSheetBuilder(text = stringResource(R.string.about_developer_text)) {
+                                openThirdBottomSheet = false
                             }
                         }
                     }
-                }
-        }
+                    Spacer(modifier = Modifier.padding(48.dp))
+                    ElevatedCard(
+                        colors = CardDefaults.elevatedCardColors(
+                            containerColor = MaterialTheme.colorScheme.onSecondary
+                        ),
+                        onClick = {
 
+                        }
+                    ) {
+                        Spacer(modifier = Modifier.padding(16.dp))
+                        Text(
+                            text = stringResource(R.string.press_any_card_to_get_info),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            textAlign = TextAlign.Center,
+                            style = MaterialTheme.typography.titleLarge
+                        )
+                        Spacer(modifier = Modifier.padding(16.dp))
+                    }
+
+                }
+            }
+        }
     }
     
     @OptIn(ExperimentalMaterial3Api::class)

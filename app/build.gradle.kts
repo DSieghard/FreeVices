@@ -12,7 +12,7 @@ android {
         applicationId = "com.sgtech.freevices"
         minSdk = 31
         targetSdk = 34
-        versionCode = 101
+        versionCode = 102
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

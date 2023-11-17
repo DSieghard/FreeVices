@@ -178,4 +178,10 @@
     <string name="send_feedback">Send feedback</string>
     <string name="sign_out">Logout</string>
     <string name="welcome_card_first_text">We all have vices, be they partying, or more harmful vices such as alcohol, tobacco, or even another type. FreeVices was born in response to that, a simple interface, which complies with every Material3 guideline, even this welcome screen! (Don\'t worry, you\'ll only see it once)\n\nThe idea behind FreeVices is to raise awareness of these ant expenses, and demonstrate that these expenses, which feel mild every day, are a considerable consumption of money.\n\nThanks to the simple interface, you can keep track of expenses that are easy to understand and even easier to use.</string>
+    <string name="welcome_text">Welcome</string>
+    <string name="about_freevices">About FreeVices</string>
+    <string name="about_text">FreeVices was born with 2 main reasons:\n\n1: Differentiate yourself from common apps with a thousand graphics, and information that saturates the user and ends up tired and without using the app.\n\n2: It was a personal challenge, which was born as a portfolio project and I wanted to make it available to users.</string>
+    <string name="press_any_card_to_get_info">Press any card to get info</string>
+    <string name="about_the_developers">About the Developers</string>
+    <string name="about_developer_text">I am an independent developer, who as a job for his professional portfolio decided to create a simple application, meeting quality standards and design guides set by Google to deliver an easy-to-use product, and with an elegant design, complying with MaterialYou.\n\nIt was a challenge because my focus as a developer was purely back-end, and taking charge of the interface design meant not only an improvement in my skills but also something fun to do.\n\nI sincerely hope you enjoy my app, and I hope I can help more people with this and other projects.\n\n-L. Felipe</string>
 </resources>
