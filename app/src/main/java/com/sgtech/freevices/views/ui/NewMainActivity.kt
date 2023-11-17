@@ -94,7 +94,7 @@ class NewMainActivity : ComponentActivity() {
         setContent {
             FreeVicesTheme(useDynamicColors = themeViewModel.isDynamicColor.value) {
                 NewMainScreen()
-                ErrorDialog {}
+                ErrorDialog{}
             }
         }
     }

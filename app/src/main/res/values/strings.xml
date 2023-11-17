@@ -177,4 +177,5 @@
     <string name="account">Account: %1$s</string>
     <string name="send_feedback">Send feedback</string>
     <string name="sign_out">Logout</string>
+    <string name="welcome_card_first_text">We all have vices, be they partying, or more harmful vices such as alcohol, tobacco, or even another type. FreeVices was born in response to that, a simple interface, which complies with every Material3 guideline, even this welcome screen! (Don\'t worry, you\'ll only see it once)\n\nThe idea behind FreeVices is to raise awareness of these ant expenses, and demonstrate that these expenses, which feel mild every day, are a considerable consumption of money.\n\nThanks to the simple interface, you can keep track of expenses that are easy to understand and even easier to use.</string>
 </resources>

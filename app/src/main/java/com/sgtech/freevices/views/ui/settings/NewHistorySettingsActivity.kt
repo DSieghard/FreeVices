@@ -43,56 +43,60 @@ import com.alorma.compose.settings.ui.SettingsMenuLink
 import com.sgtech.freevices.R
 import com.sgtech.freevices.utils.FirebaseUtils
 import com.sgtech.freevices.views.ui.HelpDialog
+import com.sgtech.freevices.views.ui.ViewModelProvider
 import com.sgtech.freevices.views.ui.theme.FreeVicesTheme
 import kotlinx.coroutines.launch
 
 class NewHistorySettingsActivity : AppCompatActivity() {
+    private val themeViewModel = ViewModelProvider.provideThemeViewModel()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.light(Color.Transparent.hashCode(), Color.Transparent.hashCode()),
             navigationBarStyle = SystemBarStyle.light(Color.Transparent.hashCode(), Color.Transparent.hashCode()),
         )
-        setContent {
-            HistorySettingsView()
-        }
-    }
-}
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun HistorySettingsView() {
-    val activity = Activity()
-    var days by remember { mutableIntStateOf(0) }
-    val snackbarHostState = remember { SnackbarHostState() }
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
-    var isHelpPressed by remember { mutableStateOf(false) }
-    if (isHelpPressed) {
-        HelpDialog( onDismissRequest = { isHelpPressed = false },
-            stringResource(id = R.string.history_settings_help)
-        )
-    }
-    var isDeleteButtonPressed by remember { mutableStateOf(false) }
-    if (isDeleteButtonPressed) {
-        when (days) {
-            30 -> DeleteDialog(days = 30) {
-                isDeleteButtonPressed = false
-            }
-            60 -> DeleteDialog(days = 60) {
-                isDeleteButtonPressed = false
-            }
-            90 -> DeleteDialog(days = 90) {
-                isDeleteButtonPressed = false
-            }
-            5000 -> DeleteDialog(days = 5000) {
-                isDeleteButtonPressed = false
+        setContent {
+            FreeVicesTheme(useDynamicColors = themeViewModel.isDynamicColor.value) {
+                HistorySettingsView()
             }
         }
     }
-    FreeVicesTheme{
+
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    fun HistorySettingsView() {
+        val activity = Activity()
+        var days by remember { mutableIntStateOf(0) }
+        val snackbarHostState = remember { SnackbarHostState() }
+        val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+        var isHelpPressed by remember { mutableStateOf(false) }
+        if (isHelpPressed) {
+            HelpDialog( onDismissRequest = { isHelpPressed = false },
+                stringResource(id = R.string.history_settings_help)
+            )
+        }
+        var isDeleteButtonPressed by remember { mutableStateOf(false) }
+        if (isDeleteButtonPressed) {
+            when (days) {
+                THIRTY_DAYS -> DeleteDialog(days = days) {
+                    isDeleteButtonPressed = false
+                }
+                SIXTY_DAYS -> DeleteDialog(days = days) {
+                    isDeleteButtonPressed = false
+                }
+                NINETY_DAYS -> DeleteDialog(days = days) {
+                    isDeleteButtonPressed = false
+                }
+                ALL_DAYS -> DeleteDialog(days = days) {
+                    isDeleteButtonPressed = false
+                }
+            }
+        }
         Scaffold(
             topBar = {
-                MediumTopAppBar(title = { Text(text = "History Settings") },
+                MediumTopAppBar(title = { Text(text = stringResource(id = R.string.history_settings)) },
                     scrollBehavior = scrollBehavior,
                     navigationIcon = {
                         IconButton(onClick = {
@@ -123,7 +127,7 @@ fun HistorySettingsView() {
                         )
                     },
                     onClick = {
-                        days = 30
+                        days = THIRTY_DAYS
                         isDeleteButtonPressed = true
                     })
                 SettingsMenuLink(title = { Text(text = stringResource(R.string.clear_last_60_days)) },
@@ -135,7 +139,7 @@ fun HistorySettingsView() {
                         )
                     },
                     onClick = {
-                        days = 60
+                        days = SIXTY_DAYS
                         isDeleteButtonPressed = true
                     })
                 SettingsMenuLink(title = { Text(text = stringResource(R.string.clear_last_90_days)) },
@@ -147,7 +151,7 @@ fun HistorySettingsView() {
                         )
                     },
                     onClick = {
-                        days = 90
+                        days = NINETY_DAYS
                         isDeleteButtonPressed = true
                     })
                 Divider(modifier = Modifier.padding(16.dp))
@@ -160,40 +164,38 @@ fun HistorySettingsView() {
                         )
                     },
                     onClick = {
-                        days = 5000
+                        days = ALL_DAYS
                         isDeleteButtonPressed = true
                     })
             }
         }
     }
-}
 
-@Composable
-fun DeleteDialog(days: Int, onDismissRequest: () -> Unit) {
-    val scope = rememberCoroutineScope()
-    val snackbarHost = remember { SnackbarHostState() }
-    val context = LocalContext.current
-    var isDeleteConfirmed by remember { mutableStateOf(false) }
-    if (isDeleteConfirmed) {
-        FirebaseUtils.deleteHistory(days, onSuccess = {
-            scope.launch {
-                snackbarHost.showSnackbar(
-                    message = context.getString(R.string.history_deleted, days),
-                    duration = SnackbarDuration.Short
-                )
+    @Composable
+    fun DeleteDialog(days: Int, onDismissRequest: () -> Unit) {
+        val scope = rememberCoroutineScope()
+        val snackbarHost = remember { SnackbarHostState() }
+        val context = LocalContext.current
+        var isDeleteConfirmed by remember { mutableStateOf(false) }
+        if (isDeleteConfirmed) {
+            FirebaseUtils.deleteHistory(days, onSuccess = {
+                scope.launch {
+                    snackbarHost.showSnackbar(
+                        message = context.getString(R.string.history_deleted, days),
+                        duration = SnackbarDuration.Short
+                    )
+                }
+                onDismissRequest()
+            }) {
+                scope.launch {
+                    snackbarHost.showSnackbar(
+                        message = context.getString(R.string.error_deleting_history, it.message),
+                        duration = SnackbarDuration.Short
+                    )
+                }
+                onDismissRequest()
             }
-            onDismissRequest()
-        }) {
-            scope.launch {
-                snackbarHost.showSnackbar(
-                    message = context.getString(R.string.error_deleting_history, it.message),
-                    duration = SnackbarDuration.Short
-                )
-            }
-            onDismissRequest()
         }
-    }
-    FreeVicesTheme {
         AlertDialog(onDismissRequest = { onDismissRequest() },
             icon = { Icon(Icons.Filled.Delete, contentDescription = null) },
             title = {
@@ -201,8 +203,8 @@ fun DeleteDialog(days: Int, onDismissRequest: () -> Unit) {
             },
             text = {
                 if (days == 5000){
-                Text(stringResource(R.string.delete_all_history),
-                    style = MaterialTheme.typography.bodyLarge)
+                    Text(stringResource(R.string.delete_all_history),
+                        style = MaterialTheme.typography.bodyLarge)
                 } else {
                     Text(
                         stringResource(R.string.delete_history_text, days),
@@ -229,4 +231,13 @@ fun DeleteDialog(days: Int, onDismissRequest: () -> Unit) {
             }
         )
     }
+
+    companion object{
+        private const val THIRTY_DAYS = 30
+        private const val SIXTY_DAYS = 60
+        private const val NINETY_DAYS = 90
+        private const val ALL_DAYS = 5000
+    }
+
 }
+

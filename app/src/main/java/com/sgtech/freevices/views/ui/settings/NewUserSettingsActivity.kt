@@ -53,60 +53,75 @@ import com.sgtech.freevices.R
 import com.sgtech.freevices.utils.FirebaseUtils
 import com.sgtech.freevices.views.ui.HelpDialog
 import com.sgtech.freevices.views.ui.LoginActivity
+import com.sgtech.freevices.views.ui.ViewModelProvider
 import com.sgtech.freevices.views.ui.theme.FreeVicesTheme
 import kotlinx.coroutines.launch
 
 class NewUserSettingsActivity : AppCompatActivity() {
+    private val themeViewModel = ViewModelProvider.provideThemeViewModel()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.light(Color.Transparent.hashCode(), Color.Transparent.hashCode()),
-            navigationBarStyle = SystemBarStyle.light(Color.Transparent.hashCode(), Color.Transparent.hashCode()),
+            statusBarStyle = SystemBarStyle.light(
+                Color.Transparent.hashCode(),
+                Color.Transparent.hashCode()
+            ),
+            navigationBarStyle = SystemBarStyle.light(
+                Color.Transparent.hashCode(),
+                Color.Transparent.hashCode()
+            ),
         )
+
         setContent {
             val scope = lifecycleScope
-            UserSettingsView(scope)
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-
-@Composable
-fun UserSettingsView(scope: LifecycleCoroutineScope){
-    val activity = Activity()
-    var isHelpOpen by rememberSaveable { mutableStateOf(false) }
-    if (isHelpOpen) {
-        HelpDialog(onDismissRequest = { isHelpOpen = false },
-            text = LocalContext.current.getString(R.string.user_settings_help))
-    }
-    var isChangeNameSelected by rememberSaveable { mutableStateOf(false) }
-    if (isChangeNameSelected) {
-        ChangeNameDialog {
-            isChangeNameSelected = false
-        }
-    }
-    var isChangePasswordSelected by rememberSaveable { mutableStateOf(false) }
-    if (isChangePasswordSelected) {
-        ChangePasswordDialog {
-            isChangePasswordSelected = false
-        }
-    }
-    var isChangeEmailSelected by rememberSaveable { mutableStateOf(false) }
-    if (isChangeEmailSelected) {
-        ChangeEmailDialog {
-            isChangeEmailSelected = false
+            FreeVicesTheme(
+                useDynamicColors = themeViewModel.isDynamicColor.value
+            ) {
+                UserSettingsView(scope)
+            }
         }
     }
 
-    var isDeleteAccountSelected by rememberSaveable { mutableStateOf(false) }
-    if (isDeleteAccountSelected) {
-        DeleteAccountDialog {
-            isDeleteAccountSelected = false
-        }
-    }
 
-    FreeVicesTheme{
+    @OptIn(ExperimentalMaterial3Api::class)
+
+    @Composable
+    fun UserSettingsView(scope: LifecycleCoroutineScope) {
+        val activity = Activity()
+        var isHelpOpen by rememberSaveable { mutableStateOf(false) }
+        if (isHelpOpen) {
+            HelpDialog(
+                onDismissRequest = { isHelpOpen = false },
+                text = LocalContext.current.getString(R.string.user_settings_help)
+            )
+        }
+        var isChangeNameSelected by rememberSaveable { mutableStateOf(false) }
+        if (isChangeNameSelected) {
+            ChangeNameDialog {
+                isChangeNameSelected = false
+            }
+        }
+        var isChangePasswordSelected by rememberSaveable { mutableStateOf(false) }
+        if (isChangePasswordSelected) {
+            ChangePasswordDialog {
+                isChangePasswordSelected = false
+            }
+        }
+        var isChangeEmailSelected by rememberSaveable { mutableStateOf(false) }
+        if (isChangeEmailSelected) {
+            ChangeEmailDialog {
+                isChangeEmailSelected = false
+            }
+        }
+
+        var isDeleteAccountSelected by rememberSaveable { mutableStateOf(false) }
+        if (isDeleteAccountSelected) {
+            DeleteAccountDialog {
+                isDeleteAccountSelected = false
+            }
+        }
+
         Scaffold(
             topBar = {
                 MediumTopAppBar(title = { Text(text = stringResource(R.string.user_settings)) },
@@ -124,7 +139,10 @@ fun UserSettingsView(scope: LifecycleCoroutineScope){
                         IconButton(onClick = {
                             isHelpOpen = true
                         }) {
-                            Icon(imageVector = Icons.Filled.HelpOutline, contentDescription = null)
+                            Icon(
+                                imageVector = Icons.Filled.HelpOutline,
+                                contentDescription = null
+                            )
                         }
                     })
             }
@@ -132,95 +150,119 @@ fun UserSettingsView(scope: LifecycleCoroutineScope){
             Column(modifier = Modifier.padding(it)) {
                 SettingsMenuLink(title = { Text(text = stringResource(R.string.change_display_name)) },
                     subtitle = { Text(text = stringResource(R.string.change_your_display_name)) },
-                    icon = { Icon(imageVector = Icons.Filled.Person, contentDescription = null) },
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Filled.Person,
+                            contentDescription = null
+                        )
+                    },
                     onClick = {
                         isChangeNameSelected = true
                     })
                 SettingsMenuLink(title = { Text(text = stringResource(R.string.change_password)) },
                     subtitle = { Text(text = stringResource(R.string.require_your_current_password)) },
-                    icon = { Icon(imageVector = Icons.Filled.Password, contentDescription = null) },
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Filled.Password,
+                            contentDescription = null
+                        )
+                    },
                     onClick = {
                         isChangePasswordSelected = true
                     })
                 SettingsMenuLink(title = { Text(text = stringResource(R.string.change_email_address)) },
                     subtitle = { Text(text = stringResource(R.string.update_your_email_address_require_your_current_password)) },
-                    icon = { Icon(imageVector = Icons.Filled.AlternateEmail, contentDescription = null) },
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Filled.AlternateEmail,
+                            contentDescription = null
+                        )
+                    },
                     onClick = {
                         isChangeEmailSelected = true
                     })
                 Divider(modifier = Modifier.padding(16.dp))
                 SettingsMenuLink(title = { Text(text = stringResource(R.string.delete_account)) },
                     subtitle = { Text(text = stringResource(R.string.delete_your_account_and_all_associated_data_this_cannot_be_undone)) },
-                    icon = { Icon(imageVector = Icons.Filled.Delete, contentDescription = null) },
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Filled.Delete,
+                            contentDescription = null
+                        )
+                    },
                     onClick = {
                         isDeleteAccountSelected = true
                     })
             }
         }
     }
-}
 
-fun splitNames(input: String): Pair<String, String>? {
-    val names = input.split(" ")
+    private fun splitNames(input: String): Pair<String, String>? {
+        val names = input.split(" ")
 
-    when (names.size) {
-        2 -> {
-            val firstName = names[0]
-            val lastName = names[1]
-            return Pair(firstName, lastName)
-        }
-        3 -> {
-            val firstName = names[0]
-            val lastName = names[1]
-            val lastSecondName = names[2]
-            return Pair("$firstName $lastName", lastSecondName)
-        }
-        4 -> {
-            val firstName = names[0]
-            val secondName = names[1]
-            val lastName = names[2]
-            val lastSecondName = names[3]
-            return Pair("$firstName $secondName", "$lastName $lastSecondName")
-        }
-        else -> {
-            return null
-        }
-    }
-}
-
-@Composable
-fun DeleteAccountDialog(onDismissRequest: () -> Unit) {
-    val scope = rememberCoroutineScope()
-    val snackbarHost = remember { SnackbarHostState() }
-    val context = LocalContext.current
-    var isDeleteAccountConfirmed by rememberSaveable { mutableStateOf(false) }
-    if (isDeleteAccountConfirmed) {
-        FirebaseUtils.deleteAccount(
-            onSuccess = {
-                scope.launch {
-                    snackbarHost.showSnackbar(
-                        message = context.getString(R.string.account_deleted),
-                        duration = SnackbarDuration.Short
-                    )
-                }
-                val intent = Intent(context, LoginActivity::class.java).apply {
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-                }
-                startActivity(context, intent, null)
-                onDismissRequest()
-            },
-            {
-                scope.launch {
-                    snackbarHost.showSnackbar(
-                        message = context.getString(R.string.error_deleting_account, it.message),
-                    )
-                }
+        when (names.size) {
+            2 -> {
+                val firstName = names[0]
+                val lastName = names[1]
+                return Pair(firstName, lastName)
             }
-        )
-        onDismissRequest()
+
+            3 -> {
+                val firstName = names[0]
+                val lastName = names[1]
+                val lastSecondName = names[2]
+                return Pair("$firstName $lastName", lastSecondName)
+            }
+
+            4 -> {
+                val firstName = names[0]
+                val secondName = names[1]
+                val lastName = names[2]
+                val lastSecondName = names[3]
+                return Pair("$firstName $secondName", "$lastName $lastSecondName")
+            }
+
+            else -> {
+                return null
+            }
+        }
     }
 
-    FreeVicesTheme {
+    @Composable
+    fun DeleteAccountDialog(onDismissRequest: () -> Unit) {
+        val scope = rememberCoroutineScope()
+        val snackbarHost = remember { SnackbarHostState() }
+        val context = LocalContext.current
+        var isDeleteAccountConfirmed by rememberSaveable { mutableStateOf(false) }
+        if (isDeleteAccountConfirmed) {
+            FirebaseUtils.deleteAccount(
+                onSuccess = {
+                    scope.launch {
+                        snackbarHost.showSnackbar(
+                            message = context.getString(R.string.account_deleted),
+                            duration = SnackbarDuration.Short
+                        )
+                    }
+                    val intent = Intent(context, LoginActivity::class.java).apply {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                    }
+                    startActivity(context, intent, null)
+                    onDismissRequest()
+                },
+                {
+                    scope.launch {
+                        snackbarHost.showSnackbar(
+                            message = context.getString(
+                                R.string.error_deleting_account,
+                                it.message
+                            ),
+                        )
+                    }
+                }
+            )
+            onDismissRequest()
+        }
+
         AlertDialog(
             onDismissRequest = {
                 onDismissRequest()
@@ -255,21 +297,19 @@ fun DeleteAccountDialog(onDismissRequest: () -> Unit) {
             }
         )
     }
-}
 
-@Composable
-fun ChangeNameDialog(onDismissRequest: () -> Unit){
-    var isChangeNameConfirmed by rememberSaveable { mutableStateOf(false) }
-    var name by remember { mutableStateOf("") }
-    if (isChangeNameConfirmed) {
-        FirebaseUtils.configDisplayNameOnAuth(name)
-        splitNames(name)?.let {
-            FirebaseUtils.updateDisplayNameOnFirestore(it.first, it.second)
+    @Composable
+    fun ChangeNameDialog(onDismissRequest: () -> Unit) {
+        var isChangeNameConfirmed by rememberSaveable { mutableStateOf(false) }
+        var name by remember { mutableStateOf("") }
+        if (isChangeNameConfirmed) {
+            FirebaseUtils.configDisplayNameOnAuth(name)
+            splitNames(name)?.let {
+                FirebaseUtils.updateDisplayNameOnFirestore(it.first, it.second)
+            }
+            isChangeNameConfirmed = false
+            onDismissRequest()
         }
-        isChangeNameConfirmed = false
-        onDismissRequest()
-    }
-    FreeVicesTheme{
         AlertDialog(
             onDismissRequest = {
                 onDismissRequest()
@@ -302,38 +342,37 @@ fun ChangeNameDialog(onDismissRequest: () -> Unit){
                 ) {
                     Text(stringResource(R.string.cancel))
                 }
-            })
+            }
+        )
     }
-}
 
-@Composable
-fun ChangePasswordDialog(onDismissRequest: () -> Unit) {
-    val context = LocalContext.current
-    var isChangePasswordConfirmed by rememberSaveable { mutableStateOf(false) }
-    var newPassword by remember { mutableStateOf("") }
-    var confirmNewPassword by remember { mutableStateOf("") }
-    val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
-    if (isChangePasswordConfirmed) {
-        FirebaseUtils.configPasswordOnAuth(newPassword, onSuccess = {
-            scope.launch {
-                snackbarHostState.showSnackbar(
-                    message = context.getString(R.string.password_changed_successfully),
-                    duration = SnackbarDuration.Short
-                )
-            }
-        }, onFailure = {
-            scope.launch {
-                snackbarHostState.showSnackbar(
-                    message = context.getString(R.string.error_updating_password, it.message),
-                    duration = SnackbarDuration.Short
-                )
-            }
-        })
-        isChangePasswordConfirmed = false
-        onDismissRequest()
-    }
-    FreeVicesTheme{
+    @Composable
+    fun ChangePasswordDialog(onDismissRequest: () -> Unit) {
+        val context = LocalContext.current
+        var isChangePasswordConfirmed by rememberSaveable { mutableStateOf(false) }
+        var newPassword by remember { mutableStateOf("") }
+        var confirmNewPassword by remember { mutableStateOf("") }
+        val snackbarHostState = remember { SnackbarHostState() }
+        val scope = rememberCoroutineScope()
+        if (isChangePasswordConfirmed) {
+            FirebaseUtils.configPasswordOnAuth(newPassword, onSuccess = {
+                scope.launch {
+                    snackbarHostState.showSnackbar(
+                        message = context.getString(R.string.password_changed_successfully),
+                        duration = SnackbarDuration.Short
+                    )
+                }
+            }, onFailure = {
+                scope.launch {
+                    snackbarHostState.showSnackbar(
+                        message = context.getString(R.string.error_updating_password, it.message),
+                        duration = SnackbarDuration.Short
+                    )
+                }
+            })
+            isChangePasswordConfirmed = false
+            onDismissRequest()
+        }
         AlertDialog(
             onDismissRequest = {
                 onDismissRequest()
@@ -383,38 +422,36 @@ fun ChangePasswordDialog(onDismissRequest: () -> Unit) {
                 ) {
                     Text(stringResource(R.string.cancel))
                 }
+            }
+        )
+    }
+
+    @Composable
+    fun ChangeEmailDialog(onDismissRequest: () -> Unit) {
+        val context = LocalContext.current
+        var isChangeEmailConfirmed by rememberSaveable { mutableStateOf(false) }
+        var newEmail by remember { mutableStateOf("") }
+        val snackbarHostState = remember { SnackbarHostState() }
+        val scope = rememberCoroutineScope()
+        if (isChangeEmailConfirmed) {
+            FirebaseUtils.configEmailOnAuth(newEmail, onSuccess = {
+                scope.launch {
+                    snackbarHostState.showSnackbar(
+                        message = context.getString(R.string.email_changed_successfully),
+                        duration = SnackbarDuration.Short
+                    )
+                }
+            }, onFailure = {
+                scope.launch {
+                    snackbarHostState.showSnackbar(
+                        message = context.getString(R.string.error_updating_email, it.message),
+                        duration = SnackbarDuration.Short
+                    )
+                }
             })
-    }
-}
-
-@Composable
-fun ChangeEmailDialog(onDismissRequest: () -> Unit) {
-    val context = LocalContext.current
-    var isChangeEmailConfirmed by rememberSaveable { mutableStateOf(false) }
-    var newEmail by remember { mutableStateOf("") }
-    val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
-    if (isChangeEmailConfirmed) {
-        FirebaseUtils.configEmailOnAuth(newEmail, onSuccess = {
-            scope.launch {
-                snackbarHostState.showSnackbar(
-                    message = context.getString(R.string.email_changed_successfully),
-                    duration = SnackbarDuration.Short
-                )
-            }
-        }, onFailure = {
-            scope.launch {
-                snackbarHostState.showSnackbar(
-                    message = context.getString(R.string.error_updating_email, it.message),
-                    duration = SnackbarDuration.Short
-                )
-            }
-        })
-        isChangeEmailConfirmed = false
-        onDismissRequest()
-    }
-
-    FreeVicesTheme {
+            isChangeEmailConfirmed = false
+            onDismissRequest()
+        }
         AlertDialog(
             onDismissRequest = {
                 onDismissRequest()
@@ -446,6 +483,7 @@ fun ChangeEmailDialog(onDismissRequest: () -> Unit) {
                 ) {
                     Text(stringResource(R.string.cancel))
                 }
-            })
+            }
+        )
     }
 }

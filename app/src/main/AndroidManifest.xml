@@ -12,7 +12,7 @@
         android:theme="@style/Theme.FreeVices">
         <activity
             android:name=".views.ui.NewMainActivity"
-            android:exported="true"
+            android:exported="false"
             android:label="@string/title_activity_new_main"
             android:theme="@style/Theme.FreeVices">
         </activity>
@@ -41,6 +41,11 @@
         <activity
             android:name=".views.ui.settings.NewUserSettingsActivity"
             android:exported="false" />
+        <activity
+            android:name=".views.ui.WelcomeActivity"
+            android:exported="false">
+
+        </activity>
     </application>
 
 </manifest>

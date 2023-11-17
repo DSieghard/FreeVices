@@ -51,9 +51,9 @@ import com.sgtech.freevices.views.ui.theme.FreeVicesTheme
 
 class NewAppSettingsActivity : AppCompatActivity() {
     private val themeViewModel = ViewModelProvider.provideThemeViewModel()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
 
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.light(
@@ -66,7 +66,7 @@ class NewAppSettingsActivity : AppCompatActivity() {
             ),
         )
         setContent {
-            FreeVicesTheme(useDynamicColors = themeViewModel.isDynamicColor.value) {
+            FreeVicesTheme(useDynamicColors = themeViewModel.isDynamicColor.value){
                 AppSettingsView()
             }
         }

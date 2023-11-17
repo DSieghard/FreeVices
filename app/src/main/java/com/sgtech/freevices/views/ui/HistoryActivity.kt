@@ -2,7 +2,9 @@ package com.sgtech.freevices.views.ui
 
 import android.os.Bundle
 import android.util.Log
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
@@ -38,6 +40,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -52,9 +55,11 @@ import com.sgtech.freevices.views.ui.theme.FreeVicesTheme
 import kotlinx.coroutines.launch
 
 class HistoryActivity : AppCompatActivity() {
-    @OptIn(ExperimentalMaterial3Api::class)
+    private val viewModel = ViewModelProvider.provideMainViewModel()
+    private val themeViewModel = ViewModelProvider.provideThemeViewModel()
+
     override fun onCreate(savedInstanceState: Bundle?) {
-        val viewModel = ViewModelProvider.provideMainViewModel()
+
         super.onCreate(savedInstanceState)
         val daysList = listOf(30, 60, 90, 180)
         daysList.forEach { days ->
@@ -64,10 +69,10 @@ class HistoryActivity : AppCompatActivity() {
                 onSuccess = { data ->
                     when(days)
                     {
-                        30 -> viewModel.updateThirtyDaysLiveDataValues(this, data)
-                        60 -> viewModel.updateSixtyDaysLiveDataValues(this, data)
-                        90 -> viewModel.updateThreeMonthsLiveDataValues(this, data)
-                        180 -> viewModel.updateSixMonthLiveDataValues(this, data)
+                        THIRTY_DAYS -> viewModel.updateThirtyDaysLiveDataValues(this, data)
+                        SIXTY_DAYS -> viewModel.updateSixtyDaysLiveDataValues(this, data)
+                        THREE_MONTHS -> viewModel.updateThreeMonthsLiveDataValues(this, data)
+                        SIX_MONTHS -> viewModel.updateSixMonthLiveDataValues(this, data)
                     }
                 },
                 onFailure = {
@@ -76,97 +81,108 @@ class HistoryActivity : AppCompatActivity() {
             )
         }
 
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.light(Color.Transparent.hashCode(), Color.Transparent.hashCode()),
+            navigationBarStyle = SystemBarStyle.light(Color.Transparent.hashCode(), Color.Transparent.hashCode()),
+        )
+
         setContent {
-            val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-            val scope = lifecycleScope
-            val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
-            val context = LocalContext.current
-            val tobaccoDataThirtyDays by viewModel.tobaccoThirtyDaysData.observeAsState(initial = 0f)
-            val alcoholDataThirtyDays by viewModel.alcoholThirtyDaysData.observeAsState(initial = 0f)
-            val partiesDataThirtyDays by viewModel.partiesThirtyDaysData.observeAsState(initial = 0f)
-            val othersDataThirtyDays by viewModel.othersThirtyDaysData.observeAsState(initial = 0f)
-            val tobaccoDataSixtyDays by viewModel.tobaccoSixtyDaysData.observeAsState(initial = 0f)
-            val alcoholDataSixtyDays by viewModel.alcoholSixtyDaysData.observeAsState(initial = 0f)
-            val partiesDataSixtyDays by viewModel.partiesSixtyDaysData.observeAsState(initial = 0f)
-            val othersDataSixtyDays by viewModel.othersSixtyDaysData.observeAsState(initial = 0f)
-            val tobaccoDataThreeMonths by viewModel.tobaccoThreeMonthsData.observeAsState(initial = 0f)
-            val alcoholDataThreeMonths by viewModel.alcoholThreeMonthsData.observeAsState(initial = 0f)
-            val partiesDataThreeMonths by viewModel.partiesThreeMonthsData.observeAsState(initial = 0f)
-            val othersDataThreeMonths by viewModel.othersThreeMonthsData.observeAsState(initial = 0f)
-            val tobaccoDataSixMonths by viewModel.tobaccoSixMonthData.observeAsState(initial = 0f)
-            val alcoholDataSixMonths by viewModel.alcoholSixMonthData.observeAsState(initial = 0f)
-            val partiesDataSixMonths by viewModel.partiesSixMonthData.observeAsState(initial = 0f)
-            val othersDataSixMonths by viewModel.othersSixMonthData.observeAsState(initial = 0f)
-            val totalThirtyDays = tobaccoDataThirtyDays + alcoholDataThirtyDays + partiesDataThirtyDays + othersDataThirtyDays
-            val totalSixtyDays = tobaccoDataSixtyDays + alcoholDataSixtyDays + partiesDataSixtyDays + othersDataSixtyDays
-            val totalThreeMonths = tobaccoDataThreeMonths + alcoholDataThreeMonths + partiesDataThreeMonths + othersDataThreeMonths
-            val totalSixMonths = tobaccoDataSixMonths + alcoholDataSixMonths + partiesDataSixMonths + othersDataSixMonths
+            FreeVicesTheme(useDynamicColors = themeViewModel.isDynamicColor.value) {
+                HistoryScreenView()
+                }
+        }
+    }
 
-            FreeVicesTheme {
-                ModalNavigationDrawer(
-                    drawerState = drawerState,
-                    drawerContent = {
-                        MainNavigationDrawer()
-                    }
-                ) {
-                    Scaffold(
-                        topBar = {
-                            LargeTopAppBar(
-                                title = {
-                                    Text(
-                                        text = stringResource(R.string.menu_history),
-                                        style = MaterialTheme.typography.headlineLarge
-                                    )
-                                },
-                                scrollBehavior = scrollBehavior,
-                                navigationIcon = {
-                                    IconButton(onClick = {
-                                        scope.launch {
-                                            finish()
-                                        }
-                                    }) {
-                                        Icon(
-                                            imageVector = Icons.Filled.ArrowBack,
-                                            contentDescription = "Finish History",
-                                        )
-                                    }
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    fun HistoryScreenView(){
+        val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+        val scope = lifecycleScope
+        val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
+        val context = LocalContext.current
+        val tobaccoDataThirtyDays by viewModel.tobaccoThirtyDaysData.observeAsState(initial = 0f)
+        val alcoholDataThirtyDays by viewModel.alcoholThirtyDaysData.observeAsState(initial = 0f)
+        val partiesDataThirtyDays by viewModel.partiesThirtyDaysData.observeAsState(initial = 0f)
+        val othersDataThirtyDays by viewModel.othersThirtyDaysData.observeAsState(initial = 0f)
+        val tobaccoDataSixtyDays by viewModel.tobaccoSixtyDaysData.observeAsState(initial = 0f)
+        val alcoholDataSixtyDays by viewModel.alcoholSixtyDaysData.observeAsState(initial = 0f)
+        val partiesDataSixtyDays by viewModel.partiesSixtyDaysData.observeAsState(initial = 0f)
+        val othersDataSixtyDays by viewModel.othersSixtyDaysData.observeAsState(initial = 0f)
+        val tobaccoDataThreeMonths by viewModel.tobaccoThreeMonthsData.observeAsState(initial = 0f)
+        val alcoholDataThreeMonths by viewModel.alcoholThreeMonthsData.observeAsState(initial = 0f)
+        val partiesDataThreeMonths by viewModel.partiesThreeMonthsData.observeAsState(initial = 0f)
+        val othersDataThreeMonths by viewModel.othersThreeMonthsData.observeAsState(initial = 0f)
+        val tobaccoDataSixMonths by viewModel.tobaccoSixMonthData.observeAsState(initial = 0f)
+        val alcoholDataSixMonths by viewModel.alcoholSixMonthData.observeAsState(initial = 0f)
+        val partiesDataSixMonths by viewModel.partiesSixMonthData.observeAsState(initial = 0f)
+        val othersDataSixMonths by viewModel.othersSixMonthData.observeAsState(initial = 0f)
+        val totalThirtyDays = tobaccoDataThirtyDays + alcoholDataThirtyDays + partiesDataThirtyDays + othersDataThirtyDays
+        val totalSixtyDays = tobaccoDataSixtyDays + alcoholDataSixtyDays + partiesDataSixtyDays + othersDataSixtyDays
+        val totalThreeMonths = tobaccoDataThreeMonths + alcoholDataThreeMonths + partiesDataThreeMonths + othersDataThreeMonths
+        val totalSixMonths = tobaccoDataSixMonths + alcoholDataSixMonths + partiesDataSixMonths + othersDataSixMonths
 
-                                },
-                                actions = {
-                                    IconButton(onClick = {
-                                        scope.launch {
-                                            val intent =
-                                                android.content.Intent(
-                                                    context,
-                                                    NewHistorySettingsActivity::class.java
-                                                )
-                                            context.startActivity(intent)
-                                        }
-                                    }) {
-                                        Icon(
-                                            imageVector = Icons.Filled.Settings,
-                                            contentDescription = "Settings",
-                                        )
-                                    }
-                                }
+        ModalNavigationDrawer(
+            drawerState = drawerState,
+            drawerContent = {
+                MainNavigationDrawer()
+            }
+        ) {
+            Scaffold(
+                topBar = {
+                    LargeTopAppBar(
+                        title = {
+                            Text(
+                                text = stringResource(R.string.menu_history),
+                                style = MaterialTheme.typography.headlineLarge
                             )
                         },
-                        snackbarHost = {
-                            SnackbarHost(hostState = SnackbarHostState())
+                        scrollBehavior = scrollBehavior,
+                        navigationIcon = {
+                            IconButton(onClick = {
+                                scope.launch {
+                                    finish()
+                                }
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Filled.ArrowBack,
+                                    contentDescription = "Finish History",
+                                )
+                            }
+
                         },
-                        modifier = Modifier.fillMaxSize()
-                    ) { paddingValues ->
-                        LazyColumn(
-                            modifier = Modifier.padding(paddingValues),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            item { HistoryCard(30, totalThirtyDays.toInt()) }
-                            item { HistoryCard(60, totalSixtyDays.toInt()) }
-                            item { HistoryCard(90, totalThreeMonths.toInt()) }
-                            item { HistoryCard(180, totalSixMonths.toInt()) }
+                        actions = {
+                            IconButton(onClick = {
+                                scope.launch {
+                                    val intent =
+                                        android.content.Intent(
+                                            context,
+                                            NewHistorySettingsActivity::class.java
+                                        )
+                                    context.startActivity(intent)
+                                }
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Filled.Settings,
+                                    contentDescription = "Settings",
+                                )
+                            }
                         }
-                    }
+                    )
+                },
+                snackbarHost = {
+                    SnackbarHost(hostState = SnackbarHostState())
+                },
+                modifier = Modifier.fillMaxSize()
+            ) { paddingValues ->
+                LazyColumn(
+                    modifier = Modifier.padding(paddingValues),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    item { HistoryCard(THIRTY_DAYS, totalThirtyDays.toInt()) }
+                    item { HistoryCard(SIXTY_DAYS, totalSixtyDays.toInt()) }
+                    item { HistoryCard(THREE_MONTHS, totalThreeMonths.toInt()) }
+                    item { HistoryCard(SIX_MONTHS, totalSixMonths.toInt()) }
                 }
             }
         }
@@ -179,28 +195,27 @@ class HistoryActivity : AppCompatActivity() {
         if (isDialogPressed) {
             ExpandedHistoryCard({isDialogPressed = false}, days)
         }
-        FreeVicesTheme {
-            OutlinedCard(
-                modifier = Modifier.padding(16.dp),
-                elevation = CardDefaults.cardElevation(
-                    defaultElevation = 12.dp
-                ),
-                onClick = {
-                    isDialogPressed = true
-                }
-            ) {
-                Text(
-                    modifier = Modifier.padding(16.dp),
-                    textAlign = TextAlign.Center,
-                    text = stringResource(
-                        R.string.your_total_expense_in_the_last_days_is,
-                        days,
-                        value
-                    ),
-                    style = MaterialTheme.typography.titleLarge
-                )
+        OutlinedCard(
+            modifier = Modifier.padding(16.dp),
+            elevation = CardDefaults.cardElevation(
+                defaultElevation = 12.dp
+            ),
+            onClick = {
+                isDialogPressed = true
             }
+        ) {
+            Text(
+                modifier = Modifier.padding(16.dp),
+                textAlign = TextAlign.Center,
+                text = stringResource(
+                    R.string.your_total_expense_in_the_last_days_is,
+                    days,
+                    value
+                ),
+                style = MaterialTheme.typography.titleLarge
+            )
         }
+
     }
 
     @Composable
@@ -327,5 +342,12 @@ class HistoryActivity : AppCompatActivity() {
 
             }
         )
+    }
+
+    companion object {
+        private const val THIRTY_DAYS = 30
+        private const val SIXTY_DAYS = 60
+        private const val THREE_MONTHS = 90
+        private const val SIX_MONTHS = 180
     }
 }
