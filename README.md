@@ -6,13 +6,14 @@
 - Firestore as Database
 - Singleton Items
 - Settings
-
-## Features to be Added
 - Welcome Screen
 - Home Screen
 - Overview Screen
 - History Screen
 - Settings Screen
+
+## Features to be Added
+- Modal Sheet to Add Expenses
 
 ## Reported Issues
 - None yet
