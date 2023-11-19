@@ -37,6 +37,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthUserCollisionException
+import com.google.firebase.auth.FirebaseAuthWeakPasswordException
 import com.sgtech.freevices.R
 import com.sgtech.freevices.utils.FirebaseUtils
 import com.sgtech.freevices.views.ui.theme.FreeVicesTheme
@@ -44,6 +46,10 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 class CreateAccountActivity : AppCompatActivity() {
+
+    //In this exact moment, only god knows how works this app.
+    //En este preciso momento, solo Dios sabe como funciona esta app.
+
     private val themeViewModel = ViewModelProvider.provideThemeViewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -69,11 +75,11 @@ class CreateAccountActivity : AppCompatActivity() {
     @Composable
     fun CreateAccountScreen() {
         val context = LocalContext.current
-        var name by remember { mutableStateOf("") }
-        var lastName by remember { mutableStateOf("") }
-        var email by remember { mutableStateOf("") }
-        var password by remember { mutableStateOf("") }
-        var confirmPassword by remember { mutableStateOf("") }
+        var name: String? by remember { mutableStateOf(null) }
+        var lastName: String? by remember { mutableStateOf(null) }
+        var email: String? by remember { mutableStateOf(null) }
+        var password: String? by remember { mutableStateOf(null) }
+        var confirmPassword: String? by remember { mutableStateOf(null) }
         val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(
             rememberTopAppBarState()
         )
@@ -96,15 +102,15 @@ class CreateAccountActivity : AppCompatActivity() {
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     item {
-                        ComposeSignupTheme.NameEditText(name) { newData -> name = newData }
+                        ComposeSignupTheme.NameEditText(name!!) { newData -> name = newData }
                         Spacer(modifier = Modifier.size(16.dp))
-                        ComposeSignupTheme.LastNameEditText(lastName) { newData -> lastName = newData }
+                        ComposeSignupTheme.LastNameEditText(lastName!!) { newData -> lastName = newData }
                         Spacer(modifier = Modifier.size(16.dp))
-                        ComposeSignupTheme.EmailEditText(email) { newData -> email = newData }
+                        ComposeSignupTheme.EmailEditText(email!!) { newData -> email = newData }
                         Spacer(modifier = Modifier.size(16.dp))
-                        ComposeSignupTheme.PasswordEditText(password) { newData -> password = newData }
+                        ComposeSignupTheme.PasswordEditText(password!!) { newData -> password = newData }
                         Spacer(modifier = Modifier.size(16.dp))
-                        ComposeSignupTheme.ConfirmPasswordEditText(confirmPassword) { newData -> confirmPassword = newData }
+                        ComposeSignupTheme.ConfirmPasswordEditText(confirmPassword!!) { newData -> confirmPassword = newData }
                     }
                 }
             },
@@ -120,7 +126,7 @@ class CreateAccountActivity : AppCompatActivity() {
                     },
                     floatingActionButton = {
                         TextButton(onClick = {
-                            if (name.isEmpty() || lastName.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
+                            if (name!!.isEmpty() || lastName!!.isEmpty() || email!!.isEmpty() || password!!.isEmpty() || confirmPassword!!.isEmpty()) {
                                 scope.launch {
                                     snackbarHostState.showSnackbar(
                                         message = getString(R.string.fill_all_the_fields),
@@ -135,23 +141,51 @@ class CreateAccountActivity : AppCompatActivity() {
                                     )
                                 }
                             } else {
-                                FirebaseUtils.createAccount(email, password, onSuccess = {
-                                    FirebaseUtils.createDataOnFirestore(name, lastName, email)
-                                    FirebaseUtils.signInWithEmail(email, password, onSuccess = {}
-                                    ) {}
-                                    val user = FirebaseAuth.getInstance().currentUser
-                                    if (user != null) {
-                                        val intent = Intent(context, NewMainActivity::class.java)
-                                        context.startActivity(intent)
+                                FirebaseUtils.createAccount(email!!, password!!, onSuccess = {
+                                    FirebaseUtils.createDataOnFirestore(name!!, lastName!!, email!!)
+                                    FirebaseUtils.signInWithEmail(email!!, password!!, onSuccess = {
+                                        val user = FirebaseAuth.getInstance().currentUser
+                                        if(user != null) {
+                                            val intent = Intent(context, NewMainActivity::class.java)
+                                            context.startActivity(intent)
+                                        }
+                                    }, {
+                                        scope.launch {
+                                            snackbarHostState.showSnackbar(
+                                                message = context.getString(R.string.unable_to_sign_in_try_again_later),
+                                                duration = SnackbarDuration.Long,
+                                                withDismissAction = true
+                                            )
+                                        }
+                                    })
+                                }) { e ->
+                                    when(e) {
+                                        is FirebaseAuthWeakPasswordException -> {
+                                            scope.launch {
+                                                snackbarHostState.showSnackbar(
+                                                    message = context.getString(R.string.password_should_be_at_least_6_characters),
+                                                    duration = SnackbarDuration.Long,
+                                                    withDismissAction = true
+                                                )
+                                            }
+                                        }
+                                        is FirebaseAuthUserCollisionException -> {
+                                            scope.launch {
+                                                snackbarHostState.showSnackbar(
+                                                    message = context.getString(R.string.account_already_exists),
+                                                    duration = SnackbarDuration.Long,
+                                                    withDismissAction = true
+                                                )
+                                            }
+                                        }
                                     }
-                                }) {
                                     scope.launch {
                                         snackbarHostState.showSnackbar(
-                                            message = it.toString(),
-                                            duration = SnackbarDuration.Short
+                                            message = context.getString(R.string.unable_to_create_account),
+                                            duration = SnackbarDuration.Long,
+                                            withDismissAction = true
                                         )
                                     }
-
                                 }
                             }
                         }) {

@@ -1,28 +1,22 @@
 package com.sgtech.freevices.utils
 
 import android.content.Context
-import android.content.Intent
-import android.util.Log
-import androidx.core.content.ContextCompat.startActivity
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseAuthActionCodeException
-import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
 import com.sgtech.freevices.R
-import com.sgtech.freevices.views.ui.LoginActivity
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
 object FirebaseUtils {
+
     fun isUserLoggedIn(): Boolean {
         val currentUser = FirebaseAuth.getInstance().currentUser
         return currentUser != null
     }
-
 
     fun signInWithEmail(
         email: String,
@@ -34,19 +28,11 @@ object FirebaseUtils {
         auth.signInWithEmailAndPassword(email.trim(), password.trim())
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    try {
-                        onSuccess()
-                    } catch (eiu: FirebaseAuthInvalidUserException) {
-                        onFailure(eiu)
-                    } catch (eac: FirebaseAuthActionCodeException) {
-                        onFailure(eac)
-                    } catch (e: Exception) {
-                        onFailure(e)
-                    }
+                    onSuccess()
                 }
             }
-            .addOnFailureListener { e ->
-                onFailure(e)
+            .addOnFailureListener { exception ->
+                onFailure(exception)
             }
     }
 
@@ -62,19 +48,22 @@ object FirebaseUtils {
         user!!.updateProfile(profileUpdates)
     }
 
-    fun updateDisplayNameOnFirestore(firstName: String, lastName: String) {
+    fun updateDisplayNameOnFirestore(firstName: String, lastName: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
         val auth = FirebaseAuth.getInstance()
         val user = auth.currentUser
         val db = FirebaseFirestore.getInstance()
         val userId = user?.uid
 
         if (userId != null) {
-            val userDb = db.collection("users").document(userId)
-            userDb.update("firstName", firstName)
-            userDb.update("lastName", lastName)
+            val userDb = db.collection(USERS).document(userId)
+            userDb.update(FIRST_NAME, firstName)
+            userDb.update(LAST_NAME, lastName)
+            onSuccess()
+        } else {
+            onFailure(Exception())
         }
-    }
 
+    }
 
     fun createAccount(
         email: String,
@@ -103,30 +92,30 @@ object FirebaseUtils {
         val user = auth.currentUser
         val uid = user?.uid
         val data = hashMapOf(
-            "firstName" to firstName,
-            "lastName" to lastName,
-            "email" to email
+            FIRST_NAME to firstName,
+            LAST_NAME to lastName,
+            EMAIL to email
         )
-        val userRef = FirebaseFirestore.getInstance().collection("users").document(uid!!)
+        val userRef = FirebaseFirestore.getInstance().collection(USERS).document(uid!!)
 
         userRef.set(data)
             .addOnSuccessListener {
                 configDisplayNameOnAuth(name = "$firstName $lastName")
 
-                val categoriesCollection = userRef.collection("categories")
+                val categoriesCollection = userRef.collection(CATEGORIES)
 
-                val tobaccoDataCollection = categoriesCollection.document("tobacco").collection("data")
-                val alcoholDataCollection = categoriesCollection.document("alcohol").collection("data")
-                val partiesDataCollection = categoriesCollection.document("parties").collection("data")
-                val othersDataCollection = categoriesCollection.document("others").collection("data")
-                val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
-                val tobaccoData = mapOf("value" to 0)
+                val tobaccoDataCollection = categoriesCollection.document(TOBACCO).collection(DATA)
+                val alcoholDataCollection = categoriesCollection.document(ALCOHOL).collection(DATA)
+                val partiesDataCollection = categoriesCollection.document(PARTIES).collection(DATA)
+                val othersDataCollection = categoriesCollection.document(OTHERS).collection(DATA)
+                val currentDate = SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).format(Date())
+                val tobaccoData = mapOf(VALUE to 0)
                 tobaccoDataCollection.document(currentDate).set(tobaccoData)
-                val alcoholData = mapOf("value" to 0)
+                val alcoholData = mapOf(VALUE to 0)
                 alcoholDataCollection.document(currentDate).set(alcoholData)
-                val partiesData = mapOf("value" to 0)
+                val partiesData = mapOf(VALUE to 0)
                 partiesDataCollection.document(currentDate).set(partiesData)
-                val othersData = mapOf("value" to 0)
+                val othersData = mapOf(VALUE to 0)
                 othersDataCollection.document(currentDate).set(othersData)
             }
     }
@@ -139,56 +128,48 @@ object FirebaseUtils {
         onFailure: (Exception) -> Unit
     ) {
         val subCollectionName = when (category) {
-            context.getString(R.string.tobacco) -> "tobacco"
-            context.getString(R.string.alcohol) -> "alcohol"
-            context.getString(R.string.parties) -> "parties"
-            context.getString(R.string.others) -> "others"
-            else -> "default"
+            context.getString(R.string.tobacco) -> TOBACCO
+            context.getString(R.string.alcohol) -> ALCOHOL
+            context.getString(R.string.parties) -> PARTIES
+            context.getString(R.string.others) -> OTHERS
+            else -> null
         }
 
         val auth = FirebaseAuth.getInstance()
         val user = auth.currentUser
         val uid = user?.uid
-        val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+        val currentDate = SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).format(Date())
 
         val categoriesCollection =
-            FirebaseFirestore.getInstance().collection("users").document(uid!!)
-                .collection("categories")
+            FirebaseFirestore.getInstance().collection(USERS).document(uid!!)
+                .collection(CATEGORIES)
 
         val categoryDataCollection =
-            categoriesCollection.document(subCollectionName).collection("data")
+            categoriesCollection.document(subCollectionName!!).collection(DATA)
 
         val currentDayDataDocument = categoryDataCollection.document(currentDate)
 
         currentDayDataDocument.get()
             .addOnSuccessListener { documentSnapshot ->
                 if (documentSnapshot.exists()) {
-                    val currentValue = documentSnapshot.getLong("value")?.toInt() ?: 0
+                    val currentValue = documentSnapshot.getLong(VALUE)?.toInt() ?: 0
 
                     val updatedValue = currentValue + amount.toFloat()
 
-                    currentDayDataDocument.set(mapOf("value" to updatedValue))
+                    currentDayDataDocument.set(mapOf(VALUE to updatedValue))
                         .addOnSuccessListener {
-                            Log.d("FirebaseUtils", "Data updated successfully")
                             onSuccess()
                         }
                         .addOnFailureListener {
-                            Log.d("FirebaseUtils", "Error updating data")
+                            onFailure(it)
                         }
                 } else {
-                    val newData = mapOf("value" to amount.toFloat())
+                    val newData = mapOf(VALUE to amount.toFloat())
                     currentDayDataDocument.set(newData)
-                        .addOnSuccessListener {
-                            Log.d("FirebaseUtils", "Data added successfully")
-                        }
-                        .addOnFailureListener {
-                            Log.d("FirebaseUtils", "Error adding data")
-                        }
                 }
                 onSuccess()
             }
             .addOnFailureListener {
-                Log.d("FirebaseUtils", "Error getting data")
                 onFailure(it)
             }
     }
@@ -242,19 +223,19 @@ object FirebaseUtils {
         user?.let {
             val userId = user.uid
             val subCollectionName = when (option) {
-                context.getString(R.string.tobacco) -> "tobacco"
-                context.getString(R.string.alcohol) -> "alcohol"
-                context.getString(R.string.parties) -> "parties"
-                context.getString(R.string.others) -> "others"
-                else -> "default"
+                context.getString(R.string.tobacco) -> TOBACCO
+                context.getString(R.string.alcohol) -> ALCOHOL
+                context.getString(R.string.parties) -> PARTIES
+                context.getString(R.string.others) -> OTHERS
+                else -> null
             }
 
-            val categoriesCollection = db.collection("users").document(userId)
-                .collection("categories").document(subCollectionName).collection("data")
+            val categoriesCollection = db.collection(USERS).document(userId)
+                .collection(CATEGORIES).document(subCollectionName!!).collection(DATA)
 
             val dataList = mutableListOf<Pair<String, Float>>()
             val currentDate = Calendar.getInstance()
-            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            val dateFormat = SimpleDateFormat(DATE_FORMAT, Locale.getDefault())
 
             for (i in 0 until daysCount) {
                 val currentDateStr = dateFormat.format(currentDate.time)
@@ -263,7 +244,7 @@ object FirebaseUtils {
                 documentRef.get()
                     .addOnSuccessListener { documentSnapshot ->
                         val categoryName = documentRef.id
-                        val categoryValue = documentSnapshot.getDouble("value")?.toFloat() ?: 0.0f
+                        val categoryValue = documentSnapshot.getDouble(VALUE)?.toFloat() ?: 0.0f
                         dataList.add(Pair(categoryName, categoryValue))
 
                         if (dataList.size == daysCount) {
@@ -281,7 +262,7 @@ object FirebaseUtils {
 
     private fun deleteUserDataFromFirestore() {
         val db = FirebaseFirestore.getInstance()
-        db.collection("users").document(FirebaseAuth.getInstance().currentUser!!.uid).delete()
+        db.collection(USERS).document(FirebaseAuth.getInstance().currentUser!!.uid).delete()
     }
 
     private fun updateEmailOnFirestore(newEmail: String, onFailure: (Exception) -> Unit) {
@@ -289,19 +270,19 @@ object FirebaseUtils {
         val currentUser = FirebaseAuth.getInstance().currentUser
 
         if (currentUser != null) {
-            val userDb = db.collection("users").document(currentUser.uid)
-            userDb.update("email", newEmail)
-        } else {
-            onFailure(Exception("User is not logged in"))
-
+            val userDb = db.collection(USERS).document(currentUser.uid)
+            userDb.update(EMAIL, newEmail)
+                .addOnFailureListener { onFailure(it) }
         }
     }
 
-
-    fun signOut(context: Context) {
-        FirebaseAuth.getInstance().signOut()
-        val intent = Intent(context, LoginActivity::class.java)
-        startActivity(context, intent, null)
+    fun signOut(onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+        try {
+            FirebaseAuth.getInstance().signOut()
+            onSuccess()
+        } catch (e: Exception) {
+            onFailure(e)
+        }
     }
 
     fun configPasswordOnAuth(newPassword: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
@@ -348,23 +329,23 @@ object FirebaseUtils {
         val calendar = Calendar.getInstance()
         calendar.add(Calendar.DAY_OF_MONTH, -days)
         val currentDate = calendar.time
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val dateFormat = SimpleDateFormat(DATE_FORMAT, Locale.getDefault())
 
         val batch = db.batch()
 
         val categories = listOf(
-            "tobacco",
-            "alcohol",
-            "parties",
-            "others"
+            TOBACCO,
+            ALCOHOL,
+            PARTIES,
+            OTHERS
         )
 
         for (category in categories) {
-            val categoryCollection = db.collection("users").document(userId)
-                .collection("categories").document(category).collection("data")
+            val categoryCollection = db.collection(USERS).document(userId)
+                .collection(CATEGORIES).document(category).collection(DATA)
 
             categoryCollection
-                .whereGreaterThanOrEqualTo("date", dateFormat.format(currentDate))
+                .whereGreaterThanOrEqualTo(DATE, dateFormat.format(currentDate))
                 .get()
                 .addOnSuccessListener { documents ->
                     for (document in documents) {
@@ -384,5 +365,19 @@ object FirebaseUtils {
                 onFailure(e)
             }
     }
+
+    private const val DATA = "data"
+    private const val TOBACCO = "tobacco"
+    private const val ALCOHOL = "alcohol"
+    private const val PARTIES = "parties"
+    private const val OTHERS = "others"
+    private const val CATEGORIES = "categories"
+    private const val VALUE = "value"
+    private const val DATE_FORMAT = "yyyy-MM-dd"
+    private const val FIRST_NAME = "firstName"
+    private const val LAST_NAME = "lastName"
+    private const val EMAIL = "email"
+    private const val USERS = "users"
+    private const val DATE = "date"
 
 }

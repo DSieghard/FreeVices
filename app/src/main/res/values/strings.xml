@@ -184,4 +184,24 @@
     <string name="press_any_card_to_get_info">Press any card to get info</string>
     <string name="about_the_developers">About the Developers</string>
     <string name="about_developer_text">I am an independent developer, who as a job for his professional portfolio decided to create a simple application, meeting quality standards and design guides set by Google to deliver an easy-to-use product, and with an elegant design, complying with MaterialYou.\n\nIt was a challenge because my focus as a developer was purely back-end, and taking charge of the interface design meant not only an improvement in my skills but also something fun to do.\n\nI sincerely hope you enjoy my app, and I hope I can help more people with this and other projects.\n\n-L. Felipe</string>
+    <string name="user_inexistent">Error: User not found.</string>
+    <string name="password_not_match">Invalid credentials. Check your email and password and try again.</string>
+    <string name="no_connection_error">Error with connection to server.</string>
+    <string name="unknown_error">Unknown error. Please try again later.</string>
+    <string name="finish_history">Finish History</string>
+    <string name="history_settings_acc">History Settings</string>
+    <string name="account_settings_acc">Account Settings</string>
+    <string name="error_no_user">Error: No User</string>
+    <string name="logout_acc">Logout</string>
+    <string name="feedback_acc">Feedback</string>
+    <string name="error_signing_out">Error in logout, try again</string>
+    <string name="history_acc">History</string>
+    <string name="sign_out_confirm">Are you sure you want to sign out?</string>
+    <string name="menu">Menu</string>
+    <string name="unable_to_sign_in_try_again_later">Unable to sign in. Try again later</string>
+    <string name="password_should_be_at_least_6_characters">Password should be at least 6 characters</string>
+    <string name="account_already_exists">Account already exists</string>
+    <string name="unable_to_create_account">Unable to create account. Try again later</string>
+    <string name="history_help_acc">History Help</string>
+    <string name="help_history_main">In this page you can see your data history for last six months. Press any card to see expanded information about your expenses.</string>
 </resources>

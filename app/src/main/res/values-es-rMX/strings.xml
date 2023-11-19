@@ -181,4 +181,24 @@
     <string name="press_any_card_to_get_info">Pulsa cualquier tarjeta para ver más</string>
     <string name="about_the_developers">Acerca del desarrollador</string>
     <string name="about_developer_text">Soy un desarrollador independiente, quien como trabajo para su portafolio profesional decidió crear una aplicación simple, cumpliendo estándares de calidad y guías de diseño puestas por Google para entregar un producto fácil de usar, y con un diseño elegante, cumpliendo con MaterialYou.\n\nFue un desafío debido a que mi enfoque como desarrollador fue netamente de back-end, y ponerme al frente del diseño de la interfaz significó no solo una mejora en mis habilidades si no que algo divertido de realizar.\n\nEspero de todo corazón que disfrutes de mi app, y espero poder ayudar a más gente con este y otros proyectos.\n\n-L. Felipe</string>
+    <string name="user_inexistent">Error: Usuario no encontrado</string>
+    <string name="password_not_match">Credenciales inválidas. Revisa tu correo y contraseña e intentalo de nuevo</string>
+    <string name="no_connection_error">Error de comunicacion con el servidor.</string>
+    <string name="unknown_error">Error desconocido. Intentalo de nuevo más tarde</string>
+    <string name="finish_history">Termina la actividad de Historial</string>
+    <string name="history_settings_acc">Ajustes del Historial</string>
+    <string name="account_settings_acc">Ajustes de la cuenta</string>
+    <string name="error_no_user">Error: Usuario no encontrado</string>
+    <string name="logout_acc">Cerrar Sesión</string>
+    <string name="feedback_acc">Comentarios</string>
+    <string name="error_signing_out">Error en cierre de sesión, intentalo de nuevo</string>
+    <string name="history_acc">Historial</string>
+    <string name="sign_out_confirm">Seguro que quieres cerrar sesión?</string>
+    <string name="menu">Menú</string>
+    <string name="unable_to_sign_in_try_again_later">Imposible iniciar sesión. Intentalo de nuevo más tarde</string>
+    <string name="password_should_be_at_least_6_characters">La contraseña debe ser de al menos 6 caracteres</string>
+    <string name="account_already_exists">Cuenta ya existe</string>
+    <string name="unable_to_create_account">Imposible crear cuenta. Intentalo de nuevo más tarde</string>
+    <string name="history_help_acc">Ayuda del Historial</string>
+    <string name="help_history_main">En esta página puedes ver el historial de tus gastos en los últimos 6 meses. Pulsa cualquier tarjeta para obtener información extendida.</string>
 </resources>

@@ -41,6 +41,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.getString
 import androidx.core.content.ContextCompat.startActivity
+import com.google.firebase.auth.FirebaseAuthActionCodeException
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.sgtech.freevices.R
 import com.sgtech.freevices.utils.FirebaseUtils
 import com.sgtech.freevices.utils.FirebaseUtils.isUserLoggedIn
@@ -71,8 +74,14 @@ class LoginActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.light(Color.Transparent.hashCode(), Color.Transparent.hashCode()),
-            navigationBarStyle = SystemBarStyle.light(Color.Transparent.hashCode(), Color.Transparent.hashCode()),
+            statusBarStyle = SystemBarStyle.light(
+                Color.Transparent.hashCode(),
+                Color.Transparent.hashCode()
+            ),
+            navigationBarStyle = SystemBarStyle.light(
+                Color.Transparent.hashCode(),
+                Color.Transparent.hashCode()
+            ),
         )
         setContent {
             FreeVicesTheme(useDynamicColors = themeViewModel.isDynamicColor.value) {
@@ -80,111 +89,134 @@ class LoginActivity : AppCompatActivity() {
             }
         }
     }
-}
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun LoginScreenView() {
-    val context = LocalContext.current
-    val activity = LocalContext.current as Activity
-    val snackbarHostState = remember { SnackbarHostState() }
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    val scrollBehavior =
-        TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
-    val scope = rememberCoroutineScope()
-    var isLoading by remember { mutableStateOf(false) }
-    if (isLoading) {
-        DialogForLoad { isLoading = false }
-    }
-    var isLoginOk by remember { mutableStateOf (false) }
-    if (isLoginOk) {
-        val intent = Intent(context, NewMainActivity::class.java)
-        startActivity(context, intent, null)
-        isLoginOk = false
-        activity.finish()
-    }
 
-    Scaffold(
-        Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-        topBar = {
-            LargeTopAppBar(
-                title = {
-                    Text(
-                        getString(context, R.string.welcome_to_freevices),
-                        style = MaterialTheme.typography.headlineLarge,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                },
-                scrollBehavior = scrollBehavior
-            )
-        },
-        content = { innerPadding ->
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                item {
-                    EmailEditText(email) { newValue -> email = newValue }
-                    Spacer(modifier = Modifier.size(48.dp))
-                    PasswordEditText(password) { newValue -> password = newValue }
-                    Spacer(modifier = Modifier.size(128.dp))
-                }
-            }
-        },
-        bottomBar = {
-            BottomAppBar(
-                actions = {
-                    TextButton(onClick = {
-                        val intent =
-                            Intent(
-                                context,
-                                CreateAccountActivity::class.java
-                            )
-                        context.startActivity(intent)
-                    }) {
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    fun LoginScreenView() {
+        val context = LocalContext.current
+        val activity = LocalContext.current as Activity
+        val snackbarHostState = remember { SnackbarHostState() }
+        var email by remember { mutableStateOf("") }
+        var password by remember { mutableStateOf("") }
+        val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
+        val scope = rememberCoroutineScope()
+        var isLoading by remember { mutableStateOf(false) }
+        if (isLoading) {
+            DialogForLoad { isLoading = false }
+        }
+        var isLoginOk by remember { mutableStateOf(false) }
+        if (isLoginOk) {
+            val intent = Intent(context, NewMainActivity::class.java)
+            startActivity(context, intent, null)
+            isLoginOk = false
+            activity.finish()
+        }
+        var authError: String? by remember { mutableStateOf(null) }
+
+        Scaffold(
+            Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+            topBar = {
+                LargeTopAppBar(
+                    title = {
                         Text(
-                            text = stringResource(R.string.sign_up),
-                            style = MaterialTheme.typography.bodyLarge
+                            stringResource(R.string.welcome_to_freevices),
+                            style = MaterialTheme.typography.headlineLarge,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
+                    },
+                    scrollBehavior = scrollBehavior
+                )
+            },
+            content = { innerPadding ->
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    item {
+                        EmailEditText(email) { newValue -> email = newValue }
+                        Spacer(modifier = Modifier.size(48.dp))
+                        PasswordEditText(password) { newValue -> password = newValue }
+                        Spacer(modifier = Modifier.size(128.dp))
                     }
-                },
-                floatingActionButton = {
-                    TextButton(onClick = {
-                        if (email.isEmpty() || password.isEmpty()) {
-                            scope.launch {
-                                snackbarHostState.showSnackbar(
-                                    message = getString(context, R.string.fill_all_the_fields),
-                                    duration = SnackbarDuration.Short
+                }
+            },
+            bottomBar = {
+                BottomAppBar(
+                    actions = {
+                        TextButton(onClick = {
+                            val intent =
+                                Intent(
+                                    context,
+                                    CreateAccountActivity::class.java
                                 )
-                            }
-                        } else {
-                            isLoading = true
-                            scope.launch {
-                                FirebaseUtils.signInWithEmail(email, password, {
-                                    isLoading = false
-                                    isLoginOk = true
-                                }) {
-                                    isLoading = false
+                            context.startActivity(intent)
+                        }) {
+                            Text(
+                                text = stringResource(R.string.sign_up),
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                        }
+                    },
+                    floatingActionButton = {
+                        TextButton(onClick = {
+                            if (email.isEmpty() || password.isEmpty()) {
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = getString(context, R.string.fill_all_the_fields),
+                                        duration = SnackbarDuration.Short
+                                    )
+                                }
+                            } else {
+                                isLoading = true
+                                scope.launch {
+                                    FirebaseUtils.signInWithEmail(email, password, {
+                                        isLoading = false
+                                        isLoginOk = true
+                                    }) {exception ->
+                                        authError = when (exception) {
+                                            is FirebaseAuthInvalidUserException -> {
+                                                context.getString(R.string.user_inexistent)
+                                            }
+
+                                            is FirebaseAuthInvalidCredentialsException -> {
+                                                context.getString(R.string.password_not_match)
+                                            }
+
+                                            is FirebaseAuthActionCodeException -> {
+                                                context.getString(R.string.no_connection_error)
+                                            }
+
+                                            else -> {
+                                                context.getString(R.string.unknown_error)
+                                            }
+                                        }
+                                        isLoading = false
+                                    }
+                                    if (authError?.isNotEmpty() == true) {
+                                        snackbarHostState.showSnackbar(
+                                            message = authError!!,
+                                            duration = SnackbarDuration.Short
+                                        )
+                                    }
                                 }
                             }
+                        }) {
+                            Text(
+                                text = stringResource(R.string.sign_in),
+                                style = MaterialTheme.typography.bodyLarge
+                            )
                         }
-                    }) {
-                        Text(
-                            text = stringResource(R.string.sign_in),
-                            style = MaterialTheme.typography.bodyLarge
-                        )
                     }
-                }
-            )
-        },
-        snackbarHost = {
-            SnackbarHost(snackbarHostState)
-        }
-    )
+                )
+            },
+            snackbarHost = {
+                SnackbarHost(snackbarHostState)
+            }
+        )
+    }
 }
-

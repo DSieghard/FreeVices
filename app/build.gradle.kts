@@ -12,8 +12,8 @@ android {
         applicationId = "com.sgtech.freevices"
         minSdk = 31
         targetSdk = 34
-        versionCode = 102
-        versionName = "1.0"
+        versionCode = 104
+        versionName = "1.0.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -36,10 +36,6 @@ android {
     }
     kotlinOptions {
         jvmTarget = "1.8"
-        freeCompilerArgs += listOf(
-            "-P",
-            "plugin:androidx.compose.compiler.plugins.kotlin:suppressKotlinVersionCompatibilityCheck=1.9.0"
-        )
     }
     buildFeatures {
         viewBinding = true

@@ -39,7 +39,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.sgtech.freevices.R
 import com.sgtech.freevices.views.ui.theme.FreeVicesTheme
@@ -67,7 +66,6 @@ class WelcomeActivity: AppCompatActivity() {
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
-    @Preview
     @Composable
     fun WelcomeScreenView() {
         var openFirstBottomSheet by rememberSaveable { mutableStateOf(false) }
@@ -81,11 +79,11 @@ class WelcomeActivity: AppCompatActivity() {
                     actions = {
                         TextButton(onClick = {
                             val intent =
-                                Intent(
-                                    context,
-                                    CreateAccountActivity::class.java
-                                )
+                                Intent(context, CreateAccountActivity::class.java).apply {
+                                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                                }
                             context.startActivity(intent)
+                            finish()
 
                         }) {
                             Text(
@@ -96,8 +94,11 @@ class WelcomeActivity: AppCompatActivity() {
                     },
                     floatingActionButton = {
                         TextButton(onClick = {
-                            val intent = Intent(context, LoginActivity::class.java)
+                            val intent = Intent(context, LoginActivity::class.java).apply {
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                            }
                             context.startActivity(intent)
+                            finish()
                         }) {
                             Text(
                                 text = stringResource(R.string.sign_in),

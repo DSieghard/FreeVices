@@ -75,9 +75,7 @@ class NewUserSettingsActivity : AppCompatActivity() {
 
         setContent {
             val scope = lifecycleScope
-            FreeVicesTheme(
-                useDynamicColors = themeViewModel.isDynamicColor.value
-            ) {
+            FreeVicesTheme(useDynamicColors = themeViewModel.isDynamicColor.value) {
                 UserSettingsView(scope)
             }
         }
@@ -85,7 +83,6 @@ class NewUserSettingsActivity : AppCompatActivity() {
 
 
     @OptIn(ExperimentalMaterial3Api::class)
-
     @Composable
     fun UserSettingsView(scope: LifecycleCoroutineScope) {
         val activity = Activity()
@@ -114,7 +111,6 @@ class NewUserSettingsActivity : AppCompatActivity() {
                 isChangeEmailSelected = false
             }
         }
-
         var isDeleteAccountSelected by rememberSaveable { mutableStateOf(false) }
         if (isDeleteAccountSelected) {
             DeleteAccountDialog {
@@ -201,24 +197,24 @@ class NewUserSettingsActivity : AppCompatActivity() {
         val names = input.split(" ")
 
         when (names.size) {
-            2 -> {
-                val firstName = names[0]
-                val lastName = names[1]
+            TWO -> {
+                val firstName = names[ZERO]
+                val lastName = names[ONE]
                 return Pair(firstName, lastName)
             }
 
-            3 -> {
-                val firstName = names[0]
-                val lastName = names[1]
-                val lastSecondName = names[2]
+            THREE -> {
+                val firstName = names[ZERO]
+                val lastName = names[ONE]
+                val lastSecondName = names[TWO]
                 return Pair("$firstName $lastName", lastSecondName)
             }
 
-            4 -> {
-                val firstName = names[0]
-                val secondName = names[1]
-                val lastName = names[2]
-                val lastSecondName = names[3]
+            FOUR -> {
+                val firstName = names[ZERO]
+                val secondName = names[ONE]
+                val lastName = names[TWO]
+                val lastSecondName = names[THREE]
                 return Pair("$firstName $secondName", "$lastName $lastSecondName")
             }
 
@@ -305,7 +301,7 @@ class NewUserSettingsActivity : AppCompatActivity() {
         if (isChangeNameConfirmed) {
             FirebaseUtils.configDisplayNameOnAuth(name)
             splitNames(name)?.let {
-                FirebaseUtils.updateDisplayNameOnFirestore(it.first, it.second)
+                FirebaseUtils.updateDisplayNameOnFirestore(it.first, it.second, {}, {})
             }
             isChangeNameConfirmed = false
             onDismissRequest()
@@ -485,5 +481,13 @@ class NewUserSettingsActivity : AppCompatActivity() {
                 }
             }
         )
+    }
+
+    companion object {
+        private const val ZERO = 0
+        private const val ONE = 1
+        private const val TWO = 2
+        private const val THREE = 3
+        private const val FOUR = 4
     }
 }
