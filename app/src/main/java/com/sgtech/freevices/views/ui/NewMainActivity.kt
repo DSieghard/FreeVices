@@ -22,6 +22,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.HelpOutline
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Menu
@@ -118,10 +119,14 @@ class NewMainActivity : ComponentActivity() {
         val partiesData by viewModel.partiesLiveData.observeAsState(initial = 0f)
         val othersData by viewModel.othersLiveData.observeAsState(initial = 0f)
         var isDialogOpen by remember { mutableStateOf(false) }
+        var isHelpOpen by remember { mutableStateOf(false) }
         val totals = tobaccoData + alcoholData + partiesData + othersData
         dataHandlerForActivity()
         if (isLoading){
             DialogForLoad { }
+        }
+        if(isHelpOpen) {
+            HelpDialog(onDismissRequest = { isHelpOpen = false }, text = stringResource(id = R.string.help_acc))
         }
 
         ModalNavigationDrawer(
@@ -184,8 +189,14 @@ class NewMainActivity : ComponentActivity() {
                                     contentDescription = stringResource(id = R.string.history_acc),
                                 )
                             }
+                            IconButton(onClick = { isHelpOpen = true }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.HelpOutline,
+                                    contentDescription = stringResource(id = R.string.help_content),
+                                )
+                            }
                         })
-
                 },
                 snackbarHost = { SnackbarHost(snackbarHostState) },
                 content = { padding ->
@@ -226,13 +237,6 @@ class NewMainActivity : ComponentActivity() {
                             HomeFab()
                         }
                     )
-
-                    if (isDialogOpen) {
-                        DetailsExtendedDialog(
-                            onDismissRequest = { isDialogOpen = false },
-                            TOTALS
-                        )
-                    }
                 },
             )
         }
@@ -326,7 +330,6 @@ class NewMainActivity : ComponentActivity() {
                 color = MaterialTheme.colorScheme.onPrimaryContainer
             )
         }
-
         if (isDialogOpen) {
             DetailsExtendedDialog(
                 onDismissRequest = { isDialogOpen = false }, category
@@ -714,7 +717,7 @@ class NewMainActivity : ComponentActivity() {
                 stringResource(id = R.string.others) -> {
                     ElevatedCardForCategory(onDismissRequest, othersData.toInt(), othersData2Weeks.toInt(), othersDataThirtyDays.toInt())
                 }
-                "totals" -> {
+                TOTALS -> {
                     ElevatedCardForCategory(onDismissRequest, totalWeek.toInt(), total2Weeks.toInt(), totalThirtyDays.toInt())
                 }
             }

@@ -211,4 +211,6 @@
     <string name="invalid_email">Email not found or invalid</string>
     <string name="forgot_password">Forgot your password?</string>
     <string name="unable_to_login">Unable to sign in. Check your mail and password and try again.</string>
+    <string name="help_acc">This is the main view.\nHere you can see your last week data, and add a new expense.\n\nAlso, there is the History Button, to check further data, or click any card to show detailed info from your expenses.\t</string>
+    <string name="help_content">Help Button</string>
 </resources>

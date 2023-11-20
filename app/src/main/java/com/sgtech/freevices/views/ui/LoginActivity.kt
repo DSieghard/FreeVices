@@ -8,6 +8,7 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -35,7 +36,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
@@ -164,18 +164,26 @@ class LoginActivity : AppCompatActivity() {
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     item {
-                        EmailEditText(email) { newValue -> email = newValue }
-                        Spacer(modifier = Modifier.size(48.dp))
-                        PasswordEditText(password) { newValue -> password = newValue }
+                        AnimatedVisibility(visible = isResetPasswordRequested) {
+                            ResetPasswordDialog { isResetPasswordRequested = false }
+                        }
+
+                        AnimatedVisibility(visible = !isResetPasswordRequested) {
+                            EmailEditText(email) { newValue -> email = newValue }
+                        }
+
+                        AnimatedVisibility(visible = !isResetPasswordRequested) {
+                            PasswordEditText(password) { newValue -> password = newValue }
+                        }
+
                         Spacer(modifier = Modifier.size(128.dp))
-                        TextButton(onClick = {
-                            isResetPasswordRequested = true
-                        },
-                            modifier = Modifier.padding(14.dp)
-                        ) {
-                            Text(
-                                text = stringResource(R.string.forgot_password),
-                            )
+
+                        AnimatedVisibility(visible = !isResetPasswordRequested) {
+                            TextButton(onClick = {
+                                isResetPasswordRequested = true
+                            }, modifier = Modifier.padding(14.dp)) {
+                                Text(text = stringResource(R.string.forgot_password))
+                            }
                         }
                     }
                 }
@@ -302,7 +310,7 @@ class LoginActivity : AppCompatActivity() {
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            TextField(
+            OutlinedTextField(
                 value = password,
                 onValueChange = onValueChange,
                 singleLine = true,
