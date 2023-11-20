@@ -204,4 +204,11 @@
     <string name="unable_to_create_account">Unable to create account. Try again later</string>
     <string name="history_help_acc">History Help</string>
     <string name="help_history_main">In this page you can see your data history for last six months. Press any card to see expanded information about your expenses.</string>
+    <string name="reset_password">Reset Password</string>
+    <string name="enter_your_email">Enter your email</string>
+    <string name="password_reset_email_sent">An email has been sent with instructions to reset your password</string>
+    <string name="error_resetting_password">Error in email send</string>
+    <string name="invalid_email">Email not found or invalid</string>
+    <string name="forgot_password">Forgot your password?</string>
+    <string name="unable_to_login">Unable to sign in. Check your mail and password and try again.</string>
 </resources>

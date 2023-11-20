@@ -366,6 +366,18 @@ object FirebaseUtils {
             }
     }
 
+    fun resetPasswordRequest(email: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+        val auth = FirebaseAuth.getInstance()
+        auth.sendPasswordResetEmail(email)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    onSuccess()
+                } else {
+                    onFailure(task.exception!!)
+                }
+            }
+    }
+
     private const val DATA = "data"
     private const val TOBACCO = "tobacco"
     private const val ALCOHOL = "alcohol"

@@ -201,4 +201,11 @@
     <string name="unable_to_create_account">Imposible crear cuenta. Intentalo de nuevo más tarde</string>
     <string name="history_help_acc">Ayuda del Historial</string>
     <string name="help_history_main">En esta página puedes ver el historial de tus gastos en los últimos 6 meses. Pulsa cualquier tarjeta para obtener información extendida.</string>
+    <string name="reset_password">Restablecer contraseña</string>
+    <string name="enter_your_email">Ingresa tu correo</string>
+    <string name="password_reset_email_sent">Se ha enviado un correo con instrucciones para restablecer la contraseña</string>
+    <string name="error_resetting_password">Error en el envío del email</string>
+    <string name="invalid_email">Email inválido o inexistente</string>
+    <string name="forgot_password">Olvidaste tu contraseña?</string>
+    <string name="unable_to_login">Imposible iniciar sesión. Revisa tu correo y contraseña y vuelve a intentarlo.</string>
 </resources>
