@@ -91,10 +91,11 @@ class NewMainActivity : ComponentActivity() {
     private val themeViewModel = ViewModelProvider.provideThemeViewModel()
     private val snackbarHostState = SnackbarHostState()
     private val scope = CoroutineScope(Dispatchers.Main)
-    private var isLoading: Boolean = false
+    private var isLoading by mutableStateOf(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        dataHandlerForActivity(onStart = { isLoading = true }, onSuccess = { isLoading = false }, onFailure = { isLoading = false })
 
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.light(Color.Transparent.hashCode(), Color.Transparent.hashCode()),
@@ -104,6 +105,9 @@ class NewMainActivity : ComponentActivity() {
         setContent {
             FreeVicesTheme(useDynamicColors = themeViewModel.isDynamicColor.value) {
                 NewMainScreen()
+                if (isLoading){
+                    DialogForLoad { }
+                }
             }
         }
     }
@@ -112,7 +116,6 @@ class NewMainActivity : ComponentActivity() {
     fun NewMainScreen() {
         val context = LocalContext.current
         val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-        val scope = rememberCoroutineScope()
         val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
         val tobaccoData by viewModel.tobaccoLiveData.observeAsState(initial = 0f)
         val alcoholData by viewModel.alcoholLiveData.observeAsState(initial = 0f)
@@ -121,10 +124,6 @@ class NewMainActivity : ComponentActivity() {
         var isDialogOpen by remember { mutableStateOf(false) }
         var isHelpOpen by remember { mutableStateOf(false) }
         val totals = tobaccoData + alcoholData + partiesData + othersData
-        dataHandlerForActivity()
-        if (isLoading){
-            DialogForLoad { }
-        }
         if(isHelpOpen) {
             HelpDialog(onDismissRequest = { isHelpOpen = false }, text = stringResource(id = R.string.help_acc))
         }
@@ -209,11 +208,11 @@ class NewMainActivity : ComponentActivity() {
                     ) {
                         item {
                             CategoryCard(tobaccoData.toInt(), stringResource(R.string.tobacco))
-                            Spacer(modifier = Modifier.padding(16.dp))
+                            Spacer(modifier = Modifier.padding(20.dp))
                             CategoryCard(alcoholData.toInt(), stringResource(R.string.alcohol))
-                            Spacer(modifier = Modifier.padding(16.dp))
+                            Spacer(modifier = Modifier.padding(20.dp))
                             CategoryCard(partiesData.toInt(), stringResource(R.string.parties))
-                            Spacer(modifier = Modifier.padding(16.dp))
+                            Spacer(modifier = Modifier.padding(20.dp))
                             CategoryCard(othersData.toInt(), stringResource(R.string.others))
                         }
                     }
@@ -242,23 +241,24 @@ class NewMainActivity : ComponentActivity() {
         }
     }
 
-    private fun dataHandlerForActivity() {
-        isLoading = true
-
+    private fun dataHandlerForActivity(onStart: () -> Unit, onSuccess: () -> Unit = {}, onFailure: () -> Unit = {}) {
+        onStart()
         FirebaseUtils.dataHandler(
             context = applicationContext,
             days = SEVEN_DAYS,
             onSuccess = { data ->
                 viewModel.updateLiveDataValues(this, data)
+                onSuccess()
             },
             onFailure = {
-                isLoading = false
                 scope.launch{
                     snackbarHostState.showSnackbar(
                         message = applicationContext.getString(R.string.error_updating_data),
-                        duration = SnackbarDuration.Short
+                        duration = SnackbarDuration.Short,
+                        withDismissAction = true
                     )
                 }
+                onFailure()
             }
         )
 
@@ -267,15 +267,17 @@ class NewMainActivity : ComponentActivity() {
             days = FOURTEEN_DAYS,
             onSuccess = { data ->
                 viewModel.updateTwoWeekLiveDataValues(this, data)
+                onSuccess()
             },
             onFailure = {
-                isLoading = false
                 scope.launch{
                     snackbarHostState.showSnackbar(
                         message = applicationContext.getString(R.string.error_updating_data),
-                        duration = SnackbarDuration.Short
+                        duration = SnackbarDuration.Short,
+                        withDismissAction = true
                     )
                 }
+                onFailure()
             }
         )
 
@@ -284,18 +286,19 @@ class NewMainActivity : ComponentActivity() {
             days = THIRTY_DAYS,
             onSuccess = { data ->
                 viewModel.updateThirtyDaysLiveDataValues(this, data)
+                onSuccess()
             },
             onFailure = {
-                isLoading = false
                 scope.launch{
                     snackbarHostState.showSnackbar(
                         message = applicationContext.getString(R.string.error_updating_data),
-                        duration = SnackbarDuration.Short
+                        duration = SnackbarDuration.Short,
+                        withDismissAction = true
                     )
                 }
+                onFailure()
             }
         )
-        isLoading = false
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
@@ -461,7 +464,6 @@ class NewMainActivity : ComponentActivity() {
         val viewModel = ViewModelProvider.provideMainViewModel()
         var expenseAmount by remember { mutableIntStateOf(ZERO) }
         val context = LocalContext.current
-        val coroutineScope = rememberCoroutineScope()
 
         Dialog(
             onDismissRequest = onCancel
@@ -499,6 +501,7 @@ class NewMainActivity : ComponentActivity() {
                         Spacer(modifier = Modifier.padding(12.dp))
 
                         Button(onClick = {
+                            isLoading = true
                             FirebaseUtils.addDataToCategory(
                                 context = context,
                                 category = category,
@@ -509,30 +512,35 @@ class NewMainActivity : ComponentActivity() {
                                         days = SEVEN_DAYS,
                                         onSuccess = { data ->
                                             viewModel.updateLiveDataValues(context, data)
-                                            coroutineScope.launch {
+                                            scope.launch {
                                                 snackbarHostState.showSnackbar(
                                                     message = context.getString(R.string.data_updated_successfully),
-                                                    duration = SnackbarDuration.Short
+                                                    duration = SnackbarDuration.Short,
+                                                    withDismissAction = true
                                                 )
                                             }
+                                            isLoading = false
                                         },
                                         onFailure = {
-                                            coroutineScope.launch {
+                                            scope.launch {
                                                 snackbarHostState.showSnackbar(
                                                     message = context.getString(R.string.error_updating_data),
-                                                    duration = SnackbarDuration.Short
+                                                    duration = SnackbarDuration.Short,
+                                                    withDismissAction = true
                                                 )
                                             }
                                         }
                                     )
                                 },
                                 onFailure = {
-                                    coroutineScope.launch {
+                                    scope.launch {
                                         snackbarHostState.showSnackbar(
                                             message = context.getString(R.string.error_updating_data),
-                                            duration = SnackbarDuration.Short
+                                            duration = SnackbarDuration.Short,
+                                            withDismissAction = true
                                         )
                                     }
+                                    isLoading = false
                                 }
                             )
                             onCancel()
@@ -644,6 +652,7 @@ class NewMainActivity : ComponentActivity() {
                     verticalAlignment = Alignment.Bottom
                 ) {
                     Button(onClick = {
+                        isLoading = true
                         FirebaseUtils.signOut(onSuccess = {
                             val intent = Intent(context, LoginActivity::class.java)
                             context.startActivity(intent)
@@ -653,12 +662,14 @@ class NewMainActivity : ComponentActivity() {
                                 scope.launch {
                                     snackbarHostState.showSnackbar(
                                         message = context.getString(R.string.error_signing_out),
-                                        duration = SnackbarDuration.Short
+                                        duration = SnackbarDuration.Short,
+                                        withDismissAction = true
                                     )
                                 }
                             })
                         onSignOutConfirmed()
                         onDismissRequest()
+                        isLoading = false
                     }) {
                         Text(text = stringResource(R.string.yes), color = MaterialTheme.colorScheme.onTertiary)
                     }

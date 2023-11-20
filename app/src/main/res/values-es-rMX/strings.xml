@@ -81,7 +81,7 @@
     <string name="nav_header_desc">Cabecera de navegacion</string>
     <string name="action_settings">Ajustes</string>
     <string name="delete_last_30_days_dialog">Borrar últimos 30 días</string>
-    <string name="data_updated_successfully">Datos eliminados con éxito</string>
+    <string name="data_updated_successfully">Datos actualizados con éxito</string>
     <string name="error_updating_data">Error actualizando datos</string>
     <string name="data_added_successfully">Datos agregados con éxito</string>
     <string name="error_adding_data">Error agregando datos</string>
@@ -121,7 +121,7 @@
     <string name="change_password">Cambiar contraseña</string>
     <string name="require_your_current_password">Requiere tu contraseña actual</string>
     <string name="change_email_address">Cambiar correo electrónico</string>
-    <string name="update_your_email_address_require_your_current_password">Actualiza tu correo electrónico \\nRequiere tu contraseña actual</string>
+    <string name="update_your_email_address_require_your_current_password">Actualiza tu correo electrónico \nRequiere tu contraseña actual</string>
     <string name="delete_account">Eliminar cuenta</string>
     <string name="delete_your_account_and_all_associated_data_this_cannot_be_undone">Elimina tu cuenta y todos sus datos asociados. Esta acción no se puede deshacer</string>
     <string name="user_settings_help">En esta pantalla puedes modificar tus ajustes de usuario, como el nombre, contraseña, tu correo, o borrar tu cuenta si lo deseas.</string>
@@ -208,10 +208,10 @@
     <string name="invalid_email">Email inválido o inexistente</string>
     <string name="forgot_password">Olvidaste tu contraseña?</string>
     <string name="unable_to_login">Imposible iniciar sesión. Revisa tu correo y contraseña y vuelve a intentarlo.</string>
-    <string name="help_acc">Esta es la vista principal.\\n\\nAquí puedes ver los datos de la última semana, y agregar nuevos gastos.\\n\\n También, puedes encontrar el historial, para ver información extendida, o pulsar una tarjeta para ver más detalles.</string>
+    <string name="help_acc">Esta es la vista principal.\n\nAquí puedes ver los datos de la última semana, y agregar nuevos gastos.\n\nTambién, puedes encontrar el historial, para ver información extendida, o pulsar una tarjeta para ver más detalles.</string>
     <string name="help_content">Botón de ayuda</string>
     <string name="show_password_for_accebility">Mostrar contraseña</string>
     <string name="password_too_weak">La contraseña no cumple los requerimientos de seguridad</string>
     <string name="help_button">Botón de Ayuda</string>
-    <string name="create_account_help">Crear una cuenta en FreeVices.\\n\\nDebes llenar todos los campos.\\n\\nLas contraseñas deben tener:\\n- Un número\\n- Una Mayúscula\\n- Una minúscula\\n- Un símbolo\\n- Al menos 8 carácteres</string>
+    <string name="create_account_help">Crear una cuenta en FreeVices.\n\nDebes llenar todos los campos.\n\nLas contraseñas deben tener:\n- Un número\n- Una Mayúscula\n- Una minúscula\n- Un símbolo\n- Al menos 8 carácteres</string>
 </resources>
