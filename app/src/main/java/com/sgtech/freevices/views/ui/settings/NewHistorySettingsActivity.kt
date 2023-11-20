@@ -118,6 +118,30 @@ class NewHistorySettingsActivity : AppCompatActivity() {
             }
         ) {
             Column(modifier = Modifier.padding(it)) {
+                SettingsMenuLink(title = { Text (text = stringResource(R.string.clear_last_7_days)) },
+                    subtitle = { Text(text = stringResource(R.string.clear_seven_days_subtitle))},
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Filled.ManageHistory,
+                            contentDescription = null
+                        )
+                    },
+                    onClick = {
+                        days = SEVEN_DAYS
+                        isDeleteButtonPressed = true
+                    })
+                SettingsMenuLink(title = { Text(text = stringResource(R.string.clear_last_14_days)) },
+                    subtitle = {Text(text = stringResource(R.string.clear_14_days_subtitle))},
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Filled.ManageHistory,
+                            contentDescription = null
+                        )
+                    },
+                    onClick = {
+                        days = FOURTEEN_DAYS
+                        isDeleteButtonPressed = true
+                    })
                 SettingsMenuLink(title = { Text(text = stringResource(R.string.clear_last_30_days)) },
                     subtitle = { Text(text = stringResource(R.string.delete_last_30_days_from_history_this_action_cannot_be_undone)) },
                     icon = {
@@ -233,6 +257,8 @@ class NewHistorySettingsActivity : AppCompatActivity() {
     }
 
     companion object{
+        private const val SEVEN_DAYS = 7
+        private const val FOURTEEN_DAYS = 14
         private const val THIRTY_DAYS = 30
         private const val SIXTY_DAYS = 60
         private const val NINETY_DAYS = 90

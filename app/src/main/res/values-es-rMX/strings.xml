@@ -214,4 +214,8 @@
     <string name="password_too_weak">La contraseña no cumple los requerimientos de seguridad</string>
     <string name="help_button">Botón de Ayuda</string>
     <string name="create_account_help">Crear una cuenta en FreeVices.\n\nDebes llenar todos los campos.\n\nLas contraseñas deben tener:\n- Un número\n- Una Mayúscula\n- Una minúscula\n- Un símbolo\n- Al menos 8 carácteres</string>
+    <string name="clear_last_7_days">Eliminar últimos 7 días</string>
+    <string name="clear_seven_days_subtitle">Borrar últimos 7 días del historial. Esta acción no puede deshacerse</string>
+    <string name="clear_last_14_days">Eliminar últimos 14 días</string>
+    <string name="clear_14_days_subtitle">Borrar últimos 14 días del historial. Esta acción no puede deshacerse</string>
 </resources>

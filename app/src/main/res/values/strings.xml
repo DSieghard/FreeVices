@@ -218,4 +218,8 @@
     <string name="password_too_weak">Password doesn\'t meet security requirements</string>
     <string name="help_button">Help Button</string>
     <string name="create_account_help">Create a account on FreeVices.\n\nFill all required fields.\n\nPassword must have: \n- One number\n- One Mayus Letter\n- One Minus Letter\n- One Symbol\n- At least 8 characters</string>
+    <string name="clear_last_7_days">Clear last 7 days</string>
+    <string name="clear_seven_days_subtitle">Delete last 7 days from history. This action cannot be undone</string>
+    <string name="clear_last_14_days">Clear last 14 days</string>
+    <string name="clear_14_days_subtitle">Delete last 14 days from history. This action cannot be undone</string>
 </resources>
