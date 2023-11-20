@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -48,7 +49,7 @@ fun DialogForLoad(onDismiss: () -> Unit) {
         ) {
             ElevatedCard(
                 modifier = Modifier
-                    .padding(16.dp),
+                    .padding(8.dp),
                 shape = MaterialTheme.shapes.large
             ) {
                 Row(
@@ -57,11 +58,19 @@ fun DialogForLoad(onDismiss: () -> Unit) {
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ){
+                    Spacer(modifier = Modifier.padding(32.dp))
                     CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                     Spacer(modifier = Modifier.padding(8.dp))
                     Text(text = stringResource(R.string.loading))
+                    Spacer(modifier = Modifier.padding(32.dp))
                 }
             }
         }
     }
+}
+
+@Preview
+@Composable
+fun PreviewLoading(){
+    DialogForLoad {}
 }

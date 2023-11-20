@@ -213,4 +213,9 @@
     <string name="unable_to_login">Unable to sign in. Check your mail and password and try again.</string>
     <string name="help_acc">This is the main view.\nHere you can see your last week data, and add a new expense.\n\nAlso, there is the History Button, to check further data, or click any card to show detailed info from your expenses.\t</string>
     <string name="help_content">Help Button</string>
+    <string name="show_password_for_accebility">Show password</string>
+    <string name="valid_email_syntax" translatable="false">[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,4}</string>
+    <string name="password_too_weak">Password doesn\'t meet security requirements</string>
+    <string name="help_button">Help Button</string>
+    <string name="create_account_help">Create a account on FreeVices.\n\nFill all required fields.\n\nPassword must have: \n- One number\n- One Mayus Letter\n- One Minus Letter\n- One Symbol\n- At least 8 characters</string>
 </resources>

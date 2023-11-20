@@ -210,4 +210,8 @@
     <string name="unable_to_login">Imposible iniciar sesión. Revisa tu correo y contraseña y vuelve a intentarlo.</string>
     <string name="help_acc">Esta es la vista principal.\\n\\nAquí puedes ver los datos de la última semana, y agregar nuevos gastos.\\n\\n También, puedes encontrar el historial, para ver información extendida, o pulsar una tarjeta para ver más detalles.</string>
     <string name="help_content">Botón de ayuda</string>
+    <string name="show_password_for_accebility">Mostrar contraseña</string>
+    <string name="password_too_weak">La contraseña no cumple los requerimientos de seguridad</string>
+    <string name="help_button">Botón de Ayuda</string>
+    <string name="create_account_help">Crear una cuenta en FreeVices.\\n\\nDebes llenar todos los campos.\\n\\nLas contraseñas deben tener:\\n- Un número\\n- Una Mayúscula\\n- Una minúscula\\n- Un símbolo\\n- Al menos 8 carácteres</string>
 </resources>
