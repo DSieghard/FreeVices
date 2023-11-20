@@ -18,7 +18,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -47,10 +46,8 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 class CreateAccountActivity : AppCompatActivity() {
 
-    //In this exact moment, only god knows how works this app.
-    //En este preciso momento, solo Dios sabe como funciona esta app.
-
     private val themeViewModel = ViewModelProvider.provideThemeViewModel()
+    private val snackbarHostState = SnackbarHostState()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -75,16 +72,15 @@ class CreateAccountActivity : AppCompatActivity() {
     @Composable
     fun CreateAccountScreen() {
         val context = LocalContext.current
-        var name: String? by remember { mutableStateOf(null) }
-        var lastName: String? by remember { mutableStateOf(null) }
-        var email: String? by remember { mutableStateOf(null) }
-        var password: String? by remember { mutableStateOf(null) }
-        var confirmPassword: String? by remember { mutableStateOf(null) }
+        var name: String? by remember { mutableStateOf("") }
+        var lastName: String? by remember { mutableStateOf("") }
+        var email: String? by remember { mutableStateOf("") }
+        var password: String? by remember { mutableStateOf("") }
+        var confirmPassword: String? by remember { mutableStateOf("") }
         val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(
             rememberTopAppBarState()
         )
         val scope = rememberCoroutineScope()
-        val snackbarHostState = remember { SnackbarHostState() }
         Scaffold(
             topBar = {
                 MediumTopAppBar(title = { Text(text = getString(R.string.register_on_freevices),
@@ -92,7 +88,7 @@ class CreateAccountActivity : AppCompatActivity() {
                 },
                     scrollBehavior = scrollBehavior)
             },
-            snackbarHost =  { SnackbarHost(snackbarHostState) },
+            snackbarHost =  { snackbarHostState },
             content = { innerPadding ->
                 LazyColumn(
                     modifier = Modifier
