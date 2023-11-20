@@ -208,4 +208,6 @@
     <string name="invalid_email">Email inválido o inexistente</string>
     <string name="forgot_password">Olvidaste tu contraseña?</string>
     <string name="unable_to_login">Imposible iniciar sesión. Revisa tu correo y contraseña y vuelve a intentarlo.</string>
+    <string name="help_acc">Esta es la vista principal.\\n\\nAquí puedes ver los datos de la última semana, y agregar nuevos gastos.\\n\\n También, puedes encontrar el historial, para ver información extendida, o pulsar una tarjeta para ver más detalles.</string>
+    <string name="help_content">Botón de ayuda</string>
 </resources>
