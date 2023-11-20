@@ -1,6 +1,5 @@
 package com.sgtech.freevices.views.ui.settings
 
-import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.SystemBarStyle
@@ -53,12 +52,14 @@ import com.sgtech.freevices.R
 import com.sgtech.freevices.utils.FirebaseUtils
 import com.sgtech.freevices.views.ui.HelpDialog
 import com.sgtech.freevices.views.ui.LoginActivity
+import com.sgtech.freevices.views.ui.NewMainActivity
 import com.sgtech.freevices.views.ui.ViewModelProvider
 import com.sgtech.freevices.views.ui.theme.FreeVicesTheme
 import kotlinx.coroutines.launch
 
 class NewUserSettingsActivity : AppCompatActivity() {
     private val themeViewModel = ViewModelProvider.provideThemeViewModel()
+    private val mainViewModel = ViewModelProvider.provideMainViewModel()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -85,7 +86,7 @@ class NewUserSettingsActivity : AppCompatActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun UserSettingsView(scope: LifecycleCoroutineScope) {
-        val activity = Activity()
+        val context = LocalContext.current
         var isHelpOpen by rememberSaveable { mutableStateOf(false) }
         if (isHelpOpen) {
             HelpDialog(
@@ -125,7 +126,10 @@ class NewUserSettingsActivity : AppCompatActivity() {
                     navigationIcon = {
                         IconButton(onClick = {
                             scope.launch {
-                                activity.finish()
+                                val intent = Intent(context, NewMainActivity::class.java).apply {
+                                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                                }
+                                startActivity(intent)
                             }
                         }) {
                             Icon(Icons.Default.ArrowBack, contentDescription = null)
@@ -296,6 +300,7 @@ class NewUserSettingsActivity : AppCompatActivity() {
 
     @Composable
     fun ChangeNameDialog(onDismissRequest: () -> Unit) {
+        val firebaseUser = FirebaseUtils.getCurrentUser()
         var isChangeNameConfirmed by rememberSaveable { mutableStateOf(false) }
         var name by remember { mutableStateOf("") }
         if (isChangeNameConfirmed) {
@@ -304,6 +309,7 @@ class NewUserSettingsActivity : AppCompatActivity() {
                 FirebaseUtils.updateDisplayNameOnFirestore(it.first, it.second, {}, {})
             }
             isChangeNameConfirmed = false
+            mainViewModel.setDisplayName(firebaseUser?.displayName)
             onDismissRequest()
         }
         AlertDialog(

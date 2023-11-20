@@ -561,6 +561,8 @@ class NewMainActivity : ComponentActivity() {
         val currentUser = FirebaseUtils.getCurrentUser()
         val activity = Activity()
         val context = LocalContext.current
+        val displayName by viewModel.displayName.observeAsState(currentUser?.displayName)
+        viewModel.setDisplayName(currentUser?.displayName)
         var signOutRequest by remember { mutableStateOf(false) }
         if (signOutRequest) {
             FreeVicesTheme {
@@ -587,7 +589,7 @@ class NewMainActivity : ComponentActivity() {
             Divider()
             Spacer(modifier = Modifier.padding(8.dp))
             Text(
-                stringResource(R.string.account, currentUser?.displayName ?: stringResource(R.string.error_no_user)),
+                stringResource(R.string.account, displayName ?: stringResource(R.string.error_no_user)),
                 modifier = Modifier.padding(24.dp),
                 style = MaterialTheme.typography.titleLarge
             )
