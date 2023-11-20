@@ -102,9 +102,9 @@
     <string name="show_password">Show password</string>
     <string name="hide_password">Hide password</string>
     <string name="sign_up">Sign Up</string>
-    <string name="your_spending_in_the_last_week_is">\nYour spending in the last week is: $%1$s\n</string>
-    <string name="your_spending_in_the_last_2_weeks_is">\nYour spending in the last 2 weeks is: $%1$s\n</string>
-    <string name="your_spending_in_the_last_month_is">\nYour spending in the last month is: $%1$s\n</string>
+    <string name="your_spending_in_the_last_week_is">Your spending in the last week is:\n$%1$s</string>
+    <string name="your_spending_in_the_last_2_weeks_is">Your spending in the last 2 weeks is:\n$%1$s</string>
+    <string name="your_spending_in_the_last_month_is">Your spending in the last month is:\n\n$%1$s</string>
     <string name="this_could_be_savings_for_your_vacation_or_to_fulfill_that_dream_you_have_pending">" This could be savings for your vacation or to fulfill that dream you have pending. "</string>
     <string name="close">Close</string>
     <string name="add_expense_button">Add expense button</string>

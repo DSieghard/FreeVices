@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -116,6 +117,7 @@ class NewMainActivity : ComponentActivity() {
     fun NewMainScreen() {
         val context = LocalContext.current
         val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+        val scaffoldScope = rememberCoroutineScope()
         val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
         val tobaccoData by viewModel.tobaccoLiveData.observeAsState(initial = 0f)
         val alcoholData by viewModel.alcoholLiveData.observeAsState(initial = 0f)
@@ -149,7 +151,7 @@ class NewMainActivity : ComponentActivity() {
                         scrollBehavior = scrollBehavior,
                         navigationIcon = {
                             IconButton(onClick = {
-                                scope.launch {
+                                scaffoldScope.launch {
                                     drawerState.apply {
                                         if (isClosed) open() else close()
                                     }
@@ -737,6 +739,36 @@ class NewMainActivity : ComponentActivity() {
     }
 
     @Composable
+    fun DetailCardForCategory(
+        text: Int,
+        value: Int
+    ) {
+        ElevatedCard(
+            modifier = Modifier
+                .padding(4.dp, 24.dp)
+                .width(240.dp)
+                .height(120.dp),
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.tertiary
+            )
+        ) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = stringResource(text, value),
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(12.dp),
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+    }
+
+    @Composable
     fun ElevatedCardForCategory(
         onDismissRequest: () -> Unit,
         weekValue: Int,
@@ -747,74 +779,37 @@ class NewMainActivity : ComponentActivity() {
             modifier = Modifier.padding(8.dp),
             shape = RoundedCornerShape(16.dp)
         ) {
-            Column(
-                modifier = Modifier.padding(16.dp),
+            LazyColumn(
+                modifier = Modifier.padding(4.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
             ) {
-                Spacer(modifier = Modifier.padding(24.dp))
-                Card(
-                    modifier = Modifier.padding(8.dp),
-                    shape = RoundedCornerShape(24.dp)
-                ) {
-                    Text(
-                        text = stringResource(
-                            R.string.your_spending_in_the_last_week_is,
-                            weekValue
-                        ),
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(8.dp)
-                    )
+                item {DetailCardForCategory(R.string.your_spending_in_the_last_week_is, weekValue)}
+                item {DetailCardForCategory(R.string.your_spending_in_the_last_2_weeks_is, twoWeekValue)}
+                item {DetailCardForCategory(R.string.your_spending_in_the_last_month_is, thirtyDaysValue)}
+                item {
+                    ElevatedCard(
+                        modifier = Modifier.padding(8.dp),
+                        shape = RoundedCornerShape(24.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.this_could_be_savings_for_your_vacation_or_to_fulfill_that_dream_you_have_pending),
+                            textAlign = TextAlign.Center,
+                            style = MaterialTheme.typography.titleLarge,
+                            modifier = Modifier.padding(8.dp)
+                        )
+                    }
                 }
-                Spacer(modifier = Modifier.padding(16.dp))
-                Card(
-                    modifier = Modifier.padding(8.dp),
-                    shape = RoundedCornerShape(24.dp)
-                ) {
-                    Text(
-                        text = stringResource(
-                            R.string.your_spending_in_the_last_2_weeks_is,
-                            twoWeekValue
-                        ),
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(8.dp)
-                    )
-                }
-                Spacer(modifier = Modifier.padding(16.dp))
-                Card(
-                    modifier = Modifier.padding(8.dp),
-                    shape = RoundedCornerShape(24.dp)
-                ) {
-                    Text(
-                        text = stringResource(
-                            R.string.your_spending_in_the_last_month_is,
-                            thirtyDaysValue
-                        ),
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(8.dp)
-                    )
-                }
-
-                Spacer(modifier = Modifier.padding(32.dp))
-                Card(
-                    modifier = Modifier.padding(8.dp),
-                    shape = RoundedCornerShape(24.dp)
-                ) {
-                    Text(
-                        text = stringResource(R.string.this_could_be_savings_for_your_vacation_or_to_fulfill_that_dream_you_have_pending),
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(8.dp)
-                    )
-                }
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 24.dp, start = 24.dp, end = 24.dp, bottom = 24.dp),
-                    horizontalArrangement = Arrangement.End,
-                    verticalAlignment = Alignment.Bottom
-                ) {
-                    OutlinedButton(onClick = { onDismissRequest() }) {
-                        Text(text = stringResource(R.string.close))
+                item {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 24.dp, start = 24.dp, end = 24.dp, bottom = 24.dp),
+                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.Bottom
+                    ) {
+                        OutlinedButton(onClick = { onDismissRequest() }) {
+                            Text(text = stringResource(R.string.close))
+                        }
                     }
                 }
             }

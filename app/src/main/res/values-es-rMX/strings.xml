@@ -99,9 +99,9 @@
     <string name="show_password">Mostrar contraseña</string>
     <string name="hide_password">Ocultar contraseña</string>
     <string name="sign_up">Crear cuenta</string>
-    <string name="your_spending_in_the_last_week_is">"\nTu gasto en la última semana es: $%1$s\n"</string>
-    <string name="your_spending_in_the_last_2_weeks_is">"\nTu gasto en las últimas 2 semanas es: $%1$s\n"</string>
-    <string name="your_spending_in_the_last_month_is">"\nTu gasto en el último mes es: $%1$s\n"</string>
+    <string name="your_spending_in_the_last_week_is">"Tu gasto en la última semana es:\n$%1$s"</string>
+    <string name="your_spending_in_the_last_2_weeks_is">"Tu gasto en las últimas 2 semanas es:\n$%1$s"</string>
+    <string name="your_spending_in_the_last_month_is">"Tu gasto en el último mes es:\n\n$%1$s"</string>
     <string name="this_could_be_savings_for_your_vacation_or_to_fulfill_that_dream_you_have_pending">"\nEsto podría ser ahorro para esas vacaciones o cumplir el sueño que tienes pendiente.\n"</string>
     <string name="close">Cerrar</string>
     <string name="add_expense_button">Botón añadir gasto</string>
