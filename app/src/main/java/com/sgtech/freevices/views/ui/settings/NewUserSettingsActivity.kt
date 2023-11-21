@@ -1,6 +1,5 @@
 package com.sgtech.freevices.views.ui.settings
 
-import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.SystemBarStyle
@@ -9,29 +8,35 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.filled.AlternateEmail
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.HelpOutline
 import androidx.compose.material.icons.filled.Password
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -53,12 +58,14 @@ import com.sgtech.freevices.R
 import com.sgtech.freevices.utils.FirebaseUtils
 import com.sgtech.freevices.views.ui.HelpDialog
 import com.sgtech.freevices.views.ui.LoginActivity
+import com.sgtech.freevices.views.ui.NewMainActivity
 import com.sgtech.freevices.views.ui.ViewModelProvider
 import com.sgtech.freevices.views.ui.theme.FreeVicesTheme
 import kotlinx.coroutines.launch
 
 class NewUserSettingsActivity : AppCompatActivity() {
     private val themeViewModel = ViewModelProvider.provideThemeViewModel()
+    private val mainViewModel = ViewModelProvider.provideMainViewModel()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -81,15 +88,14 @@ class NewUserSettingsActivity : AppCompatActivity() {
         }
     }
 
-
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun UserSettingsView(scope: LifecycleCoroutineScope) {
-        val activity = Activity()
-        var isHelpOpen by rememberSaveable { mutableStateOf(false) }
-        if (isHelpOpen) {
+        val context = LocalContext.current
+        var isHelpPressed by rememberSaveable { mutableStateOf(false) }
+        if (isHelpPressed) {
             HelpDialog(
-                onDismissRequest = { isHelpOpen = false },
+                onDismissRequest = { isHelpPressed = false },
                 text = LocalContext.current.getString(R.string.user_settings_help)
             )
         }
@@ -125,22 +131,36 @@ class NewUserSettingsActivity : AppCompatActivity() {
                     navigationIcon = {
                         IconButton(onClick = {
                             scope.launch {
-                                activity.finish()
+                                val intent = Intent(context, NewMainActivity::class.java).apply {
+                                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                                }
+                                startActivity(intent)
                             }
                         }) {
-                            Icon(Icons.Default.ArrowBack, contentDescription = null)
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = getString(R.string.back))
                         }
                     },
                     actions = {
-                        IconButton(onClick = {
-                            isHelpOpen = true
-                        }) {
-                            Icon(
-                                imageVector = Icons.Filled.HelpOutline,
-                                contentDescription = null
-                            )
+                        TooltipBox(
+                            positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+                            tooltip = {
+                                PlainTooltip {
+                                    Text(stringResource(R.string.about_help))
+                                }
+                            },
+                            state = rememberTooltipState()
+                        ) {
+                            IconButton(
+                                onClick = { isHelpPressed = true }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.HelpOutline,
+                                    contentDescription = getString(R.string.help)
+                                )
+                            }
                         }
-                    })
+                    }
+                )
             }
         ) {
             Column(modifier = Modifier.padding(it)) {
@@ -149,46 +169,54 @@ class NewUserSettingsActivity : AppCompatActivity() {
                     icon = {
                         Icon(
                             imageVector = Icons.Filled.Person,
-                            contentDescription = null
+                            contentDescription = getString(R.string.change_display_name)
                         )
                     },
                     onClick = {
                         isChangeNameSelected = true
-                    })
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                        .height(64.dp))
                 SettingsMenuLink(title = { Text(text = stringResource(R.string.change_password)) },
                     subtitle = { Text(text = stringResource(R.string.require_your_current_password)) },
                     icon = {
                         Icon(
                             imageVector = Icons.Filled.Password,
-                            contentDescription = null
+                            contentDescription = getString(R.string.change_password)
                         )
                     },
                     onClick = {
                         isChangePasswordSelected = true
-                    })
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                        .height(64.dp))
                 SettingsMenuLink(title = { Text(text = stringResource(R.string.change_email_address)) },
                     subtitle = { Text(text = stringResource(R.string.update_your_email_address_require_your_current_password)) },
                     icon = {
                         Icon(
                             imageVector = Icons.Filled.AlternateEmail,
-                            contentDescription = null
+                            contentDescription = getString(R.string.change_email_address)
                         )
                     },
                     onClick = {
                         isChangeEmailSelected = true
-                    })
-                Divider(modifier = Modifier.padding(16.dp))
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                        .height(80.dp))
+                HorizontalDivider(modifier = Modifier.padding(16.dp))
                 SettingsMenuLink(title = { Text(text = stringResource(R.string.delete_account)) },
                     subtitle = { Text(text = stringResource(R.string.delete_your_account_and_all_associated_data_this_cannot_be_undone)) },
                     icon = {
                         Icon(
                             imageVector = Icons.Filled.Delete,
-                            contentDescription = null
+                            contentDescription = getString(R.string.delete)
                         )
                     },
                     onClick = {
                         isDeleteAccountSelected = true
-                    })
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                        .height(80.dp))
             }
         }
     }
@@ -263,7 +291,7 @@ class NewUserSettingsActivity : AppCompatActivity() {
             onDismissRequest = {
                 onDismissRequest()
             },
-            icon = { Icon(Icons.Filled.Delete, contentDescription = null) },
+            icon = { Icon(Icons.Filled.Delete, contentDescription = getString(R.string.delete)) },
             title = {
                 Text(text = stringResource(R.string.delete_account))
             },
@@ -296,6 +324,7 @@ class NewUserSettingsActivity : AppCompatActivity() {
 
     @Composable
     fun ChangeNameDialog(onDismissRequest: () -> Unit) {
+        val firebaseUser = FirebaseUtils.getCurrentUser()
         var isChangeNameConfirmed by rememberSaveable { mutableStateOf(false) }
         var name by remember { mutableStateOf("") }
         if (isChangeNameConfirmed) {
@@ -304,13 +333,14 @@ class NewUserSettingsActivity : AppCompatActivity() {
                 FirebaseUtils.updateDisplayNameOnFirestore(it.first, it.second, {}, {})
             }
             isChangeNameConfirmed = false
+            mainViewModel.setDisplayName(firebaseUser?.displayName)
             onDismissRequest()
         }
         AlertDialog(
             onDismissRequest = {
                 onDismissRequest()
             },
-            icon = { Icon(Icons.Filled.Person, contentDescription = null) },
+            icon = { Icon(Icons.Filled.Person, contentDescription = getString(R.string.change_display_name)) },
             title = {
                 Text(text = stringResource(R.string.change_display_name))
             },
@@ -373,7 +403,7 @@ class NewUserSettingsActivity : AppCompatActivity() {
             onDismissRequest = {
                 onDismissRequest()
             },
-            icon = { Icon(Icons.Filled.Password, contentDescription = null) },
+            icon = { Icon(Icons.Filled.Password, contentDescription = getString(R.string.change_password)) },
             title = {
                 Text(text = stringResource(R.string.change_password))
             },
@@ -452,7 +482,7 @@ class NewUserSettingsActivity : AppCompatActivity() {
             onDismissRequest = {
                 onDismissRequest()
             },
-            icon = { Icon(Icons.Filled.Email, contentDescription = null) },
+            icon = { Icon(Icons.Filled.Email, contentDescription = getString(R.string.change_email_address)) },
             title = {
                 Text(text = stringResource(R.string.change_email_address))
             },

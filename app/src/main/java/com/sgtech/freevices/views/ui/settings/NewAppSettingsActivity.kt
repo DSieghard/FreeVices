@@ -1,7 +1,6 @@
 package com.sgtech.freevices.views.ui.settings
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
@@ -13,28 +12,35 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.filled.ColorLens
-import androidx.compose.material.icons.filled.HelpOutline
 import androidx.compose.material.icons.filled.Mail
 import androidx.compose.material.icons.filled.Reviews
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MediumTopAppBar
+import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -48,6 +54,7 @@ import com.sgtech.freevices.R
 import com.sgtech.freevices.views.ui.HelpDialog
 import com.sgtech.freevices.views.ui.ViewModelProvider
 import com.sgtech.freevices.views.ui.theme.FreeVicesTheme
+import kotlinx.coroutines.launch
 
 class NewAppSettingsActivity : AppCompatActivity() {
     private val themeViewModel = ViewModelProvider.provideThemeViewModel()
@@ -78,7 +85,7 @@ class NewAppSettingsActivity : AppCompatActivity() {
     fun AppSettingsView() {
         val state = rememberBooleanSettingState(defaultValue = themeViewModel.isDynamicColor.value)
         val snackbarHostState = remember { SnackbarHostState() }
-        val activity = Activity()
+        val scope = rememberCoroutineScope()
         val context = LocalContext.current
         val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
         var isHelpPressed by remember { mutableStateOf(false) }
@@ -102,18 +109,34 @@ class NewAppSettingsActivity : AppCompatActivity() {
                     scrollBehavior = scrollBehavior,
                     navigationIcon = {
                         IconButton(onClick = {
-                            activity.finish()
+                            scope.launch{
+                                finish()
+                            }
                         }) {
-                            Icon(Icons.Default.ArrowBack, contentDescription = null)
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = getString(R.string.back))
                         }
                     },
                     actions = {
-                        IconButton(onClick = {
-                            isHelpPressed = true
-                        }) {
-                            Icon(imageVector = Icons.Filled.HelpOutline, contentDescription = null)
+                        TooltipBox(
+                            positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+                            tooltip = {
+                                PlainTooltip {
+                                    Text(stringResource(R.string.about_help))
+                                }
+                            },
+                            state = rememberTooltipState()
+                        ) {
+                            IconButton(
+                                onClick = { isHelpPressed = true }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.HelpOutline,
+                                    contentDescription = getString(R.string.help)
+                                )
+                            }
                         }
-                    })
+                    }
+                )
             },
             snackbarHost = {
                 SnackbarHost(hostState = snackbarHostState)
@@ -123,28 +146,37 @@ class NewAppSettingsActivity : AppCompatActivity() {
                     SettingsSwitch(
                         title = { Text(text = stringResource(R.string.use_dynamic_colors)) },
                         subtitle = { Text(text = stringResource(R.string.change_the_theme_based_on_your_wallpaper)) },
-                        icon = { Icon(imageVector = Icons.Filled.ColorLens, contentDescription = null) },
+                        icon = { Icon(imageVector = Icons.Filled.ColorLens, contentDescription = getString(R.string.use_dynamic_colors)) },
                         enabled = true,
-                        state = state
+                        state = state,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(64.dp)
                     )
-                    Divider(modifier = Modifier.padding(16.dp))
+                    HorizontalDivider(modifier = Modifier.padding(16.dp))
                     SettingsMenuLink(title = { Text(text = stringResource(R.string.write_a_review)) },
                         subtitle = { Text(text = stringResource(R.string.tell_us_what_you_think)) },
                         icon = {
                             Icon(
                                 imageVector = Icons.Filled.Reviews,
-                                contentDescription = null
+                                contentDescription = getString(R.string.write_a_review)
                             )
                         },
                         onClick = {
                             openPlayStoreForRating(context)
-                        })
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(64.dp))
                     SettingsMenuLink(title = { Text(text = stringResource(R.string.contact_us)) },
                         subtitle = { Text(text = stringResource(R.string.send_us_an_email)) },
-                        icon = { Icon(imageVector = Icons.Filled.Mail, contentDescription = null) },
+                        icon = { Icon(imageVector = Icons.Filled.Mail, contentDescription = getString(R.string.contact_us)) },
                         onClick = {
                             sendEmail(context)
-                        })
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(64.dp))
                 }
             }
         )

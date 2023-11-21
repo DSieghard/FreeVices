@@ -109,7 +109,13 @@ class NewMainViewModel {
         _partiesSixMonthData.value = dataMap[context.getString(R.string.parties)] ?: 0f
         _othersSixMonthData.value = dataMap[context.getString(R.string.others)] ?: 0f
     }
-    
+
+    private val _displayName = MutableLiveData<String> (null)
+    val displayName: MutableLiveData<String> = _displayName
+
+    fun setDisplayName(name: String?) {
+        _displayName.value = name!!
+    }
 }
 
 object ViewModelProvider {

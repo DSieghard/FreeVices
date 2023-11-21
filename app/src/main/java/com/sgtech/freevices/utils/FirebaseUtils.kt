@@ -325,36 +325,30 @@ object FirebaseUtils {
         val db = FirebaseFirestore.getInstance()
         val currentUser = FirebaseAuth.getInstance().currentUser
         val userId = currentUser?.uid ?: return
-
-        val calendar = Calendar.getInstance()
-        calendar.add(Calendar.DAY_OF_MONTH, -days)
-        val currentDate = calendar.time
         val dateFormat = SimpleDateFormat(DATE_FORMAT, Locale.getDefault())
-
+        val currentDate = Calendar.getInstance().time
         val batch = db.batch()
+        val calendar = Calendar.getInstance()
 
-        val categories = listOf(
-            TOBACCO,
-            ALCOHOL,
-            PARTIES,
-            OTHERS
-        )
+        for (day in 0 until days) {
+            calendar.time = currentDate
+            calendar.add(Calendar.DAY_OF_MONTH, -day)
+            val dateToDelete = dateFormat.format(calendar.time)
 
-        for (category in categories) {
-            val categoryCollection = db.collection(USERS).document(userId)
-                .collection(CATEGORIES).document(category).collection(DATA)
+            val categories = listOf(
+                TOBACCO,
+                ALCOHOL,
+                PARTIES,
+                OTHERS
+            )
 
-            categoryCollection
-                .whereGreaterThanOrEqualTo(DATE, dateFormat.format(currentDate))
-                .get()
-                .addOnSuccessListener { documents ->
-                    for (document in documents) {
-                        batch.delete(document.reference)
-                    }
-                }
-                .addOnFailureListener { e ->
-                    onFailure(e)
-                }
+            for (category in categories) {
+                val documentRef = db.collection(USERS).document(userId)
+                    .collection(CATEGORIES).document(category)
+                    .collection(DATA).document(dateToDelete)
+
+                batch.delete(documentRef)
+            }
         }
 
         batch.commit()
@@ -364,6 +358,7 @@ object FirebaseUtils {
             .addOnFailureListener { e ->
                 onFailure(e)
             }
+
     }
 
     fun resetPasswordRequest(email: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
@@ -378,6 +373,33 @@ object FirebaseUtils {
             }
     }
 
+    fun deleteCategory(category: String, timePeriod: Int, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+        val db = FirebaseFirestore.getInstance()
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        val userId = currentUser?.uid ?: return
+
+        val calendar = Calendar.getInstance()
+        val dateFormat = SimpleDateFormat(DATE_FORMAT, Locale.getDefault())
+
+        for (day in 0 until timePeriod) {
+            calendar.time = Date()
+            calendar.add(Calendar.DAY_OF_MONTH, -day)
+            val dateToDelete = dateFormat.format(calendar.time)
+
+            val documentRef = db.collection(USERS).document(userId)
+                .collection(CATEGORIES).document(category)
+                .collection(DATA).document(dateToDelete)
+
+            documentRef.delete()
+                .addOnSuccessListener {
+                    onSuccess()
+                }
+                .addOnFailureListener { e ->
+                    onFailure(e)
+                }
+        }
+    }
+
     private const val DATA = "data"
     private const val TOBACCO = "tobacco"
     private const val ALCOHOL = "alcohol"
@@ -390,6 +412,4 @@ object FirebaseUtils {
     private const val LAST_NAME = "lastName"
     private const val EMAIL = "email"
     private const val USERS = "users"
-    private const val DATE = "date"
-
 }

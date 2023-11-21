@@ -17,26 +17,27 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.HelpOutline
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.HelpOutline
 import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -46,14 +47,18 @@ import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -91,10 +96,11 @@ class NewMainActivity : ComponentActivity() {
     private val themeViewModel = ViewModelProvider.provideThemeViewModel()
     private val snackbarHostState = SnackbarHostState()
     private val scope = CoroutineScope(Dispatchers.Main)
-    private var isLoading: Boolean = false
+    private var isLoading by mutableStateOf(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        dataHandlerForActivity(onStart = { isLoading = true }, onSuccess = { isLoading = false }, onFailure = { isLoading = false })
 
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.light(Color.Transparent.hashCode(), Color.Transparent.hashCode()),
@@ -104,6 +110,9 @@ class NewMainActivity : ComponentActivity() {
         setContent {
             FreeVicesTheme(useDynamicColors = themeViewModel.isDynamicColor.value) {
                 NewMainScreen()
+                if (isLoading){
+                    DialogForLoad { }
+                }
             }
         }
     }
@@ -112,21 +121,17 @@ class NewMainActivity : ComponentActivity() {
     fun NewMainScreen() {
         val context = LocalContext.current
         val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-        val scope = rememberCoroutineScope()
+        val scaffoldScope = rememberCoroutineScope()
         val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
         val tobaccoData by viewModel.tobaccoLiveData.observeAsState(initial = 0f)
         val alcoholData by viewModel.alcoholLiveData.observeAsState(initial = 0f)
         val partiesData by viewModel.partiesLiveData.observeAsState(initial = 0f)
         val othersData by viewModel.othersLiveData.observeAsState(initial = 0f)
         var isDialogOpen by remember { mutableStateOf(false) }
-        var isHelpOpen by remember { mutableStateOf(false) }
+        var isHelpPressed by remember { mutableStateOf(false) }
         val totals = tobaccoData + alcoholData + partiesData + othersData
-        dataHandlerForActivity()
-        if (isLoading){
-            DialogForLoad { }
-        }
-        if(isHelpOpen) {
-            HelpDialog(onDismissRequest = { isHelpOpen = false }, text = stringResource(id = R.string.help_acc))
+        if(isHelpPressed) {
+            HelpDialog(onDismissRequest = { isHelpPressed = false }, text = stringResource(id = R.string.help_acc))
         }
 
         ModalNavigationDrawer(
@@ -150,7 +155,7 @@ class NewMainActivity : ComponentActivity() {
                         scrollBehavior = scrollBehavior,
                         navigationIcon = {
                             IconButton(onClick = {
-                                scope.launch {
+                                scaffoldScope.launch {
                                     drawerState.apply {
                                         if (isClosed) open() else close()
                                     }
@@ -189,14 +194,25 @@ class NewMainActivity : ComponentActivity() {
                                     contentDescription = stringResource(id = R.string.history_acc),
                                 )
                             }
-                            IconButton(onClick = { isHelpOpen = true }
+                            TooltipBox(
+                                positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+                                tooltip = {
+                                    PlainTooltip {
+                                        Text(stringResource(R.string.about_help))
+                                    }
+                                },
+                                state = rememberTooltipState()
                             ) {
-                                Icon(
-                                    imageVector = Icons.Filled.HelpOutline,
-                                    contentDescription = stringResource(id = R.string.help_content),
-                                )
+                                IconButton(onClick = { isHelpPressed = true }
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Filled.HelpOutline,
+                                        contentDescription = stringResource(id = R.string.help_content),
+                                    )
+                                }
                             }
-                        })
+                        }
+                    )
                 },
                 snackbarHost = { SnackbarHost(snackbarHostState) },
                 content = { padding ->
@@ -209,11 +225,11 @@ class NewMainActivity : ComponentActivity() {
                     ) {
                         item {
                             CategoryCard(tobaccoData.toInt(), stringResource(R.string.tobacco))
-                            Spacer(modifier = Modifier.padding(16.dp))
+                            Spacer(modifier = Modifier.padding(20.dp))
                             CategoryCard(alcoholData.toInt(), stringResource(R.string.alcohol))
-                            Spacer(modifier = Modifier.padding(16.dp))
+                            Spacer(modifier = Modifier.padding(20.dp))
                             CategoryCard(partiesData.toInt(), stringResource(R.string.parties))
-                            Spacer(modifier = Modifier.padding(16.dp))
+                            Spacer(modifier = Modifier.padding(20.dp))
                             CategoryCard(othersData.toInt(), stringResource(R.string.others))
                         }
                     }
@@ -242,23 +258,24 @@ class NewMainActivity : ComponentActivity() {
         }
     }
 
-    private fun dataHandlerForActivity() {
-        isLoading = true
-
+    private fun dataHandlerForActivity(onStart: () -> Unit, onSuccess: () -> Unit = {}, onFailure: () -> Unit = {}) {
+        onStart()
         FirebaseUtils.dataHandler(
             context = applicationContext,
             days = SEVEN_DAYS,
             onSuccess = { data ->
                 viewModel.updateLiveDataValues(this, data)
+                onSuccess()
             },
             onFailure = {
-                isLoading = false
                 scope.launch{
                     snackbarHostState.showSnackbar(
                         message = applicationContext.getString(R.string.error_updating_data),
-                        duration = SnackbarDuration.Short
+                        duration = SnackbarDuration.Short,
+                        withDismissAction = true
                     )
                 }
+                onFailure()
             }
         )
 
@@ -267,15 +284,17 @@ class NewMainActivity : ComponentActivity() {
             days = FOURTEEN_DAYS,
             onSuccess = { data ->
                 viewModel.updateTwoWeekLiveDataValues(this, data)
+                onSuccess()
             },
             onFailure = {
-                isLoading = false
                 scope.launch{
                     snackbarHostState.showSnackbar(
                         message = applicationContext.getString(R.string.error_updating_data),
-                        duration = SnackbarDuration.Short
+                        duration = SnackbarDuration.Short,
+                        withDismissAction = true
                     )
                 }
+                onFailure()
             }
         )
 
@@ -284,21 +303,21 @@ class NewMainActivity : ComponentActivity() {
             days = THIRTY_DAYS,
             onSuccess = { data ->
                 viewModel.updateThirtyDaysLiveDataValues(this, data)
+                onSuccess()
             },
             onFailure = {
-                isLoading = false
                 scope.launch{
                     snackbarHostState.showSnackbar(
                         message = applicationContext.getString(R.string.error_updating_data),
-                        duration = SnackbarDuration.Short
+                        duration = SnackbarDuration.Short,
+                        withDismissAction = true
                     )
                 }
+                onFailure()
             }
         )
-        isLoading = false
     }
 
-    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun CategoryCard(value: Int, category: String){
         var isDialogOpen by remember { mutableStateOf(false) }
@@ -461,7 +480,6 @@ class NewMainActivity : ComponentActivity() {
         val viewModel = ViewModelProvider.provideMainViewModel()
         var expenseAmount by remember { mutableIntStateOf(ZERO) }
         val context = LocalContext.current
-        val coroutineScope = rememberCoroutineScope()
 
         Dialog(
             onDismissRequest = onCancel
@@ -499,6 +517,7 @@ class NewMainActivity : ComponentActivity() {
                         Spacer(modifier = Modifier.padding(12.dp))
 
                         Button(onClick = {
+                            isLoading = true
                             FirebaseUtils.addDataToCategory(
                                 context = context,
                                 category = category,
@@ -509,30 +528,35 @@ class NewMainActivity : ComponentActivity() {
                                         days = SEVEN_DAYS,
                                         onSuccess = { data ->
                                             viewModel.updateLiveDataValues(context, data)
-                                            coroutineScope.launch {
+                                            scope.launch {
                                                 snackbarHostState.showSnackbar(
                                                     message = context.getString(R.string.data_updated_successfully),
-                                                    duration = SnackbarDuration.Short
+                                                    duration = SnackbarDuration.Short,
+                                                    withDismissAction = true
                                                 )
                                             }
+                                            isLoading = false
                                         },
                                         onFailure = {
-                                            coroutineScope.launch {
+                                            scope.launch {
                                                 snackbarHostState.showSnackbar(
                                                     message = context.getString(R.string.error_updating_data),
-                                                    duration = SnackbarDuration.Short
+                                                    duration = SnackbarDuration.Short,
+                                                    withDismissAction = true
                                                 )
                                             }
                                         }
                                     )
                                 },
                                 onFailure = {
-                                    coroutineScope.launch {
+                                    scope.launch {
                                         snackbarHostState.showSnackbar(
                                             message = context.getString(R.string.error_updating_data),
-                                            duration = SnackbarDuration.Short
+                                            duration = SnackbarDuration.Short,
+                                            withDismissAction = true
                                         )
                                     }
+                                    isLoading = false
                                 }
                             )
                             onCancel()
@@ -551,6 +575,8 @@ class NewMainActivity : ComponentActivity() {
         val currentUser = FirebaseUtils.getCurrentUser()
         val activity = Activity()
         val context = LocalContext.current
+        val displayName by viewModel.displayName.observeAsState(currentUser?.displayName)
+        viewModel.setDisplayName(currentUser?.displayName)
         var signOutRequest by remember { mutableStateOf(false) }
         if (signOutRequest) {
             FreeVicesTheme {
@@ -574,15 +600,15 @@ class NewMainActivity : ComponentActivity() {
                 modifier = Modifier.padding(24.dp, 12.dp, 24.dp, 16.dp),
                 style = MaterialTheme.typography.titleMedium
             )
-            Divider()
+            HorizontalDivider()
             Spacer(modifier = Modifier.padding(8.dp))
             Text(
-                stringResource(R.string.account, currentUser?.displayName ?: stringResource(R.string.error_no_user)),
+                stringResource(R.string.account, displayName ?: stringResource(R.string.error_no_user)),
                 modifier = Modifier.padding(24.dp),
                 style = MaterialTheme.typography.titleLarge
             )
             Spacer(modifier = Modifier.padding(8.dp))
-            Divider()
+            HorizontalDivider()
             Spacer(modifier = Modifier.padding(8.dp))
 
             NavigationDrawerItem(
@@ -599,7 +625,7 @@ class NewMainActivity : ComponentActivity() {
                 verticalAlignment = Alignment.Bottom) {
                 NavigationDrawerItem(
                     label = { Text(text = stringResource(R.string.sign_out)) },
-                    icon = { Icon(Icons.Filled.Logout, contentDescription = stringResource(R.string.logout_acc)) },
+                    icon = { Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = stringResource(R.string.logout_acc)) },
                     selected = false,
                     onClick = { signOutRequest = true }
                 )
@@ -644,6 +670,7 @@ class NewMainActivity : ComponentActivity() {
                     verticalAlignment = Alignment.Bottom
                 ) {
                     Button(onClick = {
+                        isLoading = true
                         FirebaseUtils.signOut(onSuccess = {
                             val intent = Intent(context, LoginActivity::class.java)
                             context.startActivity(intent)
@@ -653,12 +680,14 @@ class NewMainActivity : ComponentActivity() {
                                 scope.launch {
                                     snackbarHostState.showSnackbar(
                                         message = context.getString(R.string.error_signing_out),
-                                        duration = SnackbarDuration.Short
+                                        duration = SnackbarDuration.Short,
+                                        withDismissAction = true
                                     )
                                 }
                             })
                         onSignOutConfirmed()
                         onDismissRequest()
+                        isLoading = false
                     }) {
                         Text(text = stringResource(R.string.yes), color = MaterialTheme.colorScheme.onTertiary)
                     }
@@ -726,6 +755,36 @@ class NewMainActivity : ComponentActivity() {
     }
 
     @Composable
+    fun DetailCardForCategory(
+        text: Int,
+        value: Int
+    ) {
+        ElevatedCard(
+            modifier = Modifier
+                .padding(4.dp, 24.dp)
+                .width(240.dp)
+                .height(120.dp),
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.tertiary
+            )
+        ) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = stringResource(text, value),
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(12.dp),
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+    }
+
+    @Composable
     fun ElevatedCardForCategory(
         onDismissRequest: () -> Unit,
         weekValue: Int,
@@ -736,74 +795,37 @@ class NewMainActivity : ComponentActivity() {
             modifier = Modifier.padding(8.dp),
             shape = RoundedCornerShape(16.dp)
         ) {
-            Column(
-                modifier = Modifier.padding(16.dp),
+            LazyColumn(
+                modifier = Modifier.padding(4.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
             ) {
-                Spacer(modifier = Modifier.padding(24.dp))
-                Card(
-                    modifier = Modifier.padding(8.dp),
-                    shape = RoundedCornerShape(24.dp)
-                ) {
-                    Text(
-                        text = stringResource(
-                            R.string.your_spending_in_the_last_week_is,
-                            weekValue
-                        ),
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(8.dp)
-                    )
+                item {DetailCardForCategory(R.string.your_spending_in_the_last_week_is, weekValue)}
+                item {DetailCardForCategory(R.string.your_spending_in_the_last_2_weeks_is, twoWeekValue)}
+                item {DetailCardForCategory(R.string.your_spending_in_the_last_month_is, thirtyDaysValue)}
+                item {
+                    ElevatedCard(
+                        modifier = Modifier.padding(8.dp),
+                        shape = RoundedCornerShape(24.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.this_could_be_savings_for_your_vacation_or_to_fulfill_that_dream_you_have_pending),
+                            textAlign = TextAlign.Center,
+                            style = MaterialTheme.typography.titleLarge,
+                            modifier = Modifier.padding(8.dp)
+                        )
+                    }
                 }
-                Spacer(modifier = Modifier.padding(16.dp))
-                Card(
-                    modifier = Modifier.padding(8.dp),
-                    shape = RoundedCornerShape(24.dp)
-                ) {
-                    Text(
-                        text = stringResource(
-                            R.string.your_spending_in_the_last_2_weeks_is,
-                            twoWeekValue
-                        ),
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(8.dp)
-                    )
-                }
-                Spacer(modifier = Modifier.padding(16.dp))
-                Card(
-                    modifier = Modifier.padding(8.dp),
-                    shape = RoundedCornerShape(24.dp)
-                ) {
-                    Text(
-                        text = stringResource(
-                            R.string.your_spending_in_the_last_month_is,
-                            thirtyDaysValue
-                        ),
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(8.dp)
-                    )
-                }
-
-                Spacer(modifier = Modifier.padding(32.dp))
-                Card(
-                    modifier = Modifier.padding(8.dp),
-                    shape = RoundedCornerShape(24.dp)
-                ) {
-                    Text(
-                        text = stringResource(R.string.this_could_be_savings_for_your_vacation_or_to_fulfill_that_dream_you_have_pending),
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(8.dp)
-                    )
-                }
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 24.dp, start = 24.dp, end = 24.dp, bottom = 24.dp),
-                    horizontalArrangement = Arrangement.End,
-                    verticalAlignment = Alignment.Bottom
-                ) {
-                    OutlinedButton(onClick = { onDismissRequest() }) {
-                        Text(text = stringResource(R.string.close))
+                item {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 24.dp, start = 24.dp, end = 24.dp, bottom = 24.dp),
+                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.Bottom
+                    ) {
+                        OutlinedButton(onClick = { onDismissRequest() }) {
+                            Text(text = stringResource(R.string.close))
+                        }
                     }
                 }
             }

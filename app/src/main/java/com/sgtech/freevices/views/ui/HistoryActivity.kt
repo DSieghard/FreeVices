@@ -11,8 +11,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.HelpOutline
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
@@ -21,11 +21,15 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -123,10 +127,10 @@ class HistoryActivity : AppCompatActivity() {
         val totalSixtyDays = tobaccoDataSixtyDays + alcoholDataSixtyDays + partiesDataSixtyDays + othersDataSixtyDays
         val totalThreeMonths = tobaccoDataThreeMonths + alcoholDataThreeMonths + partiesDataThreeMonths + othersDataThreeMonths
         val totalSixMonths = tobaccoDataSixMonths + alcoholDataSixMonths + partiesDataSixMonths + othersDataSixMonths
-        var isHelpOpen by rememberSaveable { mutableStateOf(false) }
-        if (isHelpOpen) {
+        var isHelpPressed by rememberSaveable { mutableStateOf(false) }
+        if (isHelpPressed) {
             HelpDialog(
-                onDismissRequest = { isHelpOpen = false },
+                onDismissRequest = { isHelpPressed = false },
                 text = stringResource(R.string.help_history_main)
             )
         }
@@ -142,18 +146,30 @@ class HistoryActivity : AppCompatActivity() {
                     navigationIcon = {
                         IconButton(onClick = { scope.launch { finish() } }) 
                         {
-                            Icon(imageVector = Icons.Filled.ArrowBack,
-                                contentDescription = stringResource(R.string.finish_history),)
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = stringResource(R.string.finish_history),
+                            )
                         }
                     },
                     actions = {
-                        IconButton(onClick = {
-                            isHelpOpen = true
-                        }) {
-                            Icon(
-                                imageVector = Icons.Filled.HelpOutline,
-                                contentDescription = stringResource(R.string.history_help_acc),
-                            )
+                        TooltipBox(
+                            positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+                            tooltip = {
+                                PlainTooltip {
+                                    Text(stringResource(R.string.about_help))
+                                }
+                            },
+                            state = rememberTooltipState()
+                        )
+                        { IconButton(onClick = {
+                            isHelpPressed = true
+                            }) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.HelpOutline,
+                                    contentDescription = stringResource(R.string.history_help_acc),
+                                )
+                            }
                         }
                         IconButton(onClick = {
                             scope.launch {
@@ -193,7 +209,6 @@ class HistoryActivity : AppCompatActivity() {
         }
     }
 
-    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun HistoryCard(days: Int, value: Int) {
         var isDialogPressed by rememberSaveable { mutableStateOf(false) }
