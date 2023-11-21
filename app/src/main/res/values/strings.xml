@@ -229,4 +229,6 @@
     <string name="last_7_days">Last 7 days</string>
     <string name="last_14_days">Last 14 days</string>
     <string name="last_30_days">Last 30 days</string>
+    <string name="about_help">About this screen</string>
+    <string name="specific_question">Or you prefer delete a specific category?</string>
 </resources>

@@ -1,6 +1,5 @@
 package com.sgtech.freevices.views.ui.settings
 
-import android.app.Activity
 import android.os.Bundle
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
@@ -10,20 +9,22 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.HelpOutline
 import androidx.compose.material.icons.filled.ManageHistory
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumTopAppBar
+import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
@@ -31,7 +32,10 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -79,7 +83,6 @@ class NewHistorySettingsActivity : AppCompatActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun HistorySettingsView() {
-        val activity = Activity()
         var days by remember { mutableIntStateOf(0) }
         val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
         var isHelpPressed by remember { mutableStateOf(false) }
@@ -117,18 +120,34 @@ class NewHistorySettingsActivity : AppCompatActivity() {
                     scrollBehavior = scrollBehavior,
                     navigationIcon = {
                         IconButton(onClick = {
-                            activity.finish()
+                            scope.launch {
+                                finish()
+                            }
                         }) {
-                            Icon(Icons.Default.ArrowBack, contentDescription = null)
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = getString(R.string.back))
                         }
                     },
                     actions = {
-                        IconButton(onClick = {
-                            isHelpPressed = true
-                        }) {
-                            Icon(imageVector = Icons.Filled.HelpOutline, contentDescription = null)
+                        TooltipBox(
+                            positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+                            tooltip = {
+                                PlainTooltip {
+                                    Text(stringResource(R.string.about_help))
+                                }
+                            },
+                            state = rememberTooltipState()
+                        ) {
+                            IconButton(
+                                onClick = { isHelpPressed = true }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.HelpOutline,
+                                    contentDescription = getString(R.string.help)
+                                )
+                            }
                         }
-                    })
+                    }
+                )
             },
             snackbarHost = {
                 SnackbarHost(hostState = snackbarHostState)
@@ -140,87 +159,106 @@ class NewHistorySettingsActivity : AppCompatActivity() {
                     icon = {
                         Icon(
                             imageVector = Icons.Filled.ManageHistory,
-                            contentDescription = null
+                            contentDescription = getString(R.string.history_acc)
                         )
                     },
                     onClick = {
                         days = SEVEN_DAYS
                         isDeleteButtonPressed = true
-                    })
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(64.dp))
                 SettingsMenuLink(title = { Text(text = stringResource(R.string.clear_last_14_days)) },
                     subtitle = {Text(text = stringResource(R.string.clear_14_days_subtitle))},
                     icon = {
                         Icon(
                             imageVector = Icons.Filled.ManageHistory,
-                            contentDescription = null
+                            contentDescription = getString(R.string.history_acc)
                         )
                     },
                     onClick = {
                         days = FOURTEEN_DAYS
                         isDeleteButtonPressed = true
-                    })
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(64.dp))
                 SettingsMenuLink(title = { Text(text = stringResource(R.string.clear_last_30_days)) },
                     subtitle = { Text(text = stringResource(R.string.delete_last_30_days_from_history_this_action_cannot_be_undone)) },
                     icon = {
                         Icon(
                             imageVector = Icons.Filled.ManageHistory,
-                            contentDescription = null
+                            contentDescription = getString(R.string.history_acc)
                         )
                     },
                     onClick = {
                         days = THIRTY_DAYS
                         isDeleteButtonPressed = true
-                    })
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(64.dp))
                 SettingsMenuLink(title = { Text(text = stringResource(R.string.clear_last_60_days)) },
                     subtitle = { Text(text = stringResource(R.string.delete_last_60_days_from_history_this_action_cannot_be_undone)) },
                     icon = {
                         Icon(
                             imageVector = Icons.Filled.ManageHistory,
-                            contentDescription = null
+                            contentDescription = getString(R.string.history_acc)
                         )
                     },
                     onClick = {
                         days = SIXTY_DAYS
                         isDeleteButtonPressed = true
-                    })
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(64.dp))
                 SettingsMenuLink(title = { Text(text = stringResource(R.string.clear_last_90_days)) },
                     subtitle = { Text(text = stringResource(R.string.delete_last_90_days_from_history_this_action_cannot_be_undone)) },
                     icon = {
                         Icon(
                             imageVector = Icons.Filled.ManageHistory,
-                            contentDescription = null
+                            contentDescription = getString(R.string.history_acc)
                         )
                     },
                     onClick = {
                         days = NINETY_DAYS
                         isDeleteButtonPressed = true
-                    })
-                Divider(modifier = Modifier.padding(16.dp))
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(64.dp))
+                HorizontalDivider(modifier = Modifier.padding(16.dp))
                 SettingsMenuLink(title = { Text(text = stringResource(R.string.clear_all_history)) },
                     subtitle = { Text(text = stringResource(R.string.delete_all_history_this_action_cannot_be_undone)) },
                     icon = {
                         Icon(
                             imageVector = Icons.Filled.ManageHistory,
-                            contentDescription = null
+                            contentDescription = getString(R.string.history_acc)
                         )
                     },
                     onClick = {
                         days = ALL_DAYS
                         isDeleteButtonPressed = true
-                    }
-                )
-                Divider(modifier = Modifier.padding(16.dp))
-                SettingsMenuLink(title = { Text( text = "Or you prefer delete a specific category?") },
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(64.dp))
+                HorizontalDivider(modifier = Modifier.padding(16.dp))
+                SettingsMenuLink(title = { Text( text = stringResource(R.string.specific_question)) },
                     icon = {
                         Icon(
                             imageVector = Icons.Filled.Delete,
-                            contentDescription = null
+                            contentDescription = getString(R.string.delete)
                         )
                     },
                     onClick = {
                         isDeleteAccountSelected = true
-                    }
-                )
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(64.dp))
             }
         }
     }
@@ -251,7 +289,7 @@ class NewHistorySettingsActivity : AppCompatActivity() {
             }
         }
         AlertDialog(onDismissRequest = { onDismissRequest() },
-            icon = { Icon(Icons.Filled.Delete, contentDescription = null) },
+            icon = { Icon(Icons.Filled.Delete, contentDescription = getString(R.string.delete)) },
             title = {
                 Text(text = stringResource(R.string.delete_history))
             },
@@ -297,14 +335,15 @@ class NewHistorySettingsActivity : AppCompatActivity() {
             onDismissRequest = {
                 onDismissRequest()
             },
-            icon = { Icon(Icons.Filled.Delete, contentDescription = null) },
+            icon = { Icon(Icons.Filled.Delete, contentDescription = getString(R.string.delete)) },
             title = { Text(stringResource(R.string.select_category_text)) },
             text = {
                 LazyColumn {
                     item { Row(
-                        modifier = Modifier.clickable {
-                            isCategory = R.string.tobacco.toString()
-                        }
+                        modifier = Modifier
+                            .clickable {
+                                isCategory = R.string.tobacco.toString()
+                            }
                             .fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -319,9 +358,10 @@ class NewHistorySettingsActivity : AppCompatActivity() {
                         )
                     } }
                     item { Row(
-                        modifier = Modifier.clickable {
-                            isCategory = R.string.alcohol.toString()
-                        }
+                        modifier = Modifier
+                            .clickable {
+                                isCategory = R.string.alcohol.toString()
+                            }
                             .fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -331,9 +371,10 @@ class NewHistorySettingsActivity : AppCompatActivity() {
                         )
                     } }
                     item { Row(
-                        modifier = Modifier.clickable {
-                            isCategory = R.string.parties.toString()
-                        }
+                        modifier = Modifier
+                            .clickable {
+                                isCategory = R.string.parties.toString()
+                            }
                             .fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -342,9 +383,10 @@ class NewHistorySettingsActivity : AppCompatActivity() {
                         Text(text = stringResource(R.string.parties))
                     } }
                     item {Row(
-                        modifier = Modifier.clickable {
-                            isCategory = R.string.others.toString()
-                        }
+                        modifier = Modifier
+                            .clickable {
+                                isCategory = R.string.others.toString()
+                            }
                             .fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -387,14 +429,15 @@ class NewHistorySettingsActivity : AppCompatActivity() {
             onDismissRequest = {
                 onDismissRequest()
             },
-            icon = { Icon(Icons.Filled.Delete, contentDescription = null) },
+            icon = { Icon(Icons.Filled.Delete, contentDescription = getString(R.string.delete)) },
             title = { Text(stringResource(R.string.select_time_period)) },
             text = {
                 LazyColumn {
                     item { Row(
-                        modifier = Modifier.clickable {
-                            timePeriod = ZERO
-                        }
+                        modifier = Modifier
+                            .clickable {
+                                timePeriod = ZERO
+                            }
                             .fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -406,9 +449,10 @@ class NewHistorySettingsActivity : AppCompatActivity() {
                         Text(text = stringResource(R.string.today))
                     } }
                     item { Row(
-                        modifier = Modifier.clickable {
-                            timePeriod = SEVEN_DAYS
-                        }
+                        modifier = Modifier
+                            .clickable {
+                                timePeriod = SEVEN_DAYS
+                            }
                             .fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -420,9 +464,10 @@ class NewHistorySettingsActivity : AppCompatActivity() {
                         Text(text = stringResource(R.string.last_7_days))
                     } }
                     item { Row(
-                        modifier = Modifier.clickable {
-                            timePeriod = FOURTEEN_DAYS
-                        }
+                        modifier = Modifier
+                            .clickable {
+                                timePeriod = FOURTEEN_DAYS
+                            }
                             .fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -435,9 +480,10 @@ class NewHistorySettingsActivity : AppCompatActivity() {
                         }
                     }
                     item { Row(
-                        modifier = Modifier.clickable {
-                            timePeriod = THIRTY_DAYS
-                        }
+                        modifier = Modifier
+                            .clickable {
+                                timePeriod = THIRTY_DAYS
+                            }
                             .fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {

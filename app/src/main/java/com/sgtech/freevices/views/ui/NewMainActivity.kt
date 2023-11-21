@@ -22,22 +22,22 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.HelpOutline
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.HelpOutline
 import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -47,14 +47,18 @@ import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -124,10 +128,10 @@ class NewMainActivity : ComponentActivity() {
         val partiesData by viewModel.partiesLiveData.observeAsState(initial = 0f)
         val othersData by viewModel.othersLiveData.observeAsState(initial = 0f)
         var isDialogOpen by remember { mutableStateOf(false) }
-        var isHelpOpen by remember { mutableStateOf(false) }
+        var isHelpPressed by remember { mutableStateOf(false) }
         val totals = tobaccoData + alcoholData + partiesData + othersData
-        if(isHelpOpen) {
-            HelpDialog(onDismissRequest = { isHelpOpen = false }, text = stringResource(id = R.string.help_acc))
+        if(isHelpPressed) {
+            HelpDialog(onDismissRequest = { isHelpPressed = false }, text = stringResource(id = R.string.help_acc))
         }
 
         ModalNavigationDrawer(
@@ -190,14 +194,25 @@ class NewMainActivity : ComponentActivity() {
                                     contentDescription = stringResource(id = R.string.history_acc),
                                 )
                             }
-                            IconButton(onClick = { isHelpOpen = true }
+                            TooltipBox(
+                                positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+                                tooltip = {
+                                    PlainTooltip {
+                                        Text(stringResource(R.string.about_help))
+                                    }
+                                },
+                                state = rememberTooltipState()
                             ) {
-                                Icon(
-                                    imageVector = Icons.Filled.HelpOutline,
-                                    contentDescription = stringResource(id = R.string.help_content),
-                                )
+                                IconButton(onClick = { isHelpPressed = true }
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Filled.HelpOutline,
+                                        contentDescription = stringResource(id = R.string.help_content),
+                                    )
+                                }
                             }
-                        })
+                        }
+                    )
                 },
                 snackbarHost = { SnackbarHost(snackbarHostState) },
                 content = { padding ->
@@ -303,7 +318,6 @@ class NewMainActivity : ComponentActivity() {
         )
     }
 
-    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun CategoryCard(value: Int, category: String){
         var isDialogOpen by remember { mutableStateOf(false) }
@@ -586,7 +600,7 @@ class NewMainActivity : ComponentActivity() {
                 modifier = Modifier.padding(24.dp, 12.dp, 24.dp, 16.dp),
                 style = MaterialTheme.typography.titleMedium
             )
-            Divider()
+            HorizontalDivider()
             Spacer(modifier = Modifier.padding(8.dp))
             Text(
                 stringResource(R.string.account, displayName ?: stringResource(R.string.error_no_user)),
@@ -594,7 +608,7 @@ class NewMainActivity : ComponentActivity() {
                 style = MaterialTheme.typography.titleLarge
             )
             Spacer(modifier = Modifier.padding(8.dp))
-            Divider()
+            HorizontalDivider()
             Spacer(modifier = Modifier.padding(8.dp))
 
             NavigationDrawerItem(
@@ -611,7 +625,7 @@ class NewMainActivity : ComponentActivity() {
                 verticalAlignment = Alignment.Bottom) {
                 NavigationDrawerItem(
                     label = { Text(text = stringResource(R.string.sign_out)) },
-                    icon = { Icon(Icons.Filled.Logout, contentDescription = stringResource(R.string.logout_acc)) },
+                    icon = { Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = stringResource(R.string.logout_acc)) },
                     selected = false,
                     onClick = { signOutRequest = true }
                 )
