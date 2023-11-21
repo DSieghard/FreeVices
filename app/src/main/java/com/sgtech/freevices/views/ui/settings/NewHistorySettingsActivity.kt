@@ -6,8 +6,12 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
@@ -20,6 +24,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumTopAppBar
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -33,22 +38,29 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import com.alorma.compose.settings.ui.SettingsMenuLink
 import com.sgtech.freevices.R
 import com.sgtech.freevices.utils.FirebaseUtils
 import com.sgtech.freevices.views.ui.HelpDialog
 import com.sgtech.freevices.views.ui.ViewModelProvider
 import com.sgtech.freevices.views.ui.theme.FreeVicesTheme
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class NewHistorySettingsActivity : AppCompatActivity() {
     private val themeViewModel = ViewModelProvider.provideThemeViewModel()
+    private val scope = CoroutineScope(Dispatchers.Main)
+    private val snackbarHostState = SnackbarHostState()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -69,13 +81,18 @@ class NewHistorySettingsActivity : AppCompatActivity() {
     fun HistorySettingsView() {
         val activity = Activity()
         var days by remember { mutableIntStateOf(0) }
-        val snackbarHostState = remember { SnackbarHostState() }
         val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
         var isHelpPressed by remember { mutableStateOf(false) }
+        var isDeleteAccountSelected by remember { mutableStateOf(false) }
         if (isHelpPressed) {
             HelpDialog( onDismissRequest = { isHelpPressed = false },
                 stringResource(id = R.string.history_settings_help)
             )
+        }
+        if (isDeleteAccountSelected) {
+            DeleteOnlyOneCategoryDialog {
+                isDeleteAccountSelected = false
+            }
         }
         var isDeleteButtonPressed by remember { mutableStateOf(false) }
         if (isDeleteButtonPressed) {
@@ -190,7 +207,20 @@ class NewHistorySettingsActivity : AppCompatActivity() {
                     onClick = {
                         days = ALL_DAYS
                         isDeleteButtonPressed = true
-                    })
+                    }
+                )
+                Divider(modifier = Modifier.padding(16.dp))
+                SettingsMenuLink(title = { Text( text = "Or you prefer delete a specific category?") },
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Filled.Delete,
+                            contentDescription = null
+                        )
+                    },
+                    onClick = {
+                        isDeleteAccountSelected = true
+                    }
+                )
             }
         }
     }
@@ -256,7 +286,203 @@ class NewHistorySettingsActivity : AppCompatActivity() {
         )
     }
 
+    @Composable
+    fun DeleteOnlyOneCategoryDialog(onDismissRequest: () -> Unit) {
+        var isCategorySelected by rememberSaveable { mutableStateOf(false) }
+        var isCategory by rememberSaveable { mutableStateOf("") }
+        if (isCategorySelected) {
+            DeleteDialogForCategory(isCategory, onDismissRequest)
+        }
+        AlertDialog(
+            onDismissRequest = {
+                onDismissRequest()
+            },
+            icon = { Icon(Icons.Filled.Delete, contentDescription = null) },
+            title = { Text(stringResource(R.string.select_category_text)) },
+            text = {
+                LazyColumn {
+                    item { Row(
+                        modifier = Modifier.clickable {
+                            isCategory = R.string.tobacco.toString()
+                        }
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = isCategory == R.string.tobacco.toString(),
+                            onClick = {
+                                isCategory = R.string.tobacco.toString()
+                            }
+                        )
+                        Text(
+                            text = stringResource(R.string.tobacco)
+                        )
+                    } }
+                    item { Row(
+                        modifier = Modifier.clickable {
+                            isCategory = R.string.alcohol.toString()
+                        }
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(selected = isCategory == R.string.alcohol.toString(),
+                            onClick = { isCategory = R.string.alcohol.toString() })
+                        Text(text = stringResource(R.string.alcohol)
+                        )
+                    } }
+                    item { Row(
+                        modifier = Modifier.clickable {
+                            isCategory = R.string.parties.toString()
+                        }
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(selected = isCategory == R.string.parties.toString(),
+                            onClick = { isCategory = R.string.parties.toString() })
+                        Text(text = stringResource(R.string.parties))
+                    } }
+                    item {Row(
+                        modifier = Modifier.clickable {
+                            isCategory = R.string.others.toString()
+                        }
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(selected = isCategory == R.string.others.toString(),
+                            onClick = {isCategory = R.string.others.toString() })
+                        Text(text = stringResource(R.string.others)
+                        )
+                    } }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        isCategorySelected = true
+                    }
+                ) {
+                    Text(stringResource(R.string.next))
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        onDismissRequest()
+                    }
+                ) {
+                    Text(stringResource(R.string.cancel))
+                }
+            },
+            properties = DialogProperties(
+                dismissOnBackPress = true,
+                dismissOnClickOutside = true,
+            )
+        )
+    }
+
+    @Composable
+    fun DeleteDialogForCategory(category: String, onDismissRequest: () -> Unit) {
+        var timePeriod by rememberSaveable { mutableIntStateOf(0) }
+        AlertDialog(
+            onDismissRequest = {
+                onDismissRequest()
+            },
+            icon = { Icon(Icons.Filled.Delete, contentDescription = null) },
+            title = { Text(stringResource(R.string.select_time_period)) },
+            text = {
+                LazyColumn {
+                    item { Row(
+                        modifier = Modifier.clickable {
+                            timePeriod = ZERO
+                        }
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = timePeriod == ZERO,
+                            onClick = {
+                                timePeriod = ZERO
+                            })
+                        Text(text = stringResource(R.string.today))
+                    } }
+                    item { Row(
+                        modifier = Modifier.clickable {
+                            timePeriod = SEVEN_DAYS
+                        }
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = timePeriod == SEVEN_DAYS,
+                            onClick = {
+                                timePeriod = SEVEN_DAYS
+                            })
+                        Text(text = stringResource(R.string.last_7_days))
+                    } }
+                    item { Row(
+                        modifier = Modifier.clickable {
+                            timePeriod = FOURTEEN_DAYS
+                        }
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = timePeriod == FOURTEEN_DAYS,
+                            onClick = {
+                                timePeriod = FOURTEEN_DAYS
+                            })
+                        Text(text = stringResource(R.string.last_14_days))
+                        }
+                    }
+                    item { Row(
+                        modifier = Modifier.clickable {
+                            timePeriod = THIRTY_DAYS
+                        }
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = timePeriod == THIRTY_DAYS,
+                            onClick = {
+                                timePeriod = THIRTY_DAYS
+                            })
+                        Text(text = stringResource(R.string.last_30_days))
+                    }}
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        FirebaseUtils.deleteCategory(category, timePeriod,
+                            onSuccess = {
+                            scope.launch {
+                                snackbarHostState.showSnackbar(
+                                    message = "History for $category deleted successfully",
+                                    duration = SnackbarDuration.Short,
+                                    withDismissAction = true
+                                )
+                            }
+                        },
+                            onFailure = {e ->
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = "Error deleting data: $e",
+                                        duration = SnackbarDuration.Short,
+                                        withDismissAction = true
+                                    )
+                                }
+                            })
+                    }
+                ) {
+                    Text(stringResource(R.string.confirm))
+                }
+            }
+        )
+    }
+
+
     companion object{
+        private const val ZERO = 0
         private const val SEVEN_DAYS = 7
         private const val FOURTEEN_DAYS = 14
         private const val THIRTY_DAYS = 30

@@ -373,6 +373,33 @@ object FirebaseUtils {
             }
     }
 
+    fun deleteCategory(category: String, timePeriod: Int, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+        val db = FirebaseFirestore.getInstance()
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        val userId = currentUser?.uid ?: return
+
+        val calendar = Calendar.getInstance()
+        val dateFormat = SimpleDateFormat(DATE_FORMAT, Locale.getDefault())
+
+        for (day in 0 until timePeriod) {
+            calendar.time = Date()
+            calendar.add(Calendar.DAY_OF_MONTH, -day)
+            val dateToDelete = dateFormat.format(calendar.time)
+
+            val documentRef = db.collection(USERS).document(userId)
+                .collection(CATEGORIES).document(category)
+                .collection(DATA).document(dateToDelete)
+
+            documentRef.delete()
+                .addOnSuccessListener {
+                    onSuccess()
+                }
+                .addOnFailureListener { e ->
+                    onFailure(e)
+                }
+        }
+    }
+
     private const val DATA = "data"
     private const val TOBACCO = "tobacco"
     private const val ALCOHOL = "alcohol"
