@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.HelpOutline
@@ -83,7 +84,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -387,9 +390,10 @@ class NewMainActivity : ComponentActivity() {
     @Composable
     fun MainNavigationDrawer(){
         val currentUser = FirebaseUtils.getCurrentUser()
+        val currentDisplayName = currentUser?.displayName ?: ""
         val activity = Activity()
         val context = LocalContext.current
-        val displayName by viewModel.displayName.observeAsState(currentUser?.displayName)
+        val displayName by viewModel.displayName.observeAsState(currentDisplayName)
         viewModel.setDisplayName(currentUser?.displayName)
         var signOutRequest by remember { mutableStateOf(false) }
         if (signOutRequest) {
@@ -450,8 +454,8 @@ class NewMainActivity : ComponentActivity() {
 
     @Composable
     fun SignOutDialog(onDismissRequest: () -> Unit, onSignOutConfirmed: () -> Unit, context: Context) {
-        val activity = Activity()
         val scope = rememberCoroutineScope()
+        val exitDisplayName = ""
         Dialog(
             onDismissRequest = { onDismissRequest() },
             properties = DialogProperties(
@@ -485,10 +489,12 @@ class NewMainActivity : ComponentActivity() {
                 ) {
                     Button(onClick = {
                         isLoading = true
+                        viewModel.setDisplayName(exitDisplayName)
                         FirebaseUtils.signOut(onSuccess = {
-                            val intent = Intent(context, LoginActivity::class.java)
+                            val intent = Intent(context, LoginActivity::class.java).apply {
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                            }
                             context.startActivity(intent)
-                            activity.finish()
                         },
                             onFailure = {
                                 scope.launch {
@@ -663,6 +669,7 @@ class NewMainActivity : ComponentActivity() {
         var category by remember { mutableStateOf("") }
         var result by remember { mutableStateOf("") }
         var isEmpty by remember { mutableStateOf(false) }
+        var hideKeyboard by remember { mutableStateOf(false) }
         when(result){
             SUCCESS -> {
                 FinishDialog(stringResource(R.string.data_added_successfully)) {
@@ -733,14 +740,26 @@ class NewMainActivity : ComponentActivity() {
                             },
                             state = TooltipState(initialIsVisible = isEmpty),
                         ) {
-                            OutlinedTextField(value = expense.toString(),
-                                onValueChange = {
-                                    expense = it.toInt()
+                            OutlinedTextField(
+                                value = expense.toString(),
+                                onValueChange = { it: String ->
+                                    val maxLength = SEVEN_DAYS
+                                    val filteredValue = it.filter { it.isDigit() }.take(maxLength)
+                                    expense = if (filteredValue.isNotEmpty()) filteredValue.toInt() else 0
                                 },
                                 isError = isEmpty,
-                                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-                                modifier = Modifier.padding(start = 48.dp, end = 16.dp)
+                                keyboardOptions = KeyboardOptions.Default.copy(
+                                    keyboardType = KeyboardType.Number,
+                                    imeAction = ImeAction.Done
+                                ),
+                                keyboardActions = KeyboardActions(onDone = { hideKeyboard = true }),
+                                modifier = Modifier.padding(start = 48.dp, end = 16.dp),
                             )
+
+                            if (hideKeyboard) {
+                                LocalSoftwareKeyboardController.current?.hide()
+                                hideKeyboard = false
+                            }
                         }
                     }
                 }

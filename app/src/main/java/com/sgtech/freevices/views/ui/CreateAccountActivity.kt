@@ -9,15 +9,19 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.HelpOutline
+import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.BottomAppBar
@@ -26,16 +30,24 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumTopAppBar
+import androidx.compose.material3.PlainTooltip
+import androidx.compose.material3.RichTooltip
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipDefaults
+import androidx.compose.material3.TooltipState
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -46,6 +58,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
@@ -53,12 +66,17 @@ import com.google.firebase.auth.FirebaseAuthWeakPasswordException
 import com.sgtech.freevices.R
 import com.sgtech.freevices.utils.FirebaseUtils
 import com.sgtech.freevices.views.ui.theme.FreeVicesTheme
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 class CreateAccountActivity : AppCompatActivity() {
 
     private val themeViewModel = ViewModelProvider.provideThemeViewModel()
     private var isSignUpAttempted = false
+    private val state = TooltipState()
+    private val scope = CoroutineScope(Dispatchers.Main)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -109,15 +127,7 @@ class CreateAccountActivity : AppCompatActivity() {
                 MediumTopAppBar(title = { Text(text = getString(R.string.register_on_freevices),
                     style = MaterialTheme.typography.headlineMedium)
                 },
-                    scrollBehavior = scrollBehavior,
-                    actions = {
-                        IconButton(onClick = { isHelpPressed = true }) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.HelpOutline,
-                                contentDescription = stringResource(R.string.help_button)
-                            )
-                        }
-                    })
+                    scrollBehavior = scrollBehavior)
             },
             content = { innerPadding ->
                 LazyColumn(
@@ -166,6 +176,7 @@ class CreateAccountActivity : AppCompatActivity() {
                                     }
                                 )
                             }
+                            isLoading = false
                         }) {
                             Text(text = stringResource(R.string.sign_up),
                                 style = MaterialTheme.typography.bodyLarge)
@@ -249,8 +260,9 @@ class CreateAccountActivity : AppCompatActivity() {
                     onFailure(Exception())
                 }
             } else {
-                Toast.makeText(context, context.getString(R.string.password_too_weak), Toast.LENGTH_LONG).show()
-                onFailure(Exception())
+                scope.launch {
+                    state.show()
+                }
             }
         } else {
             Toast.makeText(context, context.getString(R.string.error_invalid_email), Toast.LENGTH_LONG).show()
@@ -296,24 +308,46 @@ class CreateAccountActivity : AppCompatActivity() {
     @Composable
     fun PasswordEditText(password: String, onValueChange: (value: String) -> Unit) {
         var passwordHidden by rememberSaveable { mutableStateOf(true) }
-        TextField(
-            value = password,
-            onValueChange = onValueChange,
-            singleLine = true,
-            label = { Text(stringResource(R.string.password)) },
-            isError = isSignUpAttempted && password.isEmpty(),
-            visualTransformation =
-            if (passwordHidden) PasswordVisualTransformation() else VisualTransformation.None,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            trailingIcon = {
-                IconButton(onClick = { passwordHidden = !passwordHidden }) {
-                    val visibilityIcon =
-                        if (passwordHidden) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
-                    val description = if (passwordHidden) stringResource(R.string.show_password) else stringResource(R.string.hide_password)
-                    Icon(imageVector = visibilityIcon, contentDescription = description)
+        Row(modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 91.dp)) {
+            TextField(
+                value = password,
+                onValueChange = onValueChange,
+                singleLine = true,
+                label = { Text(stringResource(R.string.password)) },
+                isError = isSignUpAttempted && password.isEmpty(),
+                visualTransformation =
+                if (passwordHidden) PasswordVisualTransformation() else VisualTransformation.None,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                trailingIcon = {
+                    IconButton(onClick = { passwordHidden = !passwordHidden }) {
+                        val visibilityIcon =
+                            if (passwordHidden) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
+                        val description =
+                            if (passwordHidden) stringResource(R.string.show_password) else stringResource(
+                                R.string.hide_password
+                            )
+                        Icon(imageVector = visibilityIcon, contentDescription = description)
+                    }
+                }
+            )
+            TooltipBox(
+                positionProvider = TooltipDefaults.rememberRichTooltipPositionProvider(),
+                tooltip = {
+                    RichTooltip(title = { Text(text = stringResource(R.string.password_requirements)) })
+                    { Text(text = stringResource(R.string.security_rules), style = MaterialTheme.typography.bodyMedium) }
+                },
+                state = state
+            ) {
+                IconButton(
+                    modifier = Modifier.padding(start = 8.dp),
+                    onClick = { scope.launch { state.show() } }
+                ) {
+                    Icon(imageVector = Icons.AutoMirrored.Filled.Help, contentDescription = stringResource(R.string.password_requirements) )
                 }
             }
-        )
+        }
     }
 
     @Composable
@@ -337,5 +371,49 @@ class CreateAccountActivity : AppCompatActivity() {
                 }
             }
         )
+    }
+
+    @Preview
+    @Composable
+    fun TestTooltip() {
+        val tooltipState = rememberTooltipState()
+        val scope = rememberCoroutineScope()
+        Surface(modifier = Modifier.fillMaxSize()) {
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                TooltipBox(
+                    positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+                    tooltip = {
+                        PlainTooltip(
+                            modifier = Modifier
+                                .wrapContentWidth()
+                        ) {
+                            Text(stringResource(R.string.security_rules))
+                        }
+                    },
+                    state = tooltipState
+                ) {
+                    IconButton(
+                        modifier = Modifier.padding(),
+                        onClick = { scope.launch { tooltipState.show() } },
+                    ){
+                        Icon(imageVector = Icons.AutoMirrored.Filled.Help, contentDescription = "")
+                    }
+                }
+                TextField(
+                    value = "",
+                    modifier = Modifier.width(160.dp),
+                    onValueChange = {
+                    },
+                    singleLine = true,
+                    label = { Text(stringResource(id = R.string.confirm_password)) },
+                    isError = isSignUpAttempted,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                )
+            }
+        }
     }
 }
