@@ -26,10 +26,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumTopAppBar
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
@@ -260,7 +260,7 @@ class CreateAccountActivity : AppCompatActivity() {
 
     @Composable
     fun NameEditText(name: String, onValueChange: (value: String) -> Unit) {
-        OutlinedTextField(value = name,
+        TextField(value = name,
             onValueChange = onValueChange,
             label = { Text(text = stringResource(id = R.string.first_name)) },
             singleLine = true,
@@ -272,7 +272,7 @@ class CreateAccountActivity : AppCompatActivity() {
 
     @Composable
     fun LastNameEditText(name: String, onValueChange: (value: String) -> Unit) {
-        OutlinedTextField(value = name,
+        TextField(value = name,
             onValueChange = onValueChange,
             label = { Text(text = stringResource(id = R.string.last_name))},
             singleLine = true,
@@ -284,7 +284,7 @@ class CreateAccountActivity : AppCompatActivity() {
 
     @Composable
     fun EmailEditText(email: String, onValueChange: (value: String) -> Unit) {
-        OutlinedTextField(value = email,
+        TextField(value = email,
             onValueChange = onValueChange,
             label = { Text(text = stringResource(id = R.string.email)) },
             singleLine = true,
@@ -296,7 +296,7 @@ class CreateAccountActivity : AppCompatActivity() {
     @Composable
     fun PasswordEditText(password: String, onValueChange: (value: String) -> Unit) {
         var passwordHidden by rememberSaveable { mutableStateOf(true) }
-        OutlinedTextField(
+        TextField(
             value = password,
             onValueChange = onValueChange,
             singleLine = true,
@@ -319,7 +319,7 @@ class CreateAccountActivity : AppCompatActivity() {
     @Composable
     fun ConfirmPasswordEditText(password: String, onValueChange: (value: String) -> Unit) {
         var passwordHidden by rememberSaveable { mutableStateOf(true) }
-        OutlinedTextField(
+        TextField(
             value = password,
             onValueChange = onValueChange,
             singleLine = true,

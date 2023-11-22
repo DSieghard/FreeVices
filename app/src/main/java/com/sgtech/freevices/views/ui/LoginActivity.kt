@@ -176,13 +176,19 @@ class LoginActivity : AppCompatActivity() {
                             PasswordEditText(password) { newValue -> password = newValue }
                         }
 
-                        Spacer(modifier = Modifier.size(128.dp))
-
-                        AnimatedVisibility(visible = !isResetPasswordRequested) {
-                            TextButton(onClick = {
-                                isResetPasswordRequested = true
-                            }, modifier = Modifier.padding(14.dp)) {
-                                Text(text = stringResource(R.string.forgot_password))
+                        Spacer(modifier = Modifier.size(144.dp))
+                        Column(verticalArrangement = Arrangement.Bottom,
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.fillMaxSize()) {
+                            AnimatedVisibility(visible = !isResetPasswordRequested) {
+                                TextButton(onClick = {
+                                    isResetPasswordRequested = true
+                                }, modifier = Modifier.padding(14.dp)) {
+                                    Text(
+                                        text = stringResource(R.string.forgot_password),
+                                        style = MaterialTheme.typography.titleLarge
+                                    )
+                                }
                             }
                         }
                     }

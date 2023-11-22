@@ -1,6 +1,7 @@
 package com.sgtech.freevices.utils
 
 import android.content.Context
+import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.UserProfileChangeRequest
@@ -121,19 +122,20 @@ object FirebaseUtils {
     }
 
     fun addDataToCategory(
-        context: Context,
         category: String,
         amount: Int,
         onSuccess: () -> Unit,
         onFailure: (Exception) -> Unit
     ) {
         val subCollectionName = when (category) {
-            context.getString(R.string.tobacco) -> TOBACCO
-            context.getString(R.string.alcohol) -> ALCOHOL
-            context.getString(R.string.parties) -> PARTIES
-            context.getString(R.string.others) -> OTHERS
+            TOBACCO -> TOBACCO
+            ALCOHOL -> ALCOHOL
+            PARTIES -> PARTIES
+            OTHERS -> OTHERS
             else -> null
         }
+
+        Log.d("FirebaseUtils/addDataToCategory", "subCollectionName: $subCollectionName")
 
         val auth = FirebaseAuth.getInstance()
         val user = auth.currentUser
@@ -159,9 +161,11 @@ object FirebaseUtils {
                     currentDayDataDocument.set(mapOf(VALUE to updatedValue))
                         .addOnSuccessListener {
                             onSuccess()
+                            Log.d("FirebaseUtils/addDataToCategory", "Data added successfully")
                         }
                         .addOnFailureListener {
                             onFailure(it)
+                            Log.d("FirebaseUtils/addDataToCategory", "Failed to add data: $it")
                         }
                 } else {
                     val newData = mapOf(VALUE to amount.toFloat())
@@ -299,7 +303,7 @@ object FirebaseUtils {
 
     fun configEmailOnAuth(newEmail: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
         val currentUser = FirebaseAuth.getInstance().currentUser
-        currentUser?.updateEmail(newEmail)
+        currentUser?.verifyBeforeUpdateEmail(newEmail)
             ?.addOnCompleteListener {
                 updateEmailOnFirestore(newEmail, onFailure = { e -> onFailure(e) })
                 onSuccess()

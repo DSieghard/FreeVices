@@ -227,4 +227,5 @@
     <string name="last_30_days">Últimos 30 días</string>
     <string name="about_help">Acerca de esta pantalla</string>
     <string name="specific_question">O prefieres borrar una categoría especifica?</string>
+    <string name="null_value">El valor no puede ser 0</string>
 </resources>

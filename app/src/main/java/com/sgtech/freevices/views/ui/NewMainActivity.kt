@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -28,20 +30,22 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumTopAppBar
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
@@ -49,6 +53,9 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -56,8 +63,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
+import androidx.compose.material3.TooltipState
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
@@ -122,7 +131,7 @@ class NewMainActivity : ComponentActivity() {
         val context = LocalContext.current
         val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
         val scaffoldScope = rememberCoroutineScope()
-        val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
+        val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
         val tobaccoData by viewModel.tobaccoLiveData.observeAsState(initial = 0f)
         val alcoholData by viewModel.alcoholLiveData.observeAsState(initial = 0f)
         val partiesData by viewModel.partiesLiveData.observeAsState(initial = 0f)
@@ -361,7 +370,9 @@ class NewMainActivity : ComponentActivity() {
         var isMenuVisible by rememberSaveable { mutableStateOf(false) }
 
         if (isMenuVisible) {
-            DeployMenu { isMenuVisible = false }
+            ExpenseModalSheet {
+                isMenuVisible = false
+            }
         }
 
         ExtendedFloatingActionButton(
@@ -371,203 +382,6 @@ class NewMainActivity : ComponentActivity() {
             icon = { Icon(Icons.Filled.Add, stringResource(R.string.add_expense_button)) },
             text = { Text(text = stringResource(R.string.add)) },
         )
-    }
-
-    @Composable
-    fun DeployMenu(onDismissRequest: () -> Unit) {
-        var expenseSelected by remember { mutableStateOf(false) }
-        var categorySelected: String? by remember { mutableStateOf(null) }
-        if (expenseSelected) {
-            when (categorySelected) {
-                TOBACCO -> {
-                    ExpenseDialog(stringResource(id = R.string.tobacco), onDismissRequest, snackbarHostState)
-                }
-                ALCOHOL -> {
-                    ExpenseDialog(stringResource(id = R.string.alcohol), onDismissRequest, snackbarHostState)
-                }
-                PARTIES -> {
-                    ExpenseDialog(stringResource(id = R.string.parties), onDismissRequest, snackbarHostState)
-                }
-                OTHERS -> {
-                    ExpenseDialog(stringResource(id = R.string.others), onDismissRequest, snackbarHostState)
-                }
-            }
-        }
-
-        Dialog(
-            onDismissRequest = { onDismissRequest() },
-            properties = DialogProperties(
-                dismissOnBackPress = true,
-                dismissOnClickOutside = true
-            )
-        ) {
-            ElevatedCard(
-                elevation = CardDefaults.cardElevation(
-                    defaultElevation = 12.dp
-                ),
-                modifier = Modifier.padding(18.dp),
-
-                ) {
-                Text(
-                    text = stringResource(R.string.choose_category),
-                    modifier = Modifier.padding(24.dp),
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.titleLarge
-                )
-                Column(
-                    modifier = Modifier.padding(20.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    DropdownMenuItem(text = {
-                        Text(
-                            text = stringResource(R.string.tobacco),
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                    },
-                        onClick = { expenseSelected =  true
-                            categorySelected = TOBACCO
-                        })
-                    DropdownMenuItem(text = {
-                        Text(
-                            text = stringResource(R.string.alcohol),
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                    },
-                        onClick = { expenseSelected = true
-                            categorySelected = ALCOHOL
-                        })
-                    DropdownMenuItem(text = {
-                        Text(
-                            text = stringResource(R.string.parties),
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                    },
-                        onClick = { expenseSelected = true
-                            categorySelected = PARTIES
-                        })
-                    DropdownMenuItem(text = {
-                        Text(
-                            text = stringResource(R.string.others),
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                    },
-                        onClick = { expenseSelected = true
-                            categorySelected = OTHERS
-                        })
-                }
-                Row(
-                    modifier = Modifier
-                        .padding(16.dp, 16.dp)
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End,
-                    verticalAlignment = Alignment.Bottom
-                ) {
-                    Button(onClick = { onDismissRequest() }) {
-                        Text(text = stringResource(R.string.cancel), color = MaterialTheme.colorScheme.onTertiary)
-                    }
-                }
-            }
-        }
-    }
-
-    @Composable
-    fun ExpenseDialog(
-        category: String,
-        onCancel: () -> Unit,
-        snackbarHostState: SnackbarHostState
-    ) {
-        val viewModel = ViewModelProvider.provideMainViewModel()
-        var expenseAmount by remember { mutableIntStateOf(ZERO) }
-        val context = LocalContext.current
-
-        Dialog(
-            onDismissRequest = onCancel
-        ) {
-            Card(
-                elevation = CardDefaults.cardElevation(8.dp),
-                modifier = Modifier.padding(16.dp),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Text(stringResource(R.string.add_expense), modifier = Modifier.padding(16.dp))
-                Column(
-                    modifier = Modifier.padding(8.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    OutlinedTextField(
-                        value = expenseAmount.toString(),
-                        onValueChange = {
-                            expenseAmount = it.toIntOrNull() ?: ZERO
-                        },
-                        label = { Text(stringResource(R.string.expended_in_category, category)) },
-                        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-                        modifier = Modifier.padding(32.dp)
-                    )
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Button(onClick = onCancel) {
-                            Text(stringResource(R.string.cancel))
-                        }
-
-                        Spacer(modifier = Modifier.padding(12.dp))
-
-                        Button(onClick = {
-                            isLoading = true
-                            FirebaseUtils.addDataToCategory(
-                                context = context,
-                                category = category,
-                                amount = expenseAmount,
-                                onSuccess = {
-                                    FirebaseUtils.dataHandler(
-                                        context = context,
-                                        days = SEVEN_DAYS,
-                                        onSuccess = { data ->
-                                            viewModel.updateLiveDataValues(context, data)
-                                            scope.launch {
-                                                snackbarHostState.showSnackbar(
-                                                    message = context.getString(R.string.data_updated_successfully),
-                                                    duration = SnackbarDuration.Short,
-                                                    withDismissAction = true
-                                                )
-                                            }
-                                            isLoading = false
-                                        },
-                                        onFailure = {
-                                            scope.launch {
-                                                snackbarHostState.showSnackbar(
-                                                    message = context.getString(R.string.error_updating_data),
-                                                    duration = SnackbarDuration.Short,
-                                                    withDismissAction = true
-                                                )
-                                            }
-                                        }
-                                    )
-                                },
-                                onFailure = {
-                                    scope.launch {
-                                        snackbarHostState.showSnackbar(
-                                            message = context.getString(R.string.error_updating_data),
-                                            duration = SnackbarDuration.Short,
-                                            withDismissAction = true
-                                        )
-                                    }
-                                    isLoading = false
-                                }
-                            )
-                            onCancel()
-                        }) {
-                            Text(stringResource(R.string.add))
-                        }
-
-                    }
-                }
-            }
-        }
     }
 
     @Composable
@@ -832,15 +646,184 @@ class NewMainActivity : ComponentActivity() {
         }
     }
 
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    fun ExpenseModalSheet(onClose: () -> Unit) {
+        val edgeToEdgeEnabled by remember { mutableStateOf(false) }
+        val windowInsets = if (edgeToEdgeEnabled)
+            WindowInsets(0) else BottomSheetDefaults.windowInsets
+        val categories = listOf(
+            stringResource(R.string.tobacco),
+            stringResource(R.string.alcohol),
+            stringResource(R.string.parties),
+            stringResource(R.string.others)
+        )
+        var isCategorySelected by remember { mutableIntStateOf(0) }
+        var expense by remember { mutableIntStateOf(0) }
+        var category by remember { mutableStateOf("") }
+        var result by remember { mutableStateOf("") }
+        var isEmpty by remember { mutableStateOf(false) }
+        when(result){
+            SUCCESS -> {
+                FinishDialog(stringResource(R.string.data_added_successfully)) {
+                    result = ""
+                    onClose()
+                }
+            }
+            FAILED -> {
+                FinishDialog(stringResource(R.string.error_updating_data)) {
+                    result = ""
+                    onClose()
+                }
+            }
+        }
+
+
+        ModalBottomSheet(
+            onDismissRequest = { onClose() },
+            sheetState = rememberModalBottomSheetState(
+                skipPartiallyExpanded = false
+            ),
+            windowInsets = windowInsets
+        ) {
+            LazyColumn {
+                item {
+                    Column(verticalArrangement = Arrangement.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)) {
+                        Text (text = stringResource(R.string.choose_category), style = MaterialTheme.typography.titleLarge,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp),
+                            textAlign = TextAlign.Center)
+                        Spacer(modifier = Modifier.padding(8.dp))
+                        SingleChoiceSegmentedButtonRow(modifier = Modifier.padding(start = 40.dp, end = 40.dp)) {
+                            categories.forEachIndexed { index, label ->
+                                SegmentedButton(
+                                    shape = SegmentedButtonDefaults.itemShape(index = index, count = categories.size),
+                                    onClick = { isCategorySelected = index },
+                                    selected = index == isCategorySelected
+                                ) {
+                                    Text(label)
+                                }
+                            }
+                        }
+                    }
+                    HorizontalDivider(modifier = Modifier.padding(10.dp))
+                    Spacer(modifier = Modifier.padding(10.dp))
+                    Row(modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                        horizontalArrangement = Arrangement.Center) {
+                        Text(
+                            text = stringResource(id = R.string.how_many),
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .padding(start = 16.dp, end = 16.dp, bottom = 14.dp, top = 14.dp),
+                        )
+                        Spacer(modifier = Modifier.padding(8.dp))
+                        TooltipBox(
+                            positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+                            tooltip = {
+                                if (isEmpty) {
+                                    PlainTooltip { Text(text = stringResource(R.string.null_value), style = MaterialTheme.typography.bodyMedium) }
+                                }
+                            },
+                            state = TooltipState(initialIsVisible = isEmpty),
+                        ) {
+                            OutlinedTextField(value = expense.toString(),
+                                onValueChange = {
+                                    expense = it.toInt()
+                                },
+                                isError = isEmpty,
+                                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                                modifier = Modifier.padding(start = 48.dp, end = 16.dp)
+                            )
+                        }
+                    }
+                }
+                items(2) {
+                    Spacer(modifier = Modifier.padding(10.dp))
+                }
+                item {
+                    Row(modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.Bottom) {
+                        FilledTonalButton(modifier = Modifier.padding(end = 16.dp, bottom = 16.dp),
+                            onClick = {
+                                if (expense == 0) {
+                                    isEmpty = true
+                                } else {
+                                    isEmpty = false
+                                    category = ""
+                                    when (isCategorySelected) {
+                                        0 -> category = TOBACCO
+                                        1 -> category = ALCOHOL
+                                        2 -> category = PARTIES
+                                        3 -> category = OTHERS
+                                    }
+                                    FirebaseUtils.addDataToCategory(category, expense, {
+                                        dataHandlerForActivity(
+                                            onStart = { isLoading = true },
+                                            onSuccess = { isLoading = false },
+                                            onFailure = { isLoading = false })
+                                        scope.launch {
+                                            snackbarHostState.showSnackbar(
+                                                message = applicationContext.getString(R.string.data_added_successfully),
+                                                duration = SnackbarDuration.Short,
+                                                withDismissAction = true
+                                            )
+                                        }
+                                    }) {
+                                        dataHandlerForActivity(
+                                            onStart = { isLoading = true },
+                                            onSuccess = { isLoading = false },
+                                            onFailure = { isLoading = false })
+                                        scope.launch {
+                                            snackbarHostState.showSnackbar(
+                                                message = applicationContext.getString(R.string.error_updating_data),
+                                                duration = SnackbarDuration.Short,
+                                                withDismissAction = true
+                                            )
+                                        }
+                                    }
+                                    onClose()
+                                }
+                        }
+                        ) {
+                            Text(text = stringResource(R.string.add))
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    @Composable
+    fun FinishDialog(text : String, onDismissRequest: () -> Unit) {
+        AlertDialog(
+            onDismissRequest = { onDismissRequest() },
+            title = { Text(text = text) },
+            confirmButton = {
+                FilledTonalButton(onClick = { onDismissRequest() }) {
+                    Text(text = stringResource(R.string.ok))
+                }
+            }
+        )
+    }
+
     companion object {
         private const val THIRTY_DAYS = 30
         private const val FOURTEEN_DAYS = 14
         private const val SEVEN_DAYS = 7
-        private const val ZERO = 0
         private const val TOBACCO = "tobacco"
         private const val ALCOHOL = "alcohol"
         private const val PARTIES = "parties"
         private const val OTHERS = "others"
         private const val TOTALS = "totals"
+        private const val SUCCESS = "SUCCESS"
+        private const val FAILED = "FAILED"
     }
 }
