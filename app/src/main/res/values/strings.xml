@@ -232,6 +232,6 @@
     <string name="about_help">About this screen</string>
     <string name="specific_question">Or you prefer delete a specific category?</string>
     <string name="null_value">Value cannot be 0</string>
-    <string name="security_rules">Passwords must have:\n- 8 Characters\n- A mayus\n- A minus\n- A symbol</string>
+    <string name="security_rules">Passwords must have:\n- 8 Characters\n- A mayus\n- A minus\n- A symbol\n- A number</string>
     <string name="password_requirements">Password requirements</string>
 </resources>
