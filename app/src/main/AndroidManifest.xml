@@ -31,9 +31,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".views.AboutActivity"
-            android:exported="false" />
         <activity android:name=".views.ui.settings.NewHistorySettingsActivity"
             android:exported="false" />
         <activity android:name=".views.ui.settings.NewAppSettingsActivity"

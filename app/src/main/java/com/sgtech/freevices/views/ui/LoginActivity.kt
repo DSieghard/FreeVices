@@ -42,11 +42,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -69,6 +67,8 @@ import com.sgtech.freevices.utils.FirebaseUtils
 import com.sgtech.freevices.utils.FirebaseUtils.isUserLoggedIn
 import com.sgtech.freevices.utils.PreferencesManager
 import com.sgtech.freevices.views.ui.theme.FreeVicesTheme
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class LoginActivity : AppCompatActivity() {
@@ -77,6 +77,7 @@ class LoginActivity : AppCompatActivity() {
     private val snackbarHostState: SnackbarHostState = SnackbarHostState()
     private var isEmailError: Boolean = false
     private var isPasswordError: Boolean = false
+    private var scope = CoroutineScope(Dispatchers.Main)
 
     override fun onStart() {
         super.onStart()
@@ -122,7 +123,6 @@ class LoginActivity : AppCompatActivity() {
         var email by remember { mutableStateOf("") }
         var password by remember { mutableStateOf("") }
         val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
-        val scope = rememberCoroutineScope()
         var isLoading by remember { mutableStateOf(false) }
         if (isLoading) {
             DialogForLoad { isLoading = false }
@@ -308,7 +308,6 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    @OptIn(ExperimentalComposeUiApi::class)
     @Composable
     fun PasswordEditText(password: String, onValueChange: (value: String) -> Unit) {
         val keyboardController = LocalSoftwareKeyboardController.current
@@ -346,9 +345,7 @@ class LoginActivity : AppCompatActivity() {
     fun ResetPasswordDialog(onDismissRequest: () -> Unit) {
         var email: String? by remember { mutableStateOf("") }
         val context = LocalContext.current
-        val scope = rememberCoroutineScope()
         var isEmailError by remember { mutableStateOf(false) }
-        var isPasswordResetRequested by remember { mutableStateOf(false) }
         AlertDialog(
             onDismissRequest = {
                 onDismissRequest()
@@ -378,12 +375,12 @@ class LoginActivity : AppCompatActivity() {
                                 Toast.makeText(context, getString(R.string.fill_all_the_fields), Toast.LENGTH_LONG).show()
                             }
                         } else {
-                            isEmailError = false
                             FirebaseUtils.resetPasswordRequest(email!!, onSuccess = {
+                                onDismissRequest()
                                 scope.launch {
                                     snackbarHostState.showSnackbar(
                                         message = getString(R.string.password_reset_email_sent),
-                                        duration = SnackbarDuration.Short,
+                                        duration = SnackbarDuration.Long,
                                         withDismissAction = true
                                     )
                                 }
@@ -406,6 +403,7 @@ class LoginActivity : AppCompatActivity() {
                                             getString(R.string.error_resetting_password)
                                         }
                                     }
+                                    onDismissRequest()
                                     scope.launch {
                                         snackbarHostState.showSnackbar(
                                             message = message,
@@ -414,7 +412,7 @@ class LoginActivity : AppCompatActivity() {
                                         )
                                     }
                                 })
-                            isPasswordResetRequested = false
+                            onDismissRequest()
                         }
                     }) {
                     Text(stringResource(R.string.confirm))

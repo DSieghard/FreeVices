@@ -234,4 +234,13 @@
     <string name="null_value">Value cannot be 0</string>
     <string name="security_rules">Passwords must have:\n- 8 Characters\n- A mayus\n- A minus\n- A symbol\n- A number</string>
     <string name="password_requirements">Password requirements</string>
+    <string name="verify">Verify</string>
+    <string name="verification_email_sent">Verification mail has been sent</string>
+    <string name="account_status">Account Status: %1$s</string>
+    <string name="verified">Verified</string>
+    <string name="not_verified">Not Verified</string>
+    <string name="reauth">For make this change, you must enter your current password.</string>
+    <string name="current_password">Current Password</string>
+    <string name="error_reauth">Error on reauthentication</string>
+    <string name="profile" translatable="false">Profile</string>
 </resources>

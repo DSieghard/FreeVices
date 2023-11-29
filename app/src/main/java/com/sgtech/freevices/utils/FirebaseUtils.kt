@@ -1,7 +1,7 @@
 package com.sgtech.freevices.utils
 
 import android.content.Context
-import android.util.Log
+import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.UserProfileChangeRequest
@@ -135,8 +135,6 @@ object FirebaseUtils {
             else -> null
         }
 
-        Log.d("FirebaseUtils/addDataToCategory", "subCollectionName: $subCollectionName")
-
         val auth = FirebaseAuth.getInstance()
         val user = auth.currentUser
         val uid = user?.uid
@@ -161,11 +159,9 @@ object FirebaseUtils {
                     currentDayDataDocument.set(mapOf(VALUE to updatedValue))
                         .addOnSuccessListener {
                             onSuccess()
-                            Log.d("FirebaseUtils/addDataToCategory", "Data added successfully")
                         }
                         .addOnFailureListener {
                             onFailure(it)
-                            Log.d("FirebaseUtils/addDataToCategory", "Failed to add data: $it")
                         }
                 } else {
                     val newData = mapOf(VALUE to amount.toFloat())
@@ -298,7 +294,6 @@ object FirebaseUtils {
             ?.addOnFailureListener { e ->
                 onFailure(e)
             }
-
     }
 
     fun configEmailOnAuth(newEmail: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
@@ -403,6 +398,41 @@ object FirebaseUtils {
                 }
         }
     }
+
+    fun sendEmailVerification(onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+        val user = FirebaseAuth.getInstance().currentUser
+        user?.sendEmailVerification()
+            ?.addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                onSuccess()
+                }
+            }?.addOnFailureListener { e ->
+            onFailure(e)
+            }
+    }
+
+    sealed class AuthResult {
+        data class Success(val user: FirebaseUser) : AuthResult()
+        data class Failure(val exception: Exception) : AuthResult()
+    }
+
+    fun reAuthenticate(
+        email: String,
+        password: String,
+        callback: (AuthResult) -> Unit
+    ) {
+        val user = FirebaseAuth.getInstance().currentUser
+
+        user?.reauthenticate(EmailAuthProvider.getCredential(email, password))
+            ?.addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    callback(AuthResult.Success(user))
+                } else {
+                    callback(AuthResult.Failure(task.exception!!))
+                }
+            }
+    }
+
 
     private const val DATA = "data"
     private const val TOBACCO = "tobacco"

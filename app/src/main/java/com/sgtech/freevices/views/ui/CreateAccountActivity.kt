@@ -3,7 +3,6 @@ package com.sgtech.freevices.views.ui
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -15,8 +14,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -30,10 +27,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumTopAppBar
-import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.RichTooltip
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -41,13 +39,11 @@ import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.TooltipState
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberTooltipState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -58,7 +54,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
@@ -76,6 +71,7 @@ class CreateAccountActivity : AppCompatActivity() {
     private val themeViewModel = ViewModelProvider.provideThemeViewModel()
     private var isSignUpAttempted = false
     private val state = TooltipState()
+    private val snackbarHostState = SnackbarHostState()
     private val scope = CoroutineScope(Dispatchers.Main)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -161,10 +157,18 @@ class CreateAccountActivity : AppCompatActivity() {
                         }
                     },
                     floatingActionButton = {
-                        TextButton(onClick = {
+                        TextButton(modifier = Modifier.padding(top = 8.dp),
+                        onClick = {
                             isSignUpAttempted = true
                             if(name!!.isEmpty() || lastName!!.isEmpty() || email!!.isEmpty() || password!!.isEmpty() || confirmPassword!!.isEmpty()){
-                                Toast.makeText(context, R.string.fill_all_the_fields, Toast.LENGTH_SHORT).show()
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        context.getString(R.string.fill_all_the_fields),
+                                        duration = SnackbarDuration.Indefinite,
+                                        actionLabel = context.getString(R.string.ok),
+                                        withDismissAction = true
+                                    )
+                                }
                             } else {
                                 isLoading = true
                                 createAccountHandler(name!!, lastName!!, email!!, password!!, confirmPassword!!, context,
@@ -183,6 +187,9 @@ class CreateAccountActivity : AppCompatActivity() {
                         }
                     }
                 )
+            },
+            snackbarHost = {
+                SnackbarHost(snackbarHostState)
             }
         )
     }
@@ -230,33 +237,64 @@ class CreateAccountActivity : AppCompatActivity() {
                                 finish()
                             }
                         }, {
-                            Toast.makeText(
-                                context,
-                                context.getString(R.string.unable_to_create_account),
-                                Toast.LENGTH_LONG
-                            ).show()
+                            scope.launch {
+                                snackbarHostState.showSnackbar(
+                                    context.getString(R.string.unable_to_create_account),
+                                    duration = SnackbarDuration.Indefinite,
+                                    actionLabel = context.getString(R.string.ok),
+                                    withDismissAction = true
+                                )
+                            }
                             onFailure(it)
                         })
                     }) { e ->
                         when (e) {
                             is FirebaseAuthWeakPasswordException -> {
-                                Toast.makeText(context, context.getString(R.string.password_too_weak), Toast.LENGTH_LONG).show()
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        context.getString(R.string.password_too_weak),
+                                        duration = SnackbarDuration.Indefinite,
+                                        actionLabel = context.getString(R.string.ok),
+                                        withDismissAction = true
+                                    )
+                                }
                                 onFailure(e)
                             }
 
                             is FirebaseAuthUserCollisionException -> {
-                                Toast.makeText(context, context.getString(R.string.account_already_exists), Toast.LENGTH_LONG).show()
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        context.getString(R.string.account_already_exists),
+                                        duration = SnackbarDuration.Indefinite,
+                                        actionLabel = context.getString(R.string.ok),
+                                        withDismissAction = true
+                                    )
+                                }
                                 onFailure(e)
                             }
 
                             else -> {
-                                Toast.makeText(context, context.getString(R.string.unable_to_create_account), Toast.LENGTH_LONG).show()
+                                scope.launch{
+                                    snackbarHostState.showSnackbar(
+                                        context.getString(R.string.unable_to_create_account),
+                                        duration = SnackbarDuration.Indefinite,
+                                        actionLabel = context.getString(R.string.ok),
+                                        withDismissAction = true
+                                    )
+                                }
                                 onFailure(e)
                             }
                         }
                     }
                 } else {
-                    Toast.makeText(context, context.getString(R.string.passwords_do_not_match), Toast.LENGTH_LONG).show()
+                    scope.launch {
+                        snackbarHostState.showSnackbar(
+                            context.getString(R.string.passwords_do_not_match),
+                            duration = SnackbarDuration.Indefinite,
+                            actionLabel = context.getString(R.string.ok),
+                            withDismissAction = true
+                        )
+                    }
                     onFailure(Exception())
                 }
             } else {
@@ -265,8 +303,15 @@ class CreateAccountActivity : AppCompatActivity() {
                 }
             }
         } else {
-            Toast.makeText(context, context.getString(R.string.error_invalid_email), Toast.LENGTH_LONG).show()
-            onFailure(Exception())
+           scope.launch {
+               snackbarHostState.showSnackbar(
+                   context.getString(R.string.invalid_email),
+                   duration = SnackbarDuration.Indefinite,
+                   actionLabel = context.getString(R.string.ok),
+                   withDismissAction = true
+               )
+           }
+           onFailure(Exception())
         }
     }
 
@@ -309,9 +354,10 @@ class CreateAccountActivity : AppCompatActivity() {
     fun PasswordEditText(password: String, onValueChange: (value: String) -> Unit) {
         var passwordHidden by rememberSaveable { mutableStateOf(true) }
         Row(modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 91.dp)) {
+            .fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center) {
             TextField(
+                modifier = Modifier.padding(start = 56.dp),
                 value = password,
                 onValueChange = onValueChange,
                 singleLine = true,
@@ -341,7 +387,7 @@ class CreateAccountActivity : AppCompatActivity() {
                 state = state
             ) {
                 IconButton(
-                    modifier = Modifier.padding(start = 8.dp),
+                    modifier = Modifier.padding(start = 8.dp, top = 2.dp),
                     onClick = { scope.launch { state.show() } }
                 ) {
                     Icon(imageVector = Icons.AutoMirrored.Filled.Help, contentDescription = stringResource(R.string.password_requirements) )
@@ -371,49 +417,5 @@ class CreateAccountActivity : AppCompatActivity() {
                 }
             }
         )
-    }
-
-    @Preview
-    @Composable
-    fun TestTooltip() {
-        val tooltipState = rememberTooltipState()
-        val scope = rememberCoroutineScope()
-        Surface(modifier = Modifier.fillMaxSize()) {
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                TooltipBox(
-                    positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
-                    tooltip = {
-                        PlainTooltip(
-                            modifier = Modifier
-                                .wrapContentWidth()
-                        ) {
-                            Text(stringResource(R.string.security_rules))
-                        }
-                    },
-                    state = tooltipState
-                ) {
-                    IconButton(
-                        modifier = Modifier.padding(),
-                        onClick = { scope.launch { tooltipState.show() } },
-                    ){
-                        Icon(imageVector = Icons.AutoMirrored.Filled.Help, contentDescription = "")
-                    }
-                }
-                TextField(
-                    value = "",
-                    modifier = Modifier.width(160.dp),
-                    onValueChange = {
-                    },
-                    singleLine = true,
-                    label = { Text(stringResource(id = R.string.confirm_password)) },
-                    isError = isSignUpAttempted,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                )
-            }
-        }
     }
 }

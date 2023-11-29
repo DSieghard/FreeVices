@@ -230,4 +230,12 @@
     <string name="null_value">El valor no puede ser 0</string>
     <string name="security_rules">La contraseña debe tener:\n- 8 Carácteres\n- Una mayúscula\n- Una minúscula\n- Un simbolo\n- Un número</string>
     <string name="password_requirements">Requisitos de contraseña</string>
+    <string name="verify">Verificar</string>
+    <string name="verification_email_sent">Se ha enviado un correo de verificación</string>
+    <string name="account_status">Estado de la cuenta: %1$s</string>
+    <string name="verified">Verificada</string>
+    <string name="not_verified">No Verificada</string>
+    <string name="reauth">Para hacer esto, debes ingresar tu contraseña actual</string>
+    <string name="current_password">Contraseña actual</string>
+    <string name="error_reauth">Error reautenticando</string>
 </resources>

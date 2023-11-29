@@ -31,7 +31,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
@@ -639,7 +638,7 @@ class NewMainActivity : ComponentActivity() {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = 24.dp, start = 24.dp, end = 24.dp, bottom = 24.dp),
+                            .padding(24.dp),
                         horizontalArrangement = Arrangement.End,
                         verticalAlignment = Alignment.Bottom
                     ) {
@@ -667,24 +666,8 @@ class NewMainActivity : ComponentActivity() {
         var isCategorySelected by remember { mutableIntStateOf(0) }
         var expense by remember { mutableIntStateOf(0) }
         var category by remember { mutableStateOf("") }
-        var result by remember { mutableStateOf("") }
         var isEmpty by remember { mutableStateOf(false) }
         var hideKeyboard by remember { mutableStateOf(false) }
-        when(result){
-            SUCCESS -> {
-                FinishDialog(stringResource(R.string.data_added_successfully)) {
-                    result = ""
-                    onClose()
-                }
-            }
-            FAILED -> {
-                FinishDialog(stringResource(R.string.error_updating_data)) {
-                    result = ""
-                    onClose()
-                }
-            }
-        }
-
 
         ModalBottomSheet(
             onDismissRequest = { onClose() },
@@ -819,19 +802,6 @@ class NewMainActivity : ComponentActivity() {
             }
         }
     }
-    
-    @Composable
-    fun FinishDialog(text : String, onDismissRequest: () -> Unit) {
-        AlertDialog(
-            onDismissRequest = { onDismissRequest() },
-            title = { Text(text = text) },
-            confirmButton = {
-                FilledTonalButton(onClick = { onDismissRequest() }) {
-                    Text(text = stringResource(R.string.ok))
-                }
-            }
-        )
-    }
 
     companion object {
         private const val THIRTY_DAYS = 30
@@ -842,7 +812,5 @@ class NewMainActivity : ComponentActivity() {
         private const val PARTIES = "parties"
         private const val OTHERS = "others"
         private const val TOTALS = "totals"
-        private const val SUCCESS = "SUCCESS"
-        private const val FAILED = "FAILED"
     }
 }

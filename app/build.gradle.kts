@@ -12,8 +12,8 @@ android {
         applicationId = "com.sgtech.freevices"
         minSdk = 31
         targetSdk = 34
-        versionCode = 108
-        versionName = "1.1.0.2"
+        versionCode = 110
+        versionName = "1.1.0.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -84,6 +84,7 @@ dependencies {
     implementation("androidx.core:core-splashscreen:1.0.1")
     implementation(platform("androidx.compose:compose-bom:2023.10.01"))
     implementation("com.github.alorma:compose-settings-ui-m3:1.0.2")
+    implementation("androidx.navigation:navigation-compose:2.7.5")
 
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")

@@ -6,20 +6,31 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.filled.AlternateEmail
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Password
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -30,6 +41,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -44,28 +56,53 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Modifier.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.startActivity
-import androidx.lifecycle.LifecycleCoroutineScope
-import androidx.lifecycle.lifecycleScope
 import com.alorma.compose.settings.ui.SettingsMenuLink
+import com.google.firebase.auth.FirebaseAuth
 import com.sgtech.freevices.R
 import com.sgtech.freevices.utils.FirebaseUtils
-import com.sgtech.freevices.views.ui.HelpDialog
+import com.sgtech.freevices.views.ui.DialogForLoad
 import com.sgtech.freevices.views.ui.LoginActivity
 import com.sgtech.freevices.views.ui.NewMainActivity
 import com.sgtech.freevices.views.ui.ViewModelProvider
 import com.sgtech.freevices.views.ui.theme.FreeVicesTheme
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class NewUserSettingsActivity : AppCompatActivity() {
+    //View model
     private val themeViewModel = ViewModelProvider.provideThemeViewModel()
     private val mainViewModel = ViewModelProvider.provideMainViewModel()
+
+    //Extensions
+    private val context = this
+    private val scope = CoroutineScope(Dispatchers.Main)
+    private val snackbarHostState = SnackbarHostState()
+
+    //Option Strings
+    private var option by mutableStateOf("")
+
+    //Booleans
+    private var mailVerified by mutableStateOf( false )
+    private var isPasswordChangeInvoked by mutableStateOf( false )
+    private var isEmailChangeInvoked by mutableStateOf( false )
+    private var isDeleteAccountInvoked by mutableStateOf( false )
+    private var isReAuthRequired by mutableStateOf( false )
+    private var isReAuthApproved by mutableStateOf( false )
+    private var isHelpPressed by mutableStateOf( false )
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -81,144 +118,156 @@ class NewUserSettingsActivity : AppCompatActivity() {
         )
 
         setContent {
-            val scope = lifecycleScope
             FreeVicesTheme(useDynamicColors = themeViewModel.isDynamicColor.value) {
-                UserSettingsView(scope)
+                UserSettingsView()
+            }
+        }
+    }
+
+    @Composable
+    fun UserSettingsView() {
+        Scaffold(
+            snackbarHost = { SnackbarHost(snackbarHostState) },
+            topBar = {
+                AppBar()
+            }
+        ) {
+            Body(paddingValues = it)
+        }
+
+        when(option) {
+            NAMECHANGE -> { ChangeNameDialog { option = BLANK } }
+            PASSWORDCHANGE -> { ReAuthDialog(onDismissRequest = { option = BLANK }, option = PASSWORDCHANGE) }
+            EMAILCHANGE -> { ReAuthDialog(onDismissRequest = { option = BLANK }, option = EMAILCHANGE) }
+            DELETEACCOUNT -> { ReAuthDialog(onDismissRequest = { option = BLANK }, option = DELETEACCOUNT) }
+        }
+
+        if (isEmailChangeInvoked) { ChangeEmailDialog { isEmailChangeInvoked = false } }
+
+        if (isPasswordChangeInvoked) { ChangePasswordDialog { isPasswordChangeInvoked = false } }
+
+        if (isDeleteAccountInvoked) { DeleteAccountDialog { isDeleteAccountInvoked = false } }
+    }
+
+    @Composable
+    fun Body(paddingValues: PaddingValues) {
+        val pad = Modifier.padding(16.dp)
+        LazyColumn(modifier = Modifier.padding(paddingValues)) {
+            item {
+                HorizontalDivider(pad)
+                VerifyRow()
+                HorizontalDivider(pad)
+                ChangeNameSetting()
+                ChangePasswordSetting()
+                ChangeEmailSetting()
+                HorizontalDivider(pad)
+                DeleteAccountSetting()
+                HorizontalDivider(pad)
             }
         }
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun UserSettingsView(scope: LifecycleCoroutineScope) {
-        val context = LocalContext.current
-        var isHelpPressed by rememberSaveable { mutableStateOf(false) }
-        if (isHelpPressed) {
-            HelpDialog(
-                onDismissRequest = { isHelpPressed = false },
-                text = LocalContext.current.getString(R.string.user_settings_help)
-            )
-        }
-        var isChangeNameSelected by rememberSaveable { mutableStateOf(false) }
-        if (isChangeNameSelected) {
-            ChangeNameDialog {
-                isChangeNameSelected = false
-            }
-        }
-        var isChangePasswordSelected by rememberSaveable { mutableStateOf(false) }
-        if (isChangePasswordSelected) {
-            ChangePasswordDialog {
-                isChangePasswordSelected = false
-            }
-        }
-        var isChangeEmailSelected by rememberSaveable { mutableStateOf(false) }
-        if (isChangeEmailSelected) {
-            ChangeEmailDialog {
-                isChangeEmailSelected = false
-            }
-        }
-        var isDeleteAccountSelected by rememberSaveable { mutableStateOf(false) }
-        if (isDeleteAccountSelected) {
-            DeleteAccountDialog {
-                isDeleteAccountSelected = false
-            }
-        }
-
-        Scaffold(
-            topBar = {
-                MediumTopAppBar(title = { Text(text = stringResource(R.string.user_settings)) },
-                    scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(),
-                    navigationIcon = {
-                        IconButton(onClick = {
-                            scope.launch {
-                                val intent = Intent(context, NewMainActivity::class.java).apply {
-                                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-                                }
-                                startActivity(intent)
-                            }
-                        }) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = getString(R.string.back))
+    fun AppBar() {
+        MediumTopAppBar(title = { Text(text = stringResource(R.string.user_settings)) },
+            scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(),
+            navigationIcon = {
+                IconButton(onClick = {
+                    scope.launch {
+                        val intent = Intent(context, NewMainActivity::class.java).apply {
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
                         }
-                    },
-                    actions = {
-                        TooltipBox(
-                            positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
-                            tooltip = {
-                                PlainTooltip {
-                                    Text(stringResource(R.string.about_help))
-                                }
-                            },
-                            state = rememberTooltipState()
-                        ) {
-                            IconButton(
-                                onClick = { isHelpPressed = true }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.HelpOutline,
-                                    contentDescription = getString(R.string.help)
-                                )
-                            }
-                        }
+                        startActivity(intent)
                     }
-                )
+                }) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = getString(R.string.back))
+                }
+            },
+            actions = {
+                TooltipBox(
+                    positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+                    tooltip = {
+                        PlainTooltip {
+                            Text(stringResource(R.string.about_help))
+                        }
+                    },
+                    state = rememberTooltipState()
+                ) {
+                    IconButton(
+                        onClick = { isHelpPressed = true }
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.HelpOutline,
+                            contentDescription = getString(R.string.help)
+                        )
+                    }
+                }
             }
+        )
+    }
+
+    @Composable
+    fun VerifyRow() {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Column(modifier = Modifier.padding(it)) {
-                SettingsMenuLink(title = { Text(text = stringResource(R.string.change_display_name)) },
-                    subtitle = { Text(text = stringResource(R.string.change_your_display_name)) },
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Filled.Person,
-                            contentDescription = getString(R.string.change_display_name)
-                        )
-                    },
-                    onClick = {
-                        isChangeNameSelected = true
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                        .height(64.dp))
-                SettingsMenuLink(title = { Text(text = stringResource(R.string.change_password)) },
-                    subtitle = { Text(text = stringResource(R.string.require_your_current_password)) },
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Filled.Password,
-                            contentDescription = getString(R.string.change_password)
-                        )
-                    },
-                    onClick = {
-                        isChangePasswordSelected = true
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                        .height(64.dp))
-                SettingsMenuLink(title = { Text(text = stringResource(R.string.change_email_address)) },
-                    subtitle = { Text(text = stringResource(R.string.update_your_email_address_require_your_current_password)) },
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Filled.AlternateEmail,
-                            contentDescription = getString(R.string.change_email_address)
-                        )
-                    },
-                    onClick = {
-                        isChangeEmailSelected = true
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                        .height(80.dp))
-                HorizontalDivider(modifier = Modifier.padding(16.dp))
-                SettingsMenuLink(title = { Text(text = stringResource(R.string.delete_account)) },
-                    subtitle = { Text(text = stringResource(R.string.delete_your_account_and_all_associated_data_this_cannot_be_undone)) },
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Filled.Delete,
-                            contentDescription = getString(R.string.delete)
-                        )
-                    },
-                    onClick = {
-                        isDeleteAccountSelected = true
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                        .height(80.dp))
+            Text(text = stringResource(R.string.account_status, if (mailVerified) stringResource(R.string.verified) else stringResource(R.string.not_verified)),
+                 modifier = Modifier.padding(16.dp).weight(1f))
+            Spacer(modifier = Modifier.width(16.dp))
+            if (mailVerified) {
+                VerifyButton(state = false)
+            } else {
+                VerifyButton(state = true)
             }
+            Spacer(modifier = Modifier.width(16.dp))
         }
+    }
+
+    @Composable
+    fun ChangeNameSetting() {
+        SettingsMenuLink(
+            title = { Text(text = stringResource(R.string.change_display_name)) },
+            subtitle = { Text(text = stringResource(R.string.change_your_display_name)) },
+            icon = { Icon(imageVector = Icons.Filled.Person, contentDescription = getString(R.string.change_display_name)) },
+            onClick = { option = NAMECHANGE },
+            modifier = Modifier.fillMaxWidth().height(64.dp)
+        )
+    }
+
+    @Composable
+    fun ChangePasswordSetting() {
+        SettingsMenuLink(
+            title = { Text(text = stringResource(R.string.change_password)) },
+            subtitle = { Text(text = stringResource(R.string.require_your_current_password)) },
+            icon = { Icon(imageVector = Icons.Filled.Password, contentDescription = getString(R.string.change_password)) },
+            onClick = { option = PASSWORDCHANGE },
+            modifier = Modifier.fillMaxWidth().height(64.dp)
+        )
+    }
+
+    @Composable
+    fun ChangeEmailSetting() {
+        SettingsMenuLink(
+            title = { Text(text = stringResource(R.string.change_email_address)) },
+            subtitle = { Text(text = stringResource(R.string.update_your_email_address_require_your_current_password)) },
+            icon = { Icon(imageVector = Icons.Filled.AlternateEmail, contentDescription = getString(R.string.change_email_address)) },
+            onClick = { option = EMAILCHANGE },
+            modifier = Modifier.fillMaxWidth().height(80.dp)
+        )
+    }
+
+    @Composable
+    fun DeleteAccountSetting() {
+        SettingsMenuLink(
+            title = { Text(text = stringResource(R.string.delete_account)) },
+            subtitle = { Text(text = stringResource(R.string.delete_your_account_and_all_associated_data_this_cannot_be_undone)) },
+            icon = { Icon(imageVector = Icons.Filled.Delete, contentDescription = getString(R.string.delete)) },
+            onClick = { option = DELETEACCOUNT; isReAuthRequired = true},
+            modifier = Modifier.fillMaxWidth().height(80.dp)
+        )
     }
 
     private fun splitNames(input: String): Pair<String, String>? {
@@ -255,69 +304,31 @@ class NewUserSettingsActivity : AppCompatActivity() {
     @Composable
     fun DeleteAccountDialog(onDismissRequest: () -> Unit) {
         val scope = rememberCoroutineScope()
-        val snackbarHost = remember { SnackbarHostState() }
         val context = LocalContext.current
         var isDeleteAccountConfirmed by rememberSaveable { mutableStateOf(false) }
         if (isDeleteAccountConfirmed) {
             FirebaseUtils.deleteAccount(
                 onSuccess = {
-                    scope.launch {
-                        snackbarHost.showSnackbar(
-                            message = context.getString(R.string.account_deleted),
-                            duration = SnackbarDuration.Short
-                        )
-                    }
-                    val intent = Intent(context, LoginActivity::class.java).apply {
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-                    }
+                    scope.launch { snackbarHostState.showSnackbar(message = context.getString(R.string.account_deleted), duration = SnackbarDuration.Short) }
+                    val intent = Intent(context, LoginActivity::class.java).apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK) }
                     startActivity(context, intent, null)
                     onDismissRequest()
                 },
                 {
-                    scope.launch {
-                        snackbarHost.showSnackbar(
-                            message = context.getString(
-                                R.string.error_deleting_account,
-                                it.message
-                            ),
-                        )
-                    }
+                    scope.launch { snackbarHostState.showSnackbar(message = context.getString(R.string.error_deleting_account, it.message),
+                        duration = SnackbarDuration.Short) }
                 }
             )
             onDismissRequest()
         }
 
         AlertDialog(
-            onDismissRequest = {
-                onDismissRequest()
-            },
+            onDismissRequest = { onDismissRequest() },
             icon = { Icon(Icons.Filled.Delete, contentDescription = getString(R.string.delete)) },
-            title = {
-                Text(text = stringResource(R.string.delete_account))
-            },
-            text = {
-                Text(
-                    stringResource(R.string.delete_account_warning),
-                    style = MaterialTheme.typography.bodyLarge
-                )
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        isDeleteAccountConfirmed = true
-                    }
-                ) {
-                    Text(stringResource(R.string.delete))
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = {
-                        onDismissRequest()
-                    }
-                ) {
-                    Text(stringResource(R.string.cancel))
-                }
+            title = { Text(text = stringResource(R.string.delete_account)) },
+            text = { Text(stringResource(R.string.delete_account_warning), style = MaterialTheme.typography.bodyLarge) },
+            confirmButton = { TextButton(onClick = { isDeleteAccountConfirmed = true }) { Text(stringResource(R.string.delete)) } },
+            dismissButton = { TextButton(onClick = { onDismissRequest() ; option = BLANK }) { Text(stringResource(R.string.cancel)) }
             }
         )
     }
@@ -378,7 +389,6 @@ class NewUserSettingsActivity : AppCompatActivity() {
         var isChangePasswordConfirmed by rememberSaveable { mutableStateOf(false) }
         var newPassword by remember { mutableStateOf("") }
         var confirmNewPassword by remember { mutableStateOf("") }
-        val snackbarHostState = remember { SnackbarHostState() }
         val scope = rememberCoroutineScope()
         if (isChangePasswordConfirmed) {
             FirebaseUtils.configPasswordOnAuth(newPassword, onSuccess = {
@@ -443,6 +453,7 @@ class NewUserSettingsActivity : AppCompatActivity() {
             dismissButton = {
                 TextButton(
                     onClick = {
+                        option = BLANK
                         onDismissRequest()
                     }
                 ) {
@@ -457,7 +468,6 @@ class NewUserSettingsActivity : AppCompatActivity() {
         val context = LocalContext.current
         var isChangeEmailConfirmed by rememberSaveable { mutableStateOf(false) }
         var newEmail by remember { mutableStateOf("") }
-        val snackbarHostState = remember { SnackbarHostState() }
         val scope = rememberCoroutineScope()
         if (isChangeEmailConfirmed) {
             FirebaseUtils.configEmailOnAuth(newEmail, onSuccess = {
@@ -505,6 +515,7 @@ class NewUserSettingsActivity : AppCompatActivity() {
                 TextButton(
                     onClick = {
                         onDismissRequest()
+                        option = BLANK
                     }
                 ) {
                     Text(stringResource(R.string.cancel))
@@ -513,7 +524,112 @@ class NewUserSettingsActivity : AppCompatActivity() {
         )
     }
 
+    @Composable
+    fun VerifyButton(state: Boolean) {
+        val scope = rememberCoroutineScope()
+        var isLoading by remember { mutableStateOf(false) }
+        if (isLoading) {
+            DialogForLoad { }
+        }
+        Button(
+            onClick = {
+                isLoading = true
+                FirebaseUtils.sendEmailVerification(
+                    onSuccess = {
+                        scope.launch {
+                            snackbarHostState.showSnackbar(
+                                message = getString(R.string.verification_email_sent),
+                                duration = SnackbarDuration.Short,
+                                withDismissAction = true
+                            )
+                        }
+                        isLoading = false
+                }, onFailure = {
+                    isLoading = false
+                })
+            },
+            enabled = state
+        ) {
+            Text(stringResource(R.string.verify))
+        }
+    }
+
+    @Composable
+    fun ReAuthDialog(onDismissRequest: () -> Unit, option: String) {
+        val user = FirebaseAuth.getInstance().currentUser
+        val userEmail = user?.email
+        var password by remember { mutableStateOf("") }
+        var passwordHidden by rememberSaveable { mutableStateOf(true) }
+        var isPasswordFilled by remember { mutableStateOf(false) }
+
+        AlertDialog(
+            onDismissRequest = {
+                onDismissRequest()
+            },
+            icon = { Icon(Icons.Filled.Lock, contentDescription = getString(R.string.password)) },
+            title = { Text(text = stringResource(R.string.reauth)) },
+            text = {
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    singleLine = true,
+                    isError = password.isEmpty(),
+                    label = { Text(stringResource(R.string.enter_password)) },
+                    visualTransformation = if (passwordHidden) PasswordVisualTransformation() else VisualTransformation.None,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
+                    keyboardActions = KeyboardActions(onDone = { dismissKeyboardShortcutsHelper() ; onDismissRequest() }),
+                    trailingIcon = { IconButton(onClick = { passwordHidden = !passwordHidden }) {
+                            val visibilityIcon = if (passwordHidden) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
+                            val description = if (passwordHidden) stringResource(R.string.show_password) else stringResource(R.string.hide_password)
+                            Icon(imageVector = visibilityIcon, contentDescription = description) }
+                    }
+                )
+            },
+            confirmButton = { TextButton(onClick = { isPasswordFilled = true }) { Text(stringResource(R.string.confirm)) } },
+            dismissButton = { TextButton(onClick = { onDismissRequest() }) { Text(stringResource(R.string.cancel)) } }
+        )
+
+        if (isPasswordFilled) {
+            if (userEmail != null && password.isNotEmpty()) {
+                FirebaseUtils.reAuthenticate(userEmail, password) { result ->
+                    when (result) {
+                        is FirebaseUtils.AuthResult.Success -> {
+                            isReAuthApproved = true
+                            when (option) {
+                                PASSWORDCHANGE -> {
+                                    isPasswordChangeInvoked = true
+                                }
+                                EMAILCHANGE -> {
+                                    isEmailChangeInvoked = true
+                                }
+                                DELETEACCOUNT -> {
+                                    isDeleteAccountInvoked = true
+                                }
+                            }
+                        }
+                        is FirebaseUtils.AuthResult.Failure -> {
+                            val exception = result.exception
+                            onDismissRequest()
+                            scope.launch{
+                                snackbarHostState.showSnackbar(
+                                    message = exception.message.toString(),
+                                    duration = SnackbarDuration.Short,
+                                    withDismissAction = true
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     companion object {
+        private const val BLANK = ""
+        private const val EMAILCHANGE = "emailchange"
+        private const val PASSWORDCHANGE = "passwordchange"
+        private const val NAMECHANGE = "namechange"
+        private const val DELETEACCOUNT = "deleteaccount"
         private const val ZERO = 0
         private const val ONE = 1
         private const val TWO = 2
