@@ -422,7 +422,6 @@ object FirebaseUtils {
         callback: (AuthResult) -> Unit
     ) {
         val user = FirebaseAuth.getInstance().currentUser
-
         user?.reauthenticate(EmailAuthProvider.getCredential(email, password))
             ?.addOnCompleteListener { task ->
                 if (task.isSuccessful) {

@@ -2,6 +2,7 @@ package com.sgtech.freevices.views.ui.settings
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -32,11 +33,13 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumTopAppBar
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Scaffold
@@ -58,7 +61,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.Modifier.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -66,6 +68,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.startActivity
 import com.alorma.compose.settings.ui.SettingsMenuLink
@@ -95,13 +98,15 @@ class NewUserSettingsActivity : AppCompatActivity() {
     private var option by mutableStateOf("")
 
     //Booleans
-    private var mailVerified by mutableStateOf( false )
-    private var isPasswordChangeInvoked by mutableStateOf( false )
-    private var isEmailChangeInvoked by mutableStateOf( false )
-    private var isDeleteAccountInvoked by mutableStateOf( false )
-    private var isReAuthRequired by mutableStateOf( false )
-    private var isReAuthApproved by mutableStateOf( false )
-    private var isHelpPressed by mutableStateOf( false )
+    private var mailVerified by mutableStateOf(false)
+    private var isPasswordChangeInvoked by mutableStateOf(false)
+    private var isEmailChangeInvoked by mutableStateOf(false)
+    private var isDeleteAccountInvoked by mutableStateOf(false)
+    private var isReAuthRequired by mutableStateOf(false)
+    private var isReAuthApproved by mutableStateOf(false)
+    private var isHelpPressed by mutableStateOf(false)
+    private var passwordHidden by mutableStateOf(true)
+    private var isPasswordFilled by mutableStateOf(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -135,18 +140,35 @@ class NewUserSettingsActivity : AppCompatActivity() {
             Body(paddingValues = it)
         }
 
-        when(option) {
-            NAMECHANGE -> { ChangeNameDialog { option = BLANK } }
-            PASSWORDCHANGE -> { ReAuthDialog(onDismissRequest = { option = BLANK }, option = PASSWORDCHANGE) }
-            EMAILCHANGE -> { ReAuthDialog(onDismissRequest = { option = BLANK }, option = EMAILCHANGE) }
-            DELETEACCOUNT -> { ReAuthDialog(onDismissRequest = { option = BLANK }, option = DELETEACCOUNT) }
+        when (option) {
+            NAMECHANGE -> {
+                ChangeNameDialog { option = BLANK }
+            }
+
+            PASSWORDCHANGE -> {
+                ReAuthDialog(onDismissRequest = { option = BLANK }, option = PASSWORDCHANGE)
+            }
+
+            EMAILCHANGE -> {
+                ReAuthDialog(onDismissRequest = { option = BLANK }, option = EMAILCHANGE)
+            }
+
+            DELETEACCOUNT -> {
+                ReAuthDialog(onDismissRequest = { option = BLANK }, option = DELETEACCOUNT)
+            }
         }
 
-        if (isEmailChangeInvoked) { ChangeEmailDialog { isEmailChangeInvoked = false } }
+        if (isEmailChangeInvoked) {
+            ChangeEmailDialog { isEmailChangeInvoked = false }
+        }
 
-        if (isPasswordChangeInvoked) { ChangePasswordDialog { isPasswordChangeInvoked = false } }
+        if (isPasswordChangeInvoked) {
+            ChangePasswordDialog { isPasswordChangeInvoked = false }
+        }
 
-        if (isDeleteAccountInvoked) { DeleteAccountDialog { isDeleteAccountInvoked = false } }
+        if (isDeleteAccountInvoked) {
+            DeleteAccountDialog { isDeleteAccountInvoked = false }
+        }
     }
 
     @Composable
@@ -181,7 +203,10 @@ class NewUserSettingsActivity : AppCompatActivity() {
                         startActivity(intent)
                     }
                 }) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = getString(R.string.back))
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = getString(R.string.back)
+                    )
                 }
             },
             actions = {
@@ -214,8 +239,15 @@ class NewUserSettingsActivity : AppCompatActivity() {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(text = stringResource(R.string.account_status, if (mailVerified) stringResource(R.string.verified) else stringResource(R.string.not_verified)),
-                 modifier = Modifier.padding(16.dp).weight(1f))
+            Text(
+                text = stringResource(
+                    R.string.account_status,
+                    if (mailVerified) stringResource(R.string.verified) else stringResource(R.string.not_verified)
+                ),
+                modifier = Modifier
+                    .padding(16.dp)
+                    .weight(1f)
+            )
             Spacer(modifier = Modifier.width(16.dp))
             if (mailVerified) {
                 VerifyButton(state = false)
@@ -231,9 +263,16 @@ class NewUserSettingsActivity : AppCompatActivity() {
         SettingsMenuLink(
             title = { Text(text = stringResource(R.string.change_display_name)) },
             subtitle = { Text(text = stringResource(R.string.change_your_display_name)) },
-            icon = { Icon(imageVector = Icons.Filled.Person, contentDescription = getString(R.string.change_display_name)) },
+            icon = {
+                Icon(
+                    imageVector = Icons.Filled.Person,
+                    contentDescription = getString(R.string.change_display_name)
+                )
+            },
             onClick = { option = NAMECHANGE },
-            modifier = Modifier.fillMaxWidth().height(64.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(64.dp)
         )
     }
 
@@ -242,9 +281,16 @@ class NewUserSettingsActivity : AppCompatActivity() {
         SettingsMenuLink(
             title = { Text(text = stringResource(R.string.change_password)) },
             subtitle = { Text(text = stringResource(R.string.require_your_current_password)) },
-            icon = { Icon(imageVector = Icons.Filled.Password, contentDescription = getString(R.string.change_password)) },
+            icon = {
+                Icon(
+                    imageVector = Icons.Filled.Password,
+                    contentDescription = getString(R.string.change_password)
+                )
+            },
             onClick = { option = PASSWORDCHANGE },
-            modifier = Modifier.fillMaxWidth().height(64.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(64.dp)
         )
     }
 
@@ -253,9 +299,16 @@ class NewUserSettingsActivity : AppCompatActivity() {
         SettingsMenuLink(
             title = { Text(text = stringResource(R.string.change_email_address)) },
             subtitle = { Text(text = stringResource(R.string.update_your_email_address_require_your_current_password)) },
-            icon = { Icon(imageVector = Icons.Filled.AlternateEmail, contentDescription = getString(R.string.change_email_address)) },
+            icon = {
+                Icon(
+                    imageVector = Icons.Filled.AlternateEmail,
+                    contentDescription = getString(R.string.change_email_address)
+                )
+            },
             onClick = { option = EMAILCHANGE },
-            modifier = Modifier.fillMaxWidth().height(80.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(80.dp)
         )
     }
 
@@ -264,9 +317,16 @@ class NewUserSettingsActivity : AppCompatActivity() {
         SettingsMenuLink(
             title = { Text(text = stringResource(R.string.delete_account)) },
             subtitle = { Text(text = stringResource(R.string.delete_your_account_and_all_associated_data_this_cannot_be_undone)) },
-            icon = { Icon(imageVector = Icons.Filled.Delete, contentDescription = getString(R.string.delete)) },
-            onClick = { option = DELETEACCOUNT; isReAuthRequired = true},
-            modifier = Modifier.fillMaxWidth().height(80.dp)
+            icon = {
+                Icon(
+                    imageVector = Icons.Filled.Delete,
+                    contentDescription = getString(R.string.delete)
+                )
+            },
+            onClick = { option = DELETEACCOUNT; isReAuthRequired = true },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(80.dp)
         )
     }
 
@@ -309,14 +369,29 @@ class NewUserSettingsActivity : AppCompatActivity() {
         if (isDeleteAccountConfirmed) {
             FirebaseUtils.deleteAccount(
                 onSuccess = {
-                    scope.launch { snackbarHostState.showSnackbar(message = context.getString(R.string.account_deleted), duration = SnackbarDuration.Short) }
-                    val intent = Intent(context, LoginActivity::class.java).apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK) }
+                    scope.launch {
+                        snackbarHostState.showSnackbar(
+                            message = context.getString(R.string.account_deleted),
+                            duration = SnackbarDuration.Short
+                        )
+                    }
+                    val intent = Intent(
+                        context,
+                        LoginActivity::class.java
+                    ).apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK) }
                     startActivity(context, intent, null)
                     onDismissRequest()
                 },
                 {
-                    scope.launch { snackbarHostState.showSnackbar(message = context.getString(R.string.error_deleting_account, it.message),
-                        duration = SnackbarDuration.Short) }
+                    scope.launch {
+                        snackbarHostState.showSnackbar(
+                            message = context.getString(
+                                R.string.error_deleting_account,
+                                it.message
+                            ),
+                            duration = SnackbarDuration.Short
+                        )
+                    }
                 }
             )
             onDismissRequest()
@@ -326,9 +401,23 @@ class NewUserSettingsActivity : AppCompatActivity() {
             onDismissRequest = { onDismissRequest() },
             icon = { Icon(Icons.Filled.Delete, contentDescription = getString(R.string.delete)) },
             title = { Text(text = stringResource(R.string.delete_account)) },
-            text = { Text(stringResource(R.string.delete_account_warning), style = MaterialTheme.typography.bodyLarge) },
-            confirmButton = { TextButton(onClick = { isDeleteAccountConfirmed = true }) { Text(stringResource(R.string.delete)) } },
-            dismissButton = { TextButton(onClick = { onDismissRequest() ; option = BLANK }) { Text(stringResource(R.string.cancel)) }
+            text = {
+                Text(
+                    stringResource(R.string.delete_account_warning),
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = { isDeleteAccountConfirmed = true }) {
+                    Text(
+                        stringResource(R.string.delete)
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    onDismissRequest(); option = BLANK
+                }) { Text(stringResource(R.string.cancel)) }
             }
         )
     }
@@ -351,7 +440,12 @@ class NewUserSettingsActivity : AppCompatActivity() {
             onDismissRequest = {
                 onDismissRequest()
             },
-            icon = { Icon(Icons.Filled.Person, contentDescription = getString(R.string.change_display_name)) },
+            icon = {
+                Icon(
+                    Icons.Filled.Person,
+                    contentDescription = getString(R.string.change_display_name)
+                )
+            },
             title = {
                 Text(text = stringResource(R.string.change_display_name))
             },
@@ -386,23 +480,50 @@ class NewUserSettingsActivity : AppCompatActivity() {
     @Composable
     fun ChangePasswordDialog(onDismissRequest: () -> Unit) {
         val context = LocalContext.current
+        var showReLogin by rememberSaveable { mutableStateOf(false) }
         var isChangePasswordConfirmed by rememberSaveable { mutableStateOf(false) }
         var newPassword by remember { mutableStateOf("") }
         var confirmNewPassword by remember { mutableStateOf("") }
         val scope = rememberCoroutineScope()
+
+        if (showReLogin) {
+            ReLoginDialog(onDismissRequest = {
+                showReLogin = false
+                val intent = Intent(
+                    context,
+                    LoginActivity::class.java
+                ).apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK) }
+                startActivity(context, intent, null)
+            })
+        }
         if (isChangePasswordConfirmed) {
             FirebaseUtils.configPasswordOnAuth(newPassword, onSuccess = {
-                scope.launch {
-                    snackbarHostState.showSnackbar(
-                        message = context.getString(R.string.password_changed_successfully),
-                        duration = SnackbarDuration.Short
-                    )
-                }
+                FirebaseUtils.signOut(onSuccess = {
+                    val intent = Intent(context, LoginActivity::class.java).apply {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                    }
+                    startActivity(intent)
+                    onDismissRequest()
+                }, onFailure = {
+                    scope.launch {
+                        snackbarHostState.showSnackbar(
+                            message = context.getString(
+                                R.string.error_updating_password,
+                                it.message
+                            ),
+                            duration = SnackbarDuration.Short,
+                            withDismissAction = true
+                        )
+                    }
+                })
+
             }, onFailure = {
                 scope.launch {
+                    Log.d("ChangePassword", "Password change failed")
                     snackbarHostState.showSnackbar(
                         message = context.getString(R.string.error_updating_password, it.message),
-                        duration = SnackbarDuration.Short
+                        duration = SnackbarDuration.Short,
+                        withDismissAction = true
                     )
                 }
             })
@@ -413,27 +534,76 @@ class NewUserSettingsActivity : AppCompatActivity() {
             onDismissRequest = {
                 onDismissRequest()
             },
-            icon = { Icon(Icons.Filled.Password, contentDescription = getString(R.string.change_password)) },
+            icon = {
+                Icon(
+                    Icons.Filled.Password,
+                    contentDescription = getString(R.string.change_password)
+                )
+            },
             title = {
                 Text(text = stringResource(R.string.change_password))
             },
             text = {
                 Column {
+                    Text(
+                        text = stringResource(R.string.if_change_if_successful_you_must_login_again),
+                        style = MaterialTheme.typography.bodyLarge,
+                        textAlign = TextAlign.Center
+                    )
+                    HorizontalDivider(modifier = Modifier.padding(8.dp))
                     OutlinedTextField(
                         value = newPassword,
                         onValueChange = { newPassword = it },
-                        label = { Text(stringResource(R.string.new_password)) }
+                        singleLine = true,
+                        isError = newPassword.isEmpty(),
+                        label = { Text(stringResource(R.string.enter_password)) },
+                        visualTransformation = if (passwordHidden) PasswordVisualTransformation() else VisualTransformation.None,
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Password,
+                            imeAction = ImeAction.Done
+                        ),
+                        keyboardActions = KeyboardActions(onDone = { dismissKeyboardShortcutsHelper(); onDismissRequest() }),
+                        trailingIcon = {
+                            IconButton(onClick = { passwordHidden = !passwordHidden }) {
+                                val visibilityIcon =
+                                    if (passwordHidden) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
+                                val description =
+                                    if (passwordHidden) stringResource(R.string.show_password) else stringResource(
+                                        R.string.hide_password
+                                    )
+                                Icon(imageVector = visibilityIcon, contentDescription = description)
+                            }
+                        }
                     )
                     Spacer(modifier = Modifier.padding(8.dp))
                     OutlinedTextField(
                         value = confirmNewPassword,
                         onValueChange = { confirmNewPassword = it },
-                        label = { Text(stringResource(R.string.confirm_new_password)) }
+                        singleLine = true,
+                        isError = confirmNewPassword.isEmpty(),
+                        label = { Text(stringResource(R.string.enter_password)) },
+                        visualTransformation = if (passwordHidden) PasswordVisualTransformation() else VisualTransformation.None,
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Password,
+                            imeAction = ImeAction.Done
+                        ),
+                        keyboardActions = KeyboardActions(onDone = { dismissKeyboardShortcutsHelper(); onDismissRequest() }),
+                        trailingIcon = {
+                            IconButton(onClick = { passwordHidden = !passwordHidden }) {
+                                val visibilityIcon =
+                                    if (passwordHidden) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
+                                val description =
+                                    if (passwordHidden) stringResource(R.string.show_password) else stringResource(
+                                        R.string.hide_password
+                                    )
+                                Icon(imageVector = visibilityIcon, contentDescription = description)
+                            }
+                        }
                     )
                 }
             },
             confirmButton = {
-                TextButton(
+                FilledTonalButton(
                     onClick = {
                         if (newPassword == confirmNewPassword) {
                             isChangePasswordConfirmed = true
@@ -447,19 +617,30 @@ class NewUserSettingsActivity : AppCompatActivity() {
                         }
                     }
                 ) {
-                    Text(stringResource(R.string.confirm))
+                    Text(stringResource(R.string.confirm_and_login))
                 }
             },
             dismissButton = {
-                TextButton(
-                    onClick = {
-                        option = BLANK
-                        onDismissRequest()
-                    }
-                ) {
+                OutlinedButton(onClick = { option = BLANK; onDismissRequest() }) {
                     Text(stringResource(R.string.cancel))
                 }
             }
+        )
+    }
+
+    @Composable
+    fun ReLoginDialog(onDismissRequest: () -> Unit) {
+        AlertDialog(
+            onDismissRequest = { onDismissRequest() },
+            confirmButton = {
+                val intent = Intent(
+                    context,
+                    LoginActivity::class.java
+                ).apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK) }
+                startActivity(context, intent, null)
+            },
+            title = { Text(text = stringResource(R.string.password_changed_successfully)) },
+            text = { Text(text = stringResource(R.string.relogin)) },
         )
     }
 
@@ -492,7 +673,12 @@ class NewUserSettingsActivity : AppCompatActivity() {
             onDismissRequest = {
                 onDismissRequest()
             },
-            icon = { Icon(Icons.Filled.Email, contentDescription = getString(R.string.change_email_address)) },
+            icon = {
+                Icon(
+                    Icons.Filled.Email,
+                    contentDescription = getString(R.string.change_email_address)
+                )
+            },
             title = {
                 Text(text = stringResource(R.string.change_email_address))
             },
@@ -544,9 +730,9 @@ class NewUserSettingsActivity : AppCompatActivity() {
                             )
                         }
                         isLoading = false
-                }, onFailure = {
-                    isLoading = false
-                })
+                    }, onFailure = {
+                        isLoading = false
+                    })
             },
             enabled = state
         ) {
@@ -559,8 +745,6 @@ class NewUserSettingsActivity : AppCompatActivity() {
         val user = FirebaseAuth.getInstance().currentUser
         val userEmail = user?.email
         var password by remember { mutableStateOf("") }
-        var passwordHidden by rememberSaveable { mutableStateOf(true) }
-        var isPasswordFilled by remember { mutableStateOf(false) }
 
         AlertDialog(
             onDismissRequest = {
@@ -576,16 +760,31 @@ class NewUserSettingsActivity : AppCompatActivity() {
                     isError = password.isEmpty(),
                     label = { Text(stringResource(R.string.enter_password)) },
                     visualTransformation = if (passwordHidden) PasswordVisualTransformation() else VisualTransformation.None,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
-                    keyboardActions = KeyboardActions(onDone = { dismissKeyboardShortcutsHelper() ; onDismissRequest() }),
-                    trailingIcon = { IconButton(onClick = { passwordHidden = !passwordHidden }) {
-                            val visibilityIcon = if (passwordHidden) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
-                            val description = if (passwordHidden) stringResource(R.string.show_password) else stringResource(R.string.hide_password)
-                            Icon(imageVector = visibilityIcon, contentDescription = description) }
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Password,
+                        imeAction = ImeAction.Done
+                    ),
+                    keyboardActions = KeyboardActions(onDone = { dismissKeyboardShortcutsHelper(); onDismissRequest() }),
+                    trailingIcon = {
+                        IconButton(onClick = { passwordHidden = !passwordHidden }) {
+                            val visibilityIcon =
+                                if (passwordHidden) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
+                            val description =
+                                if (passwordHidden) stringResource(R.string.show_password) else stringResource(
+                                    R.string.hide_password
+                                )
+                            Icon(imageVector = visibilityIcon, contentDescription = description)
+                        }
                     }
                 )
             },
-            confirmButton = { TextButton(onClick = { isPasswordFilled = true }) { Text(stringResource(R.string.confirm)) } },
+            confirmButton = {
+                TextButton(onClick = { isPasswordFilled = true }) {
+                    Text(
+                        stringResource(R.string.confirm)
+                    )
+                }
+            },
             dismissButton = { TextButton(onClick = { onDismissRequest() }) { Text(stringResource(R.string.cancel)) } }
         )
 
@@ -599,18 +798,21 @@ class NewUserSettingsActivity : AppCompatActivity() {
                                 PASSWORDCHANGE -> {
                                     isPasswordChangeInvoked = true
                                 }
+
                                 EMAILCHANGE -> {
                                     isEmailChangeInvoked = true
                                 }
+
                                 DELETEACCOUNT -> {
                                     isDeleteAccountInvoked = true
                                 }
                             }
                         }
+
                         is FirebaseUtils.AuthResult.Failure -> {
                             val exception = result.exception
                             onDismissRequest()
-                            scope.launch{
+                            scope.launch {
                                 snackbarHostState.showSnackbar(
                                     message = exception.message.toString(),
                                     duration = SnackbarDuration.Short,

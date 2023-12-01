@@ -76,13 +76,11 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -108,6 +106,13 @@ class NewMainActivity : ComponentActivity() {
     private val snackbarHostState = SnackbarHostState()
     private val scope = CoroutineScope(Dispatchers.Main)
     private var isLoading by mutableStateOf(false)
+    private var isMenuVisible by mutableStateOf(false)
+    private val currentUser = FirebaseUtils.getCurrentUser()
+    private val currentDisplayName = currentUser?.displayName ?: ""
+    private val activity = Activity()
+    private val context = this
+    private var isDialogOpen by mutableStateOf(false)
+    private var isHelpPressed by  mutableStateOf(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -130,7 +135,6 @@ class NewMainActivity : ComponentActivity() {
 
     @Composable
     fun NewMainScreen() {
-        val context = LocalContext.current
         val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
         val scaffoldScope = rememberCoroutineScope()
         val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
@@ -138,19 +142,12 @@ class NewMainActivity : ComponentActivity() {
         val alcoholData by viewModel.alcoholLiveData.observeAsState(initial = 0f)
         val partiesData by viewModel.partiesLiveData.observeAsState(initial = 0f)
         val othersData by viewModel.othersLiveData.observeAsState(initial = 0f)
-        var isDialogOpen by remember { mutableStateOf(false) }
-        var isHelpPressed by remember { mutableStateOf(false) }
         val totals = tobaccoData + alcoholData + partiesData + othersData
         if(isHelpPressed) {
             HelpDialog(onDismissRequest = { isHelpPressed = false }, text = stringResource(id = R.string.help_acc))
         }
 
-        ModalNavigationDrawer(
-            drawerState = drawerState,
-            drawerContent = {
-                MainNavigationDrawer()
-            }
-        ) {
+        ModalNavigationDrawer(drawerState = drawerState, drawerContent = { MainNavigationDrawer() }) {
             Scaffold(
                 Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
                 topBar = {
@@ -171,12 +168,8 @@ class NewMainActivity : ComponentActivity() {
                                         if (isClosed) open() else close()
                                     }
                                 }
-                            }) {
-                                Icon(
-                                    imageVector = Icons.Filled.Menu,
-                                    contentDescription = stringResource(R.string.menu),
-                                )
-                            }
+                            })
+                            { Icon(imageVector = Icons.Filled.Menu, contentDescription = stringResource(R.string.menu),) }
                         },
                         actions = {
                             IconButton(onClick = {
@@ -186,12 +179,8 @@ class NewMainActivity : ComponentActivity() {
                                     )
                                     context.startActivity(intent)
                                 }
-                            }) {
-                                Icon(
-                                    imageVector = Icons.Filled.Settings,
-                                    contentDescription = stringResource(id = R.string.settings),
-                                )
-                            }
+                            }) { Icon(imageVector = Icons.Filled.Settings, contentDescription = stringResource(id = R.string.settings),) }
+
                             IconButton(onClick = {
                                 scope.launch {
                                     val intent = Intent(
@@ -199,28 +188,13 @@ class NewMainActivity : ComponentActivity() {
                                     )
                                     context.startActivity(intent)
                                 }
-                            }) {
-                                Icon(
-                                    imageVector = Icons.Filled.History,
-                                    contentDescription = stringResource(id = R.string.history_acc),
-                                )
-                            }
+                            }) { Icon(imageVector = Icons.Filled.History, contentDescription = stringResource(id = R.string.history_acc),) }
+
                             TooltipBox(
                                 positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
-                                tooltip = {
-                                    PlainTooltip {
-                                        Text(stringResource(R.string.about_help))
-                                    }
-                                },
+                                tooltip = { PlainTooltip { Text(stringResource(R.string.about_help)) } },
                                 state = rememberTooltipState()
-                            ) {
-                                IconButton(onClick = { isHelpPressed = true }
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.AutoMirrored.Filled.HelpOutline,
-                                        contentDescription = stringResource(id = R.string.help_content),
-                                    )
-                                }
+                            ) { IconButton(onClick = { isHelpPressed = true }) { Icon(imageVector = Icons.AutoMirrored.Filled.HelpOutline, contentDescription = stringResource(id = R.string.help_content),) }
                             }
                         }
                     )
@@ -228,12 +202,8 @@ class NewMainActivity : ComponentActivity() {
                 snackbarHost = { SnackbarHost(snackbarHostState) },
                 content = { padding ->
                     LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(padding)
-                            .padding(60.dp, 60.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
+                        modifier = Modifier.fillMaxSize().padding(padding).padding(60.dp, 60.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally) {
                         item {
                             CategoryCard(tobaccoData.toInt(), stringResource(R.string.tobacco))
                             Spacer(modifier = Modifier.padding(20.dp))
@@ -246,23 +216,10 @@ class NewMainActivity : ComponentActivity() {
                     }
                 },
                 bottomBar = {
-                    BottomAppBar(
-                        actions = {
-                            TextButton(onClick = {
-                                isDialogOpen = true
-                            }) {
-                                Text(
-                                    text = stringResource(
-                                        R.string.week_spend,
-                                        totals.toInt()
-                                    ),
-                                    style = MaterialTheme.typography.bodyLarge
-                                )
-                            }
-                        },
-                        floatingActionButton = {
-                            HomeFab()
-                        }
+                    BottomAppBar(actions = { TextButton(onClick = { isDialogOpen = true } ) {
+                                Text(text = stringResource(R.string.week_spend, totals.toInt()),
+                                    style = MaterialTheme.typography.bodyLarge) } },
+                        floatingActionButton = { HomeFab() }
                     )
                 },
             )
@@ -333,54 +290,37 @@ class NewMainActivity : ComponentActivity() {
     fun CategoryCard(value: Int, category: String){
         var isDialogOpen by remember { mutableStateOf(false) }
         ElevatedCard(
-            elevation = CardDefaults.cardElevation(
-                defaultElevation = 6.dp
-            ),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer
-            ),
-            modifier = Modifier
-                .size(width = 240.dp, height = 120.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+            modifier = Modifier.size(width = 240.dp, height = 120.dp),
             onClick = { isDialogOpen = true }
         ) {
             Text(
                 text = category,
-                modifier = Modifier
-                    .padding(16.dp),
+                modifier = Modifier.padding(16.dp),
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onPrimaryContainer
             )
             Text(
                 text = "$$value",
-                modifier = Modifier
-                    .padding(16.dp),
+                modifier = Modifier.padding(16.dp),
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onPrimaryContainer
             )
         }
         if (isDialogOpen) {
-            DetailsExtendedDialog(
-                onDismissRequest = { isDialogOpen = false }, category
-            )
+            DetailsExtendedDialog( onDismissRequest = { isDialogOpen = false }, category )
         }
     }
 
     @Composable
     fun HomeFab() {
-        var isMenuVisible by rememberSaveable { mutableStateOf(false) }
-
-        if (isMenuVisible) {
-            ExpenseModalSheet {
-                isMenuVisible = false
-            }
-        }
+        if (isMenuVisible) { ExpenseModalSheet { isMenuVisible = false } }
 
         ExtendedFloatingActionButton(
-            onClick = {
-                isMenuVisible = true
-            },
+            onClick = { isMenuVisible = true },
             icon = { Icon(Icons.Filled.Add, stringResource(R.string.add_expense_button)) },
             text = { Text(text = stringResource(R.string.add)) },
         )
@@ -388,10 +328,6 @@ class NewMainActivity : ComponentActivity() {
 
     @Composable
     fun MainNavigationDrawer(){
-        val currentUser = FirebaseUtils.getCurrentUser()
-        val currentDisplayName = currentUser?.displayName ?: ""
-        val activity = Activity()
-        val context = LocalContext.current
         val displayName by viewModel.displayName.observeAsState(currentDisplayName)
         viewModel.setDisplayName(currentUser?.displayName)
         var signOutRequest by remember { mutableStateOf(false) }
@@ -432,11 +368,7 @@ class NewMainActivity : ComponentActivity() {
                 label = { Text(text = stringResource(id = R.string.account_settings)) },
                 icon = { Icon(Icons.Filled.Settings, contentDescription = stringResource(R.string.account_settings_acc)) },
                 selected = false,
-                onClick = {
-                    val intent = Intent(context,
-                        NewUserSettingsActivity::class.java)
-                    context.startActivity(intent)
-                }
+                onClick = { val intent = Intent(context, NewUserSettingsActivity::class.java); context.startActivity(intent) }
             )
             Row(modifier = Modifier.fillMaxSize(),
                 verticalAlignment = Alignment.Bottom) {
@@ -457,16 +389,9 @@ class NewMainActivity : ComponentActivity() {
         val exitDisplayName = ""
         Dialog(
             onDismissRequest = { onDismissRequest() },
-            properties = DialogProperties(
-                dismissOnBackPress = true,
-                dismissOnClickOutside = true
-            )
+            properties = DialogProperties(dismissOnBackPress = true, dismissOnClickOutside = true)
         ) {
-            ElevatedCard(
-                elevation = CardDefaults.cardElevation(
-                    defaultElevation = 12.dp),
-            )
-            {
+            ElevatedCard(elevation = CardDefaults.cardElevation(defaultElevation = 12.dp)) {
                 Text(
                     stringResource(R.string.sign_out),
                     modifier = Modifier.padding(24.dp),
@@ -480,9 +405,7 @@ class NewMainActivity : ComponentActivity() {
                     style = MaterialTheme.typography.titleMedium
                 )
                 Row(
-                    modifier = Modifier
-                        .padding(16.dp, 16.dp)
-                        .fillMaxWidth(),
+                    modifier = Modifier.padding(16.dp, 16.dp).fillMaxWidth(),
                     horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.Bottom
                 ) {
@@ -490,12 +413,9 @@ class NewMainActivity : ComponentActivity() {
                         isLoading = true
                         viewModel.setDisplayName(exitDisplayName)
                         FirebaseUtils.signOut(onSuccess = {
-                            val intent = Intent(context, LoginActivity::class.java).apply {
-                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-                            }
+                            val intent = Intent(context, LoginActivity::class.java).apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK) }
                             context.startActivity(intent)
-                        },
-                            onFailure = {
+                        }, onFailure = {
                                 scope.launch {
                                     snackbarHostState.showSnackbar(
                                         message = context.getString(R.string.error_signing_out),
@@ -503,18 +423,17 @@ class NewMainActivity : ComponentActivity() {
                                         withDismissAction = true
                                     )
                                 }
-                            })
+                            }
+                        )
                         onSignOutConfirmed()
                         onDismissRequest()
                         isLoading = false
-                    }) {
+                        }
+                    ) {
                         Text(text = stringResource(R.string.yes), color = MaterialTheme.colorScheme.onTertiary)
                     }
                     Spacer(modifier = Modifier.padding(16.dp))
-                    Button(onClick = {
-                        onDismissRequest()
-                    })
-                    {
+                    Button(onClick = { onDismissRequest() }) {
                         Text(text = stringResource(R.string.no), color = MaterialTheme.colorScheme.onTertiary)
                     }
                 }
@@ -523,12 +442,8 @@ class NewMainActivity : ComponentActivity() {
     }
 
     @Composable
-    fun DetailsExtendedDialog(
-        onDismissRequest: () -> Unit,
-        category: String
-    ) {
+    fun DetailsExtendedDialog(onDismissRequest: () -> Unit, category: String) {
         val viewModel = ViewModelProvider.provideMainViewModel()
-        LocalContext.current
         val tobaccoData by viewModel.tobaccoLiveData.observeAsState(initial = 0f)
         val alcoholData by viewModel.alcoholLiveData.observeAsState(initial = 0f)
         val partiesData by viewModel.partiesLiveData.observeAsState(initial = 0f)
@@ -545,13 +460,7 @@ class NewMainActivity : ComponentActivity() {
         val total2Weeks = tobaccoData2Weeks + alcoholData2Weeks + partiesData2Weeks + othersData2Weeks
         val totalThirtyDays = tobaccoDataThirtyDays + alcoholDataThirtyDays + partiesDataThirtyDays + othersDataThirtyDays
 
-        Dialog(
-            onDismissRequest = { onDismissRequest() },
-            properties = DialogProperties(
-                dismissOnBackPress = true,
-                dismissOnClickOutside = true
-            )
-        ) {
+        Dialog(onDismissRequest = { onDismissRequest() }, properties = DialogProperties(dismissOnBackPress = true, dismissOnClickOutside = true) ) {
             when (category) {
                 stringResource(id = R.string.tobacco) -> {
                     ElevatedCardForCategory(onDismissRequest, tobaccoData.toInt(), tobaccoData2Weeks.toInt(), tobaccoDataThirtyDays.toInt())
@@ -574,20 +483,11 @@ class NewMainActivity : ComponentActivity() {
     }
 
     @Composable
-    fun DetailCardForCategory(
-        text: Int,
-        value: Int
-    ) {
+    fun DetailCardForCategory(text: Int, value: Int) {
         ElevatedCard(
-            modifier = Modifier
-                .padding(4.dp, 24.dp)
-                .width(240.dp)
-                .height(120.dp),
+            modifier = Modifier.padding(4.dp, 24.dp).width(240.dp).height(120.dp),
             shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.tertiary
-            )
-        ) {
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiary) ) {
             Column(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.Center,
@@ -604,30 +504,15 @@ class NewMainActivity : ComponentActivity() {
     }
 
     @Composable
-    fun ElevatedCardForCategory(
-        onDismissRequest: () -> Unit,
-        weekValue: Int,
-        twoWeekValue: Int,
-        thirtyDaysValue: Int
-    ) {
-        ElevatedCard(
-            modifier = Modifier.padding(8.dp),
-            shape = RoundedCornerShape(16.dp)
-        ) {
-            LazyColumn(
-                modifier = Modifier.padding(4.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
+    fun ElevatedCardForCategory(onDismissRequest: () -> Unit, weekValue: Int, twoWeekValue: Int, thirtyDaysValue: Int) {
+        ElevatedCard( modifier = Modifier.padding(8.dp), shape = RoundedCornerShape(16.dp)) {
+            LazyColumn(modifier = Modifier.padding(4.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                 item {DetailCardForCategory(R.string.your_spending_in_the_last_week_is, weekValue)}
                 item {DetailCardForCategory(R.string.your_spending_in_the_last_2_weeks_is, twoWeekValue)}
                 item {DetailCardForCategory(R.string.your_spending_in_the_last_month_is, thirtyDaysValue)}
                 item {
-                    ElevatedCard(
-                        modifier = Modifier.padding(8.dp),
-                        shape = RoundedCornerShape(24.dp)
-                    ) {
-                        Text(
-                            text = stringResource(R.string.this_could_be_savings_for_your_vacation_or_to_fulfill_that_dream_you_have_pending),
+                    ElevatedCard(modifier = Modifier.padding(8.dp), shape = RoundedCornerShape(24.dp)) {
+                        Text(text = stringResource(R.string.this_could_be_savings_for_your_vacation_or_to_fulfill_that_dream_you_have_pending),
                             textAlign = TextAlign.Center,
                             style = MaterialTheme.typography.titleLarge,
                             modifier = Modifier.padding(8.dp)
@@ -635,16 +520,8 @@ class NewMainActivity : ComponentActivity() {
                     }
                 }
                 item {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(24.dp),
-                        horizontalArrangement = Arrangement.End,
-                        verticalAlignment = Alignment.Bottom
-                    ) {
-                        OutlinedButton(onClick = { onDismissRequest() }) {
-                            Text(text = stringResource(R.string.close))
-                        }
+                    Row(modifier = Modifier.fillMaxWidth().padding(24.dp), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.Bottom) {
+                        OutlinedButton(onClick = { onDismissRequest() }) { Text(text = stringResource(R.string.close)) }
                     }
                 }
             }
@@ -671,27 +548,18 @@ class NewMainActivity : ComponentActivity() {
 
         ModalBottomSheet(
             onDismissRequest = { onClose() },
-            sheetState = rememberModalBottomSheetState(
-                skipPartiallyExpanded = false
-            ),
+            sheetState = rememberModalBottomSheetState( skipPartiallyExpanded = false ),
             windowInsets = windowInsets
         ) {
             LazyColumn {
-                item {
-                    Column(verticalArrangement = Arrangement.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp)) {
+                item { Column(verticalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth().padding(16.dp)) {
                         Text (text = stringResource(R.string.choose_category), style = MaterialTheme.typography.titleLarge,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp),
+                            modifier = Modifier.fillMaxWidth().padding(8.dp),
                             textAlign = TextAlign.Center)
                         Spacer(modifier = Modifier.padding(8.dp))
                         SingleChoiceSegmentedButtonRow(modifier = Modifier.padding(start = 40.dp, end = 40.dp)) {
                             categories.forEachIndexed { index, label ->
-                                SegmentedButton(
-                                    shape = SegmentedButtonDefaults.itemShape(index = index, count = categories.size),
+                                SegmentedButton(shape = SegmentedButtonDefaults.itemShape(index = index, count = categories.size),
                                     onClick = { isCategorySelected = index },
                                     selected = index == isCategorySelected
                                 ) {
@@ -702,28 +570,20 @@ class NewMainActivity : ComponentActivity() {
                     }
                     HorizontalDivider(modifier = Modifier.padding(10.dp))
                     Spacer(modifier = Modifier.padding(10.dp))
-                    Row(modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp),
+                    Row(modifier = Modifier.fillMaxWidth().padding(8.dp),
                         horizontalArrangement = Arrangement.Center) {
-                        Text(
-                            text = stringResource(id = R.string.how_many),
+                        Text(text = stringResource(id = R.string.how_many),
                             style = MaterialTheme.typography.titleMedium,
-                            modifier = Modifier
-                                .fillMaxHeight()
-                                .padding(start = 16.dp, end = 16.dp, bottom = 14.dp, top = 14.dp),
-                        )
+                            modifier = Modifier.fillMaxHeight().padding(start = 16.dp, end = 16.dp, bottom = 14.dp, top = 14.dp),)
                         Spacer(modifier = Modifier.padding(8.dp))
-                        TooltipBox(
-                            positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+                        TooltipBox(positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
                             tooltip = {
                                 if (isEmpty) {
                                     PlainTooltip { Text(text = stringResource(R.string.null_value), style = MaterialTheme.typography.bodyMedium) }
                                 }
                             },
                             state = TooltipState(initialIsVisible = isEmpty),
-                        ) {
-                            OutlinedTextField(
+                        ) { OutlinedTextField(
                                 value = expense.toString(),
                                 onValueChange = { it: String ->
                                     val maxLength = SEVEN_DAYS
@@ -731,16 +591,12 @@ class NewMainActivity : ComponentActivity() {
                                     expense = if (filteredValue.isNotEmpty()) filteredValue.toInt() else 0
                                 },
                                 isError = isEmpty,
-                                keyboardOptions = KeyboardOptions.Default.copy(
-                                    keyboardType = KeyboardType.Number,
-                                    imeAction = ImeAction.Done
-                                ),
+                                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done ),
                                 keyboardActions = KeyboardActions(onDone = { hideKeyboard = true }),
                                 modifier = Modifier.padding(start = 48.dp, end = 16.dp),
                             )
 
-                            if (hideKeyboard) {
-                                LocalSoftwareKeyboardController.current?.hide()
+                            if (hideKeyboard) { LocalSoftwareKeyboardController.current?.hide()
                                 hideKeyboard = false
                             }
                         }

@@ -12,8 +12,8 @@ android {
         applicationId = "com.sgtech.freevices"
         minSdk = 31
         targetSdk = 34
-        versionCode = 110
-        versionName = "1.1.0.4"
+        versionCode = 112
+        versionName = "1.1.0.6"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -79,17 +79,21 @@ dependencies {
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
-    implementation("androidx.compose.material3:material3:1.2.0-alpha11")
+    implementation("androidx.compose.material3:material3:1.2.0-alpha12")
     implementation("androidx.compose.runtime:runtime-livedata:1.5.4")
     implementation("androidx.core:core-splashscreen:1.0.1")
     implementation(platform("androidx.compose:compose-bom:2023.10.01"))
     implementation("com.github.alorma:compose-settings-ui-m3:1.0.2")
     implementation("androidx.navigation:navigation-compose:2.7.5")
+    implementation("com.google.android.gms:play-services-auth:20.7.0")
+    implementation("androidx.credentials:credentials:1.2.0")
+    implementation("androidx.credentials:credentials-play-services-auth:1.2.0")
+    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.0")
 
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
     androidTestImplementation(platform("androidx.compose:compose-bom:2023.10.01"))
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     androidTestImplementation(platform("androidx.compose:compose-bom:2023.10.01"))
-    debugImplementation("androidx.compose.ui:ui-test-manifest:1.6.0-beta01")
+    debugImplementation("androidx.compose.ui:ui-test-manifest:1.6.0-beta02")
 }

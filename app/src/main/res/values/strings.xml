@@ -243,4 +243,7 @@
     <string name="current_password">Current Password</string>
     <string name="error_reauth">Error on reauthentication</string>
     <string name="profile" translatable="false">Profile</string>
+    <string name="relogin">You must relogin to continue</string>
+    <string name="confirm_and_login">Confirm and login</string>
+    <string name="if_change_if_successful_you_must_login_again">If change if successful, you must login again</string>
 </resources>

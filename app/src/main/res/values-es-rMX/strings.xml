@@ -238,4 +238,6 @@
     <string name="reauth">Para hacer esto, debes ingresar tu contraseña actual</string>
     <string name="current_password">Contraseña actual</string>
     <string name="error_reauth">Error reautenticando</string>
+    <string name="confirm_and_login">Confirmar y ir al inicio de sesión</string>
+    <string name="if_change_if_successful_you_must_login_again">Si el cambio se realiza con éxito, debes iniciar sesión nuevamente</string>
 </resources>

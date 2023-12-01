@@ -114,7 +114,6 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun LoginScreenView() {
@@ -122,7 +121,8 @@ class LoginActivity : AppCompatActivity() {
         val activity = LocalContext.current as Activity
         var email by remember { mutableStateOf("") }
         var password by remember { mutableStateOf("") }
-        val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
+        val scrollBehavior =
+            TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
         var isLoading by remember { mutableStateOf(false) }
         if (isLoading) {
             DialogForLoad { isLoading = false }
@@ -177,9 +177,11 @@ class LoginActivity : AppCompatActivity() {
                         }
 
                         Spacer(modifier = Modifier.size(144.dp))
-                        Column(verticalArrangement = Arrangement.Bottom,
+                        Column(
+                            verticalArrangement = Arrangement.Bottom,
                             horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.fillMaxSize()) {
+                            modifier = Modifier.fillMaxSize()
+                        ) {
                             AnimatedVisibility(visible = !isResetPasswordRequested) {
                                 TextButton(onClick = {
                                     isResetPasswordRequested = true
@@ -220,29 +222,41 @@ class LoginActivity : AppCompatActivity() {
                                         isPasswordError = true
                                         scope.launch {
                                             snackbarHostState.showSnackbar(
-                                                message = getString(context, R.string.fill_all_the_fields),
+                                                message = getString(
+                                                    context,
+                                                    R.string.fill_all_the_fields
+                                                ),
                                                 duration = SnackbarDuration.Short
                                             )
                                         }
                                     }
+
                                     email.isEmpty() -> {
                                         isEmailError = true
                                         scope.launch {
                                             snackbarHostState.showSnackbar(
-                                                message = getString(context, R.string.fill_all_the_fields),
+                                                message = getString(
+                                                    context,
+                                                    R.string.fill_all_the_fields
+                                                ),
                                                 duration = SnackbarDuration.Short
                                             )
                                         }
                                     }
+
                                     password.isEmpty() -> {
                                         isPasswordError = true
                                         scope.launch {
                                             snackbarHostState.showSnackbar(
-                                                message = getString(context, R.string.fill_all_the_fields),
+                                                message = getString(
+                                                    context,
+                                                    R.string.fill_all_the_fields
+                                                ),
                                                 duration = SnackbarDuration.Short
                                             )
                                         }
                                     }
+
                                     else -> {
                                         isLoading = true
                                         scope.launch {
@@ -254,12 +268,15 @@ class LoginActivity : AppCompatActivity() {
                                                     is FirebaseAuthInvalidUserException -> {
                                                         context.getString(R.string.user_inexistent)
                                                     }
+
                                                     is FirebaseAuthInvalidCredentialsException -> {
                                                         context.getString(R.string.password_not_match)
                                                     }
+
                                                     is FirebaseAuthActionCodeException -> {
                                                         context.getString(R.string.no_connection_error)
                                                     }
+
                                                     else -> {
                                                         context.getString(R.string.password_not_match)
                                                     }
@@ -302,8 +319,10 @@ class LoginActivity : AppCompatActivity() {
                 label = { Text(stringResource(R.string.email)) },
                 isError = isEmailError,
                 singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email,
-                    imeAction = ImeAction.Next),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Email,
+                    imeAction = ImeAction.Next
+                ),
             )
         }
     }
@@ -323,8 +342,10 @@ class LoginActivity : AppCompatActivity() {
                 label = { Text(stringResource(R.string.enter_password)) },
                 visualTransformation =
                 if (passwordHidden) PasswordVisualTransformation() else VisualTransformation.None,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password,
-                    imeAction = ImeAction.Done),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Password,
+                    imeAction = ImeAction.Done
+                ),
                 keyboardActions = KeyboardActions(onDone = {
                     keyboardController?.hide()
                 }),
@@ -332,7 +353,10 @@ class LoginActivity : AppCompatActivity() {
                     IconButton(onClick = { passwordHidden = !passwordHidden }) {
                         val visibilityIcon =
                             if (passwordHidden) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
-                        val description = if (passwordHidden) stringResource(R.string.show_password) else stringResource(R.string.hide_password)
+                        val description =
+                            if (passwordHidden) stringResource(R.string.show_password) else stringResource(
+                                R.string.hide_password
+                            )
                         Icon(imageVector = visibilityIcon, contentDescription = description)
                     }
                 }
@@ -372,7 +396,11 @@ class LoginActivity : AppCompatActivity() {
                         if (email!!.isEmpty()) {
                             isEmailError = true
                             scope.launch {
-                                Toast.makeText(context, getString(R.string.fill_all_the_fields), Toast.LENGTH_LONG).show()
+                                Toast.makeText(
+                                    context,
+                                    getString(R.string.fill_all_the_fields),
+                                    Toast.LENGTH_LONG
+                                ).show()
                             }
                         } else {
                             FirebaseUtils.resetPasswordRequest(email!!, onSuccess = {
