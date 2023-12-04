@@ -12,8 +12,8 @@ android {
         applicationId = "com.sgtech.freevices"
         minSdk = 31
         targetSdk = 34
-        versionCode = 112
-        versionName = "1.1.0.6"
+        versionCode = 114
+        versionName = "1.1.0.8"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -28,6 +28,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
     compileOptions {
@@ -82,7 +83,6 @@ dependencies {
     implementation("androidx.compose.material3:material3:1.2.0-alpha12")
     implementation("androidx.compose.runtime:runtime-livedata:1.5.4")
     implementation("androidx.core:core-splashscreen:1.0.1")
-    implementation(platform("androidx.compose:compose-bom:2023.10.01"))
     implementation("com.github.alorma:compose-settings-ui-m3:1.0.2")
     implementation("androidx.navigation:navigation-compose:2.7.5")
     implementation("com.google.android.gms:play-services-auth:20.7.0")
@@ -96,4 +96,5 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     androidTestImplementation(platform("androidx.compose:compose-bom:2023.10.01"))
     debugImplementation("androidx.compose.ui:ui-test-manifest:1.6.0-beta02")
+
 }

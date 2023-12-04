@@ -96,17 +96,18 @@ class NewUserSettingsActivity : AppCompatActivity() {
 
     //Option Strings
     private var option by mutableStateOf("")
+    private var newPassword by mutableStateOf("")
+    private var confirmNewPassword by mutableStateOf("")
 
     //Booleans
     private var mailVerified by mutableStateOf(false)
-    private var isPasswordChangeInvoked by mutableStateOf(false)
-    private var isEmailChangeInvoked by mutableStateOf(false)
-    private var isDeleteAccountInvoked by mutableStateOf(false)
     private var isReAuthRequired by mutableStateOf(false)
     private var isReAuthApproved by mutableStateOf(false)
     private var isHelpPressed by mutableStateOf(false)
     private var passwordHidden by mutableStateOf(true)
     private var isPasswordFilled by mutableStateOf(false)
+    private var showReLogin by mutableStateOf(false)
+    private var isChangePasswordConfirmed by mutableStateOf(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -140,34 +141,44 @@ class NewUserSettingsActivity : AppCompatActivity() {
             Body(paddingValues = it)
         }
 
+        //Case A: Require re-login
+        if (isReAuthRequired) {
+            ReAuthDialog(
+                onDismissRequest = {
+                    isReAuthRequired = false
+                    isReAuthApproved = true
+                }
+            )
+        }
+
+        if (isReAuthApproved) {
+            when (option) {
+                PASSWORDCHANGE -> {
+                    ChangePasswordDialog {
+                        isReAuthApproved = false
+                    }
+                }
+
+                EMAILCHANGE -> {
+                    ChangeEmailDialog {
+                        isReAuthApproved = false
+                    }
+                }
+
+                DELETEACCOUNT -> {
+                    DeleteAccountDialog {
+                        isReAuthApproved = false
+                    }
+                }
+            }
+        }
+
         when (option) {
             NAMECHANGE -> {
-                ChangeNameDialog { option = BLANK }
+                ChangeNameDialog {
+                    option = BLANK
+                }
             }
-
-            PASSWORDCHANGE -> {
-                ReAuthDialog(onDismissRequest = { option = BLANK }, option = PASSWORDCHANGE)
-            }
-
-            EMAILCHANGE -> {
-                ReAuthDialog(onDismissRequest = { option = BLANK }, option = EMAILCHANGE)
-            }
-
-            DELETEACCOUNT -> {
-                ReAuthDialog(onDismissRequest = { option = BLANK }, option = DELETEACCOUNT)
-            }
-        }
-
-        if (isEmailChangeInvoked) {
-            ChangeEmailDialog { isEmailChangeInvoked = false }
-        }
-
-        if (isPasswordChangeInvoked) {
-            ChangePasswordDialog { isPasswordChangeInvoked = false }
-        }
-
-        if (isDeleteAccountInvoked) {
-            DeleteAccountDialog { isDeleteAccountInvoked = false }
         }
     }
 
@@ -258,6 +269,8 @@ class NewUserSettingsActivity : AppCompatActivity() {
         }
     }
 
+
+    //Does not require re-auth
     @Composable
     fun ChangeNameSetting() {
         SettingsMenuLink(
@@ -287,7 +300,18 @@ class NewUserSettingsActivity : AppCompatActivity() {
                     contentDescription = getString(R.string.change_password)
                 )
             },
-            onClick = { option = PASSWORDCHANGE },
+            onClick = {
+                checkTokenStatus(
+                    onTokenValid = {
+                        option = PASSWORDCHANGE
+                        isReAuthApproved = true
+                    },
+                    onTokenInvalid = {
+                        option = PASSWORDCHANGE
+                        isReAuthRequired = true
+                    }
+                )
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(64.dp)
@@ -305,7 +329,18 @@ class NewUserSettingsActivity : AppCompatActivity() {
                     contentDescription = getString(R.string.change_email_address)
                 )
             },
-            onClick = { option = EMAILCHANGE },
+            onClick = {
+                checkTokenStatus(
+                    onTokenValid = {
+                        option = EMAILCHANGE
+                        isReAuthApproved = true
+                    },
+                    onTokenInvalid = {
+                        option = EMAILCHANGE
+                        isReAuthRequired = true
+                    }
+                )
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(80.dp)
@@ -323,7 +358,18 @@ class NewUserSettingsActivity : AppCompatActivity() {
                     contentDescription = getString(R.string.delete)
                 )
             },
-            onClick = { option = DELETEACCOUNT; isReAuthRequired = true },
+            onClick = {
+                checkTokenStatus(
+                    onTokenValid = {
+                        option = DELETEACCOUNT
+                        isReAuthApproved = true
+                    },
+                    onTokenInvalid = {
+                        option = DELETEACCOUNT
+                        isReAuthRequired = true
+                    }
+                )
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(80.dp)
@@ -479,15 +525,8 @@ class NewUserSettingsActivity : AppCompatActivity() {
 
     @Composable
     fun ChangePasswordDialog(onDismissRequest: () -> Unit) {
-        val context = LocalContext.current
-        var showReLogin by rememberSaveable { mutableStateOf(false) }
-        var isChangePasswordConfirmed by rememberSaveable { mutableStateOf(false) }
-        var newPassword by remember { mutableStateOf("") }
-        var confirmNewPassword by remember { mutableStateOf("") }
-        val scope = rememberCoroutineScope()
-
         if (showReLogin) {
-            ReLoginDialog(onDismissRequest = {
+            ReAuthDialog(onDismissRequest = {
                 showReLogin = false
                 val intent = Intent(
                     context,
@@ -629,22 +668,6 @@ class NewUserSettingsActivity : AppCompatActivity() {
     }
 
     @Composable
-    fun ReLoginDialog(onDismissRequest: () -> Unit) {
-        AlertDialog(
-            onDismissRequest = { onDismissRequest() },
-            confirmButton = {
-                val intent = Intent(
-                    context,
-                    LoginActivity::class.java
-                ).apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK) }
-                startActivity(context, intent, null)
-            },
-            title = { Text(text = stringResource(R.string.password_changed_successfully)) },
-            text = { Text(text = stringResource(R.string.relogin)) },
-        )
-    }
-
-    @Composable
     fun ChangeEmailDialog(onDismissRequest: () -> Unit) {
         val context = LocalContext.current
         var isChangeEmailConfirmed by rememberSaveable { mutableStateOf(false) }
@@ -741,7 +764,7 @@ class NewUserSettingsActivity : AppCompatActivity() {
     }
 
     @Composable
-    fun ReAuthDialog(onDismissRequest: () -> Unit, option: String) {
+    fun ReAuthDialog(onDismissRequest: () -> Unit) {
         val user = FirebaseAuth.getInstance().currentUser
         val userEmail = user?.email
         var password by remember { mutableStateOf("") }
@@ -794,19 +817,6 @@ class NewUserSettingsActivity : AppCompatActivity() {
                     when (result) {
                         is FirebaseUtils.AuthResult.Success -> {
                             isReAuthApproved = true
-                            when (option) {
-                                PASSWORDCHANGE -> {
-                                    isPasswordChangeInvoked = true
-                                }
-
-                                EMAILCHANGE -> {
-                                    isEmailChangeInvoked = true
-                                }
-
-                                DELETEACCOUNT -> {
-                                    isDeleteAccountInvoked = true
-                                }
-                            }
                         }
 
                         is FirebaseUtils.AuthResult.Failure -> {
@@ -821,6 +831,27 @@ class NewUserSettingsActivity : AppCompatActivity() {
                             }
                         }
                     }
+                }
+            }
+        }
+    }
+
+    private fun checkTokenStatus(onTokenValid: () -> Unit, onTokenInvalid: () -> Unit) {
+        var isTokenValid by mutableStateOf(false)
+        val user = FirebaseAuth.getInstance().currentUser
+        val tokenThreshold = 3600L
+
+        user?.getIdToken(false)?.addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val expiresIn = task.result?.expirationTimestamp ?: 0L
+                val currentTimeMillis = System.currentTimeMillis()
+                val currentTimeSeconds = currentTimeMillis / 1000
+                val timeRemainingSeconds = expiresIn - currentTimeSeconds
+                isTokenValid = timeRemainingSeconds < tokenThreshold
+
+                when (isTokenValid) {
+                    true -> onTokenValid()
+                    false -> onTokenInvalid()
                 }
             }
         }

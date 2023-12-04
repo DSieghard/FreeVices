@@ -49,7 +49,12 @@ object FirebaseUtils {
         user!!.updateProfile(profileUpdates)
     }
 
-    fun updateDisplayNameOnFirestore(firstName: String, lastName: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+    fun updateDisplayNameOnFirestore(
+        firstName: String,
+        lastName: String,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
         val auth = FirebaseAuth.getInstance()
         val user = auth.currentUser
         val db = FirebaseFirestore.getInstance()
@@ -285,7 +290,11 @@ object FirebaseUtils {
         }
     }
 
-    fun configPasswordOnAuth(newPassword: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+    fun configPasswordOnAuth(
+        newPassword: String,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
         val currentUser = FirebaseAuth.getInstance().currentUser
         currentUser?.updatePassword(newPassword)
             ?.addOnCompleteListener {
@@ -372,7 +381,12 @@ object FirebaseUtils {
             }
     }
 
-    fun deleteCategory(category: String, timePeriod: Int, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+    fun deleteCategory(
+        category: String,
+        timePeriod: Int,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
         val db = FirebaseFirestore.getInstance()
         val currentUser = FirebaseAuth.getInstance().currentUser
         val userId = currentUser?.uid ?: return
@@ -404,10 +418,10 @@ object FirebaseUtils {
         user?.sendEmailVerification()
             ?.addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                onSuccess()
+                    onSuccess()
                 }
             }?.addOnFailureListener { e ->
-            onFailure(e)
+                onFailure(e)
             }
     }
 

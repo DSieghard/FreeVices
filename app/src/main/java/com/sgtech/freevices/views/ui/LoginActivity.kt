@@ -192,6 +192,20 @@ class LoginActivity : AppCompatActivity() {
                                     )
                                 }
                             }
+                            // Disabled for now
+                            /*TextButton(onClick = {
+                                scope.launch {
+                                    val intent = Intent(
+                                        context, NewLoginActivity::class.java
+                                    ).apply {
+                                        flags =
+                                            Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                    }
+                                    context.startActivity(intent)
+                                }
+                            }) {
+                                Text(text = "Test New Login UI")
+                            }*/
                         }
                     }
                 }
