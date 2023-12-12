@@ -51,7 +51,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.lifecycleScope
 import com.sgtech.freevices.R
 import com.sgtech.freevices.utils.FirebaseUtils
-import com.sgtech.freevices.views.ui.settings.NewHistorySettingsActivity
+import com.sgtech.freevices.views.ui.settings.NewSettingsActivity
 import com.sgtech.freevices.views.ui.theme.FreeVicesTheme
 import kotlinx.coroutines.launch
 
@@ -70,8 +70,7 @@ class HistoryActivity : AppCompatActivity() {
                 context = applicationContext,
                 days = days,
                 onSuccess = { data ->
-                    when(days)
-                    {
+                    when (days) {
                         THIRTY_DAYS -> viewModel.updateThirtyDaysLiveDataValues(this, data)
                         SIXTY_DAYS -> viewModel.updateSixtyDaysLiveDataValues(this, data)
                         THREE_MONTHS -> viewModel.updateThreeMonthsLiveDataValues(this, data)
@@ -79,7 +78,7 @@ class HistoryActivity : AppCompatActivity() {
                     }
                 },
                 onFailure = {
-                    scope.launch{
+                    scope.launch {
                         snackbarHostState.showSnackbar(
                             message = applicationContext.getString(R.string.error_updating_data),
                             duration = SnackbarDuration.Short,
@@ -91,8 +90,14 @@ class HistoryActivity : AppCompatActivity() {
         }
 
         enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.light(Color.Transparent.hashCode(), Color.Transparent.hashCode()),
-            navigationBarStyle = SystemBarStyle.light(Color.Transparent.hashCode(), Color.Transparent.hashCode()),
+            statusBarStyle = SystemBarStyle.light(
+                Color.Transparent.hashCode(),
+                Color.Transparent.hashCode()
+            ),
+            navigationBarStyle = SystemBarStyle.light(
+                Color.Transparent.hashCode(),
+                Color.Transparent.hashCode()
+            ),
         )
 
         setContent {
@@ -104,7 +109,7 @@ class HistoryActivity : AppCompatActivity() {
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun HistoryScreenView(){
+    fun HistoryScreenView() {
         val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
         val context = LocalContext.current
         val tobaccoDataThirtyDays by viewModel.tobaccoThirtyDaysData.observeAsState(initial = FLOAT_ZERO)
@@ -123,10 +128,14 @@ class HistoryActivity : AppCompatActivity() {
         val alcoholDataSixMonths by viewModel.alcoholSixMonthData.observeAsState(initial = FLOAT_ZERO)
         val partiesDataSixMonths by viewModel.partiesSixMonthData.observeAsState(initial = FLOAT_ZERO)
         val othersDataSixMonths by viewModel.othersSixMonthData.observeAsState(initial = FLOAT_ZERO)
-        val totalThirtyDays = tobaccoDataThirtyDays + alcoholDataThirtyDays + partiesDataThirtyDays + othersDataThirtyDays
-        val totalSixtyDays = tobaccoDataSixtyDays + alcoholDataSixtyDays + partiesDataSixtyDays + othersDataSixtyDays
-        val totalThreeMonths = tobaccoDataThreeMonths + alcoholDataThreeMonths + partiesDataThreeMonths + othersDataThreeMonths
-        val totalSixMonths = tobaccoDataSixMonths + alcoholDataSixMonths + partiesDataSixMonths + othersDataSixMonths
+        val totalThirtyDays =
+            tobaccoDataThirtyDays + alcoholDataThirtyDays + partiesDataThirtyDays + othersDataThirtyDays
+        val totalSixtyDays =
+            tobaccoDataSixtyDays + alcoholDataSixtyDays + partiesDataSixtyDays + othersDataSixtyDays
+        val totalThreeMonths =
+            tobaccoDataThreeMonths + alcoholDataThreeMonths + partiesDataThreeMonths + othersDataThreeMonths
+        val totalSixMonths =
+            tobaccoDataSixMonths + alcoholDataSixMonths + partiesDataSixMonths + othersDataSixMonths
         var isHelpPressed by rememberSaveable { mutableStateOf(false) }
         if (isHelpPressed) {
             HelpDialog(
@@ -139,12 +148,14 @@ class HistoryActivity : AppCompatActivity() {
             topBar = {
                 LargeTopAppBar(
                     title = {
-                        Text(text = stringResource(R.string.menu_history),
-                            style = MaterialTheme.typography.headlineLarge)
+                        Text(
+                            text = stringResource(R.string.menu_history),
+                            style = MaterialTheme.typography.headlineLarge
+                        )
                     },
                     scrollBehavior = scrollBehavior,
                     navigationIcon = {
-                        IconButton(onClick = { scope.launch { finish() } }) 
+                        IconButton(onClick = { scope.launch { finish() } })
                         {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -162,8 +173,9 @@ class HistoryActivity : AppCompatActivity() {
                             },
                             state = rememberTooltipState()
                         )
-                        { IconButton(onClick = {
-                            isHelpPressed = true
+                        {
+                            IconButton(onClick = {
+                                isHelpPressed = true
                             }) {
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Filled.HelpOutline,
@@ -176,14 +188,14 @@ class HistoryActivity : AppCompatActivity() {
                                 val intent =
                                     android.content.Intent(
                                         context,
-                                        NewHistorySettingsActivity::class.java
+                                        NewSettingsActivity::class.java
                                     )
                                 context.startActivity(intent)
                             }
                         }) {
                             Icon(
                                 imageVector = Icons.Filled.Settings,
-                                contentDescription = stringResource(R.string.history_settings_acc),
+                                contentDescription = stringResource(R.string.settings),
                             )
                         }
                     }
@@ -213,7 +225,7 @@ class HistoryActivity : AppCompatActivity() {
     fun HistoryCard(days: Int, value: Int) {
         var isDialogPressed by rememberSaveable { mutableStateOf(false) }
         if (isDialogPressed) {
-            ExpandedHistoryCard({isDialogPressed = false}, days)
+            ExpandedHistoryCard({ isDialogPressed = false }, days)
         }
         ElevatedCard(
             modifier = Modifier.padding(16.dp),
@@ -246,7 +258,7 @@ class HistoryActivity : AppCompatActivity() {
     @Composable
     fun ExpandedHistoryCard(onDismissRequest: () -> Unit, days: Int) {
         val viewModel = ViewModelProvider.provideMainViewModel()
-        var tobaccoValue by remember {  mutableFloatStateOf(FLOAT_ZERO) }
+        var tobaccoValue by remember { mutableFloatStateOf(FLOAT_ZERO) }
         var alcoholValue by remember { mutableFloatStateOf(FLOAT_ZERO) }
         var partiesValue by remember { mutableFloatStateOf(FLOAT_ZERO) }
         var othersValue by remember { mutableFloatStateOf(FLOAT_ZERO) }
@@ -258,18 +270,21 @@ class HistoryActivity : AppCompatActivity() {
                 partiesValue = viewModel.partiesThirtyDaysData.value ?: FLOAT_ZERO
                 othersValue = viewModel.othersThirtyDaysData.value ?: FLOAT_ZERO
             }
+
             SIXTY_DAYS -> {
                 tobaccoValue = viewModel.tobaccoSixtyDaysData.value ?: FLOAT_ZERO
                 alcoholValue = viewModel.alcoholSixtyDaysData.value ?: FLOAT_ZERO
                 partiesValue = viewModel.partiesSixtyDaysData.value ?: FLOAT_ZERO
                 othersValue = viewModel.othersSixtyDaysData.value ?: FLOAT_ZERO
             }
+
             THREE_MONTHS -> {
                 tobaccoValue = viewModel.tobaccoThreeMonthsData.value ?: FLOAT_ZERO
                 alcoholValue = viewModel.alcoholThreeMonthsData.value ?: FLOAT_ZERO
                 partiesValue = viewModel.partiesThreeMonthsData.value ?: FLOAT_ZERO
                 othersValue = viewModel.othersThreeMonthsData.value ?: FLOAT_ZERO
             }
+
             SIX_MONTHS -> {
                 tobaccoValue = viewModel.tobaccoSixMonthData.value ?: FLOAT_ZERO
                 alcoholValue = viewModel.alcoholSixMonthData.value ?: FLOAT_ZERO
@@ -280,21 +295,51 @@ class HistoryActivity : AppCompatActivity() {
         Dialog(onDismissRequest = onDismissRequest,
             properties = DialogProperties(
                 dismissOnBackPress = true,
-                dismissOnClickOutside = true),
+                dismissOnClickOutside = true
+            ),
             content = {
                 ElevatedCard(
                     elevation = CardDefaults.cardElevation(
-                        defaultElevation = 12.dp),
+                        defaultElevation = 12.dp
+                    ),
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.secondary
                     )
                 ) {
                     LazyColumn(
                         content = {
-                        item {DetailCard(text = stringResource(R.string.tobacco_expense, tobaccoValue.toInt()))}
-                        item {DetailCard(text = stringResource(R.string.alcohol_expense, alcoholValue.toInt()))}
-                        item {DetailCard(text = stringResource(R.string.parties_expense, partiesValue.toInt()))}
-                        item {DetailCard(text = stringResource(R.string.others_expense, othersValue.toInt())) }
+                            item {
+                                DetailCard(
+                                    text = stringResource(
+                                        R.string.tobacco_expense,
+                                        tobaccoValue.toInt()
+                                    )
+                                )
+                            }
+                            item {
+                                DetailCard(
+                                    text = stringResource(
+                                        R.string.alcohol_expense,
+                                        alcoholValue.toInt()
+                                    )
+                                )
+                            }
+                            item {
+                                DetailCard(
+                                    text = stringResource(
+                                        R.string.parties_expense,
+                                        partiesValue.toInt()
+                                    )
+                                )
+                            }
+                            item {
+                                DetailCard(
+                                    text = stringResource(
+                                        R.string.others_expense,
+                                        othersValue.toInt()
+                                    )
+                                )
+                            }
                         }
                     )
                 }

@@ -1,6 +1,7 @@
 package com.sgtech.freevices.utils
 
 import android.content.Context
+import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.UserProfileChangeRequest
@@ -48,7 +49,12 @@ object FirebaseUtils {
         user!!.updateProfile(profileUpdates)
     }
 
-    fun updateDisplayNameOnFirestore(firstName: String, lastName: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+    fun updateDisplayNameOnFirestore(
+        firstName: String,
+        lastName: String,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
         val auth = FirebaseAuth.getInstance()
         val user = auth.currentUser
         val db = FirebaseFirestore.getInstance()
@@ -121,17 +127,16 @@ object FirebaseUtils {
     }
 
     fun addDataToCategory(
-        context: Context,
         category: String,
         amount: Int,
         onSuccess: () -> Unit,
         onFailure: (Exception) -> Unit
     ) {
         val subCollectionName = when (category) {
-            context.getString(R.string.tobacco) -> TOBACCO
-            context.getString(R.string.alcohol) -> ALCOHOL
-            context.getString(R.string.parties) -> PARTIES
-            context.getString(R.string.others) -> OTHERS
+            TOBACCO -> TOBACCO
+            ALCOHOL -> ALCOHOL
+            PARTIES -> PARTIES
+            OTHERS -> OTHERS
             else -> null
         }
 
@@ -285,7 +290,11 @@ object FirebaseUtils {
         }
     }
 
-    fun configPasswordOnAuth(newPassword: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+    fun configPasswordOnAuth(
+        newPassword: String,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
         val currentUser = FirebaseAuth.getInstance().currentUser
         currentUser?.updatePassword(newPassword)
             ?.addOnCompleteListener {
@@ -294,12 +303,11 @@ object FirebaseUtils {
             ?.addOnFailureListener { e ->
                 onFailure(e)
             }
-
     }
 
     fun configEmailOnAuth(newEmail: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
         val currentUser = FirebaseAuth.getInstance().currentUser
-        currentUser?.updateEmail(newEmail)
+        currentUser?.verifyBeforeUpdateEmail(newEmail)
             ?.addOnCompleteListener {
                 updateEmailOnFirestore(newEmail, onFailure = { e -> onFailure(e) })
                 onSuccess()
@@ -321,7 +329,22 @@ object FirebaseUtils {
             }
     }
 
-    fun deleteHistory(days: Int, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+    fun deleteHistory(
+        context: Context,
+        category: String,
+        days: Int,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        val categoryToDelete: String = when (category) {
+            context.getString(R.string.tobacco) -> TOBACCO
+            context.getString(R.string.alcohol) -> ALCOHOL
+            context.getString(R.string.parties) -> PARTIES
+            context.getString(R.string.others) -> OTHERS
+            else -> ""
+        }
+
+
         val db = FirebaseFirestore.getInstance()
         val currentUser = FirebaseAuth.getInstance().currentUser
         val userId = currentUser?.uid ?: return
@@ -329,26 +352,15 @@ object FirebaseUtils {
         val currentDate = Calendar.getInstance().time
         val batch = db.batch()
         val calendar = Calendar.getInstance()
-
         for (day in 0 until days) {
             calendar.time = currentDate
             calendar.add(Calendar.DAY_OF_MONTH, -day)
             val dateToDelete = dateFormat.format(calendar.time)
+            val documentRef = db.collection(USERS).document(userId)
+                .collection(CATEGORIES).document(categoryToDelete)
+                .collection(DATA).document(dateToDelete)
 
-            val categories = listOf(
-                TOBACCO,
-                ALCOHOL,
-                PARTIES,
-                OTHERS
-            )
-
-            for (category in categories) {
-                val documentRef = db.collection(USERS).document(userId)
-                    .collection(CATEGORIES).document(category)
-                    .collection(DATA).document(dateToDelete)
-
-                batch.delete(documentRef)
-            }
+            batch.delete(documentRef)
         }
 
         batch.commit()
@@ -373,32 +385,39 @@ object FirebaseUtils {
             }
     }
 
-    fun deleteCategory(category: String, timePeriod: Int, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
-        val db = FirebaseFirestore.getInstance()
-        val currentUser = FirebaseAuth.getInstance().currentUser
-        val userId = currentUser?.uid ?: return
-
-        val calendar = Calendar.getInstance()
-        val dateFormat = SimpleDateFormat(DATE_FORMAT, Locale.getDefault())
-
-        for (day in 0 until timePeriod) {
-            calendar.time = Date()
-            calendar.add(Calendar.DAY_OF_MONTH, -day)
-            val dateToDelete = dateFormat.format(calendar.time)
-
-            val documentRef = db.collection(USERS).document(userId)
-                .collection(CATEGORIES).document(category)
-                .collection(DATA).document(dateToDelete)
-
-            documentRef.delete()
-                .addOnSuccessListener {
+    fun sendEmailVerification(onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+        val user = FirebaseAuth.getInstance().currentUser
+        user?.sendEmailVerification()
+            ?.addOnCompleteListener { task ->
+                if (task.isSuccessful) {
                     onSuccess()
                 }
-                .addOnFailureListener { e ->
-                    onFailure(e)
-                }
-        }
+            }?.addOnFailureListener { e ->
+                onFailure(e)
+            }
     }
+
+    sealed class AuthResult {
+        data class Success(val user: FirebaseUser) : AuthResult()
+        data class Failure(val exception: Exception) : AuthResult()
+    }
+
+    fun reAuthenticate(
+        email: String,
+        password: String,
+        callback: (AuthResult) -> Unit
+    ) {
+        val user = FirebaseAuth.getInstance().currentUser
+        user?.reauthenticate(EmailAuthProvider.getCredential(email, password))
+            ?.addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    callback(AuthResult.Success(user))
+                } else {
+                    callback(AuthResult.Failure(task.exception!!))
+                }
+            }
+    }
+
 
     private const val DATA = "data"
     private const val TOBACCO = "tobacco"

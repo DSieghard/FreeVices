@@ -110,11 +110,15 @@ class NewMainViewModel {
         _othersSixMonthData.value = dataMap[context.getString(R.string.others)] ?: 0f
     }
 
-    private val _displayName = MutableLiveData<String> (null)
-    val displayName: MutableLiveData<String> = _displayName
+    private val _displayName = MutableLiveData<String?> (null)
+    val displayName: MutableLiveData<String?> = _displayName
 
     fun setDisplayName(name: String?) {
-        _displayName.value = name!!
+        if (name == null) {
+            _displayName.value = ""
+        } else {
+            _displayName.value = name
+        }
     }
 }
 

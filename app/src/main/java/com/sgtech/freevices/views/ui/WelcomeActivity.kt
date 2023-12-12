@@ -7,24 +7,22 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.Surface
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -65,7 +63,6 @@ class WelcomeActivity: AppCompatActivity() {
         }
     }
 
-    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun WelcomeScreenView() {
         var openFirstBottomSheet by rememberSaveable { mutableStateOf(false) }
@@ -111,104 +108,110 @@ class WelcomeActivity: AppCompatActivity() {
         ) { contentPadding ->
             Surface(modifier = Modifier.padding(contentPadding),
                 color = MaterialTheme.colorScheme.background) {
-                Column(modifier = Modifier
+                LazyColumn(modifier = Modifier
                     .padding(contentPadding)
-                    .fillMaxSize()
-                    .padding(24.dp),
+                    .padding(start = 36.dp, end = 36.dp),
                     verticalArrangement = Arrangement.Center
                 )
                 {
-                    ElevatedCard(
-                        colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.primary),
-                        onClick = { openFirstBottomSheet = true }
-                    ) {
-                        Spacer(modifier = Modifier.padding(16.dp))
-                        Text(
-                            text = stringResource(R.string.welcome_text),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            textAlign = TextAlign.Center,
-                            style = MaterialTheme.typography.titleLarge
-                        )
-                        Spacer(modifier = Modifier.padding(16.dp))
-
-                        if (openFirstBottomSheet) {
-                            ModalSheetBuilder(text = stringResource(R.string.welcome_card_first_text),
-                                onClose = { openFirstBottomSheet = false })
-                        }
-                    }
-                    Spacer(modifier = Modifier.padding(16.dp))
-                    ElevatedCard(
-                        colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.onPrimary),
-                        onClick = { openSecondBottomSheet = true }
-                    ) {
-                        Spacer(modifier = Modifier.padding(16.dp))
-                        Text(
-                            text = stringResource(R.string.about_freevices),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            textAlign = TextAlign.Center,
-                            style = MaterialTheme.typography.titleLarge
-                        )
-                        Spacer(modifier = Modifier.padding(16.dp))
-
-                        if (openSecondBottomSheet) {
-                            ModalSheetBuilder(text = stringResource(R.string.about_text),
-                                onClose = {
-                                    openSecondBottomSheet = false
-                                }
+                    item {
+                        ElevatedCard(
+                            colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.primary),
+                            onClick = { openFirstBottomSheet = true }
+                        ) {
+                            Spacer(modifier = Modifier.padding(16.dp))
+                            Text(
+                                text = stringResource(R.string.welcome_text),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                textAlign = TextAlign.Center,
+                                style = MaterialTheme.typography.titleLarge
                             )
-                        }
-                    }
-                    Spacer(modifier = Modifier.padding(16.dp))
-                    ElevatedCard(
-                        colors = CardDefaults.elevatedCardColors(
-                            containerColor = MaterialTheme.colorScheme.secondary
-                        ),
-                        onClick = {
-                            openThirdBottomSheet = true
-                        }
-                    ) {
-                        Spacer(modifier = Modifier.padding(16.dp))
-                        Text(
-                            text = stringResource(R.string.about_the_developers),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            textAlign = TextAlign.Center,
-                            style = MaterialTheme.typography.titleLarge
-                        )
-                        Spacer(modifier = Modifier.padding(16.dp))
+                            Spacer(modifier = Modifier.padding(16.dp))
 
-                        if (openThirdBottomSheet) {
-                            ModalSheetBuilder(text = stringResource(R.string.about_developer_text)) {
-                                openThirdBottomSheet = false
+                            if (openFirstBottomSheet) {
+                                ModalSheetBuilder(text = stringResource(R.string.welcome_card_first_text),
+                                    onClose = { openFirstBottomSheet = false })
                             }
                         }
                     }
-                    Spacer(modifier = Modifier.padding(48.dp))
-                    ElevatedCard(
-                        colors = CardDefaults.elevatedCardColors(
-                            containerColor = MaterialTheme.colorScheme.onSecondary
-                        ),
-                        onClick = {
+                    item { Spacer (modifier = Modifier.padding(16.dp)) }
+                    item {
+                        ElevatedCard(
+                            colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.onPrimary),
+                            onClick = { openSecondBottomSheet = true }
+                        ) {
+                            Spacer(modifier = Modifier.padding(16.dp))
+                            Text(
+                                text = stringResource(R.string.about_freevices),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                textAlign = TextAlign.Center,
+                                style = MaterialTheme.typography.titleLarge
+                            )
+                            Spacer(modifier = Modifier.padding(16.dp))
 
+                            if (openSecondBottomSheet) {
+                                ModalSheetBuilder(text = stringResource(R.string.about_text),
+                                    onClose = {
+                                        openSecondBottomSheet = false
+                                    }
+                                )
+                            }
                         }
-                    ) {
-                        Spacer(modifier = Modifier.padding(16.dp))
-                        Text(
-                            text = stringResource(R.string.press_any_card_to_get_info),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            textAlign = TextAlign.Center,
-                            style = MaterialTheme.typography.titleLarge
-                        )
-                        Spacer(modifier = Modifier.padding(16.dp))
                     }
+                    item { Spacer (modifier = Modifier.padding(16.dp)) }
+                    item {
+                        ElevatedCard(
+                            colors = CardDefaults.elevatedCardColors(
+                                containerColor = MaterialTheme.colorScheme.secondary
+                            ),
+                            onClick = {
+                                openThirdBottomSheet = true
+                            }
+                        ) {
+                            Spacer(modifier = Modifier.padding(16.dp))
+                            Text(
+                                text = stringResource(R.string.about_the_developers),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                textAlign = TextAlign.Center,
+                                style = MaterialTheme.typography.titleLarge
+                            )
+                            Spacer(modifier = Modifier.padding(16.dp))
 
+                            if (openThirdBottomSheet) {
+                                ModalSheetBuilder(text = stringResource(R.string.about_developer_text)) {
+                                    openThirdBottomSheet = false
+                                }
+                            }
+                        }
+                    }
+                    item { Spacer (modifier = Modifier.padding(24.dp)) }
+                    item {
+                        ElevatedCard(
+                            colors = CardDefaults.elevatedCardColors(
+                                containerColor = MaterialTheme.colorScheme.onSecondary
+                            ),
+                            onClick = {},
+                            enabled = false
+                        ) {
+                            Spacer(modifier = Modifier.padding(16.dp))
+                            Text(
+                                text = stringResource(R.string.press_any_card_to_get_info),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                textAlign = TextAlign.Center,
+                                style = MaterialTheme.typography.titleLarge,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Spacer(modifier = Modifier.padding(16.dp))
+                        }
+                    }
                 }
             }
         }
@@ -238,7 +241,7 @@ class WelcomeActivity: AppCompatActivity() {
                             style = MaterialTheme.typography.headlineLarge
                         )
                     }
-                    Divider(modifier = Modifier.padding(10.dp))
+                    HorizontalDivider(modifier = Modifier.padding(10.dp))
                     Text(
                         modifier = Modifier.padding(16.dp),
                         style = MaterialTheme.typography.bodyLarge,

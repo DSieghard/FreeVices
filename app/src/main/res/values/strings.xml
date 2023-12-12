@@ -231,4 +231,34 @@
     <string name="last_30_days">Last 30 days</string>
     <string name="about_help">About this screen</string>
     <string name="specific_question">Or you prefer delete a specific category?</string>
+    <string name="null_value">Value cannot be 0</string>
+    <string name="security_rules">Passwords must have:\n- 8 Characters\n- A mayus\n- A minus\n- A symbol\n- A number</string>
+    <string name="password_requirements">Password requirements</string>
+    <string name="verify">Verify</string>
+    <string name="verification_email_sent">Verification mail has been sent</string>
+    <string name="account_status">Account Status: %1$s</string>
+    <string name="verified">Verified</string>
+    <string name="not_verified">Not Verified</string>
+    <string name="reauth">For make this change, you must enter your current password.</string>
+    <string name="current_password">Current Password</string>
+    <string name="error_reauth">Error on reauthentication</string>
+    <string name="profile" translatable="false">Profile</string>
+    <string name="relogin" translatable="false">You must relogin to continue</string>
+    <string name="confirm_and_login">Confirm and login</string>
+    <string name="if_change_if_successful_you_must_login_again">If change if successful, you must login again</string>
+    <string name="one_week">Last Week</string>
+    <string name="two_weeks">Last Two Weeks</string>
+    <string name="one_month">Last Month</string>
+    <string name="two_months">Last Two Months</string>
+    <string name="six_months">Last Six Months</string>
+    <string name="all_time">All time</string>
+    <string name="three_months">Last Three Months</string>
+    <string name="manage_history">Manage History</string>
+    <string name="miscellaneous">Miscellaneous</string>
+    <string name="color_settings">Color Settings</string>
+    <string name="all_history_deleted">All History deleted</string>
+    <string name="unable_to_delete_history">Unable to delete history</string>
+    <string name="delete_confirmation">Are you sure you want to delete history?</string>
+    <string name="delete_warning">This action cannot be undone</string>
+    <string name="today_history_deleted">Today history deleted</string>
 </resources>
