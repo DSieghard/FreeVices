@@ -329,7 +329,22 @@ object FirebaseUtils {
             }
     }
 
-    fun deleteHistory(days: Int, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+    fun deleteHistory(
+        context: Context,
+        category: String,
+        days: Int,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        val categoryToDelete: String = when (category) {
+            context.getString(R.string.tobacco) -> TOBACCO
+            context.getString(R.string.alcohol) -> ALCOHOL
+            context.getString(R.string.parties) -> PARTIES
+            context.getString(R.string.others) -> OTHERS
+            else -> ""
+        }
+
+
         val db = FirebaseFirestore.getInstance()
         val currentUser = FirebaseAuth.getInstance().currentUser
         val userId = currentUser?.uid ?: return
@@ -337,26 +352,15 @@ object FirebaseUtils {
         val currentDate = Calendar.getInstance().time
         val batch = db.batch()
         val calendar = Calendar.getInstance()
-
         for (day in 0 until days) {
             calendar.time = currentDate
             calendar.add(Calendar.DAY_OF_MONTH, -day)
             val dateToDelete = dateFormat.format(calendar.time)
+            val documentRef = db.collection(USERS).document(userId)
+                .collection(CATEGORIES).document(categoryToDelete)
+                .collection(DATA).document(dateToDelete)
 
-            val categories = listOf(
-                TOBACCO,
-                ALCOHOL,
-                PARTIES,
-                OTHERS
-            )
-
-            for (category in categories) {
-                val documentRef = db.collection(USERS).document(userId)
-                    .collection(CATEGORIES).document(category)
-                    .collection(DATA).document(dateToDelete)
-
-                batch.delete(documentRef)
-            }
+            batch.delete(documentRef)
         }
 
         batch.commit()
@@ -379,38 +383,6 @@ object FirebaseUtils {
                     onFailure(task.exception!!)
                 }
             }
-    }
-
-    fun deleteCategory(
-        category: String,
-        timePeriod: Int,
-        onSuccess: () -> Unit,
-        onFailure: (Exception) -> Unit
-    ) {
-        val db = FirebaseFirestore.getInstance()
-        val currentUser = FirebaseAuth.getInstance().currentUser
-        val userId = currentUser?.uid ?: return
-
-        val calendar = Calendar.getInstance()
-        val dateFormat = SimpleDateFormat(DATE_FORMAT, Locale.getDefault())
-
-        for (day in 0 until timePeriod) {
-            calendar.time = Date()
-            calendar.add(Calendar.DAY_OF_MONTH, -day)
-            val dateToDelete = dateFormat.format(calendar.time)
-
-            val documentRef = db.collection(USERS).document(userId)
-                .collection(CATEGORIES).document(category)
-                .collection(DATA).document(dateToDelete)
-
-            documentRef.delete()
-                .addOnSuccessListener {
-                    onSuccess()
-                }
-                .addOnFailureListener { e ->
-                    onFailure(e)
-                }
-        }
     }
 
     fun sendEmailVerification(onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {

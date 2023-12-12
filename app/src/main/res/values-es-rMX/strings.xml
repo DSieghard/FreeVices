@@ -149,7 +149,7 @@
     <string name="delete_all_history_this_action_cannot_be_undone">Borrar todo el historial. Esta acción no puede deshacerse</string>
     <string name="delete_history">Eliminar historial</string>
     <string name="delete_history_text">Estás seguro que quieres borrar el historial de los últimos %1$d días?</string>
-    <string name="history_deleted">Últimos %1$d eliminados.</string>
+    <string name="history_deleted">Últimos %1$d días eliminados.</string>
     <string name="error_deleting_history">Error eliminando historial: %1$s</string>
     <string name="delete_all_history">Estás seguro que quieres borrar todo tu historial. Está acción no puede deshacerse</string>
     <string name="app_settings_help">Aquí puedes modificar la configuración de la aplicación. A medida mejoresmos, agregaremos más opciones</string>
@@ -240,4 +240,19 @@
     <string name="error_reauth">Error reautenticando</string>
     <string name="confirm_and_login">Confirmar y ir al inicio de sesión</string>
     <string name="if_change_if_successful_you_must_login_again">Si el cambio se realiza con éxito, debes iniciar sesión nuevamente</string>
+    <string name="one_week">Última semana</string>
+    <string name="two_weeks">Últimas 2 semanas</string>
+    <string name="one_month">Último Mes</string>
+    <string name="two_months">Últimos 2 meses</string>
+    <string name="six_months">Últimos 6 meses</string>
+    <string name="all_time">Todo el historial</string>
+    <string name="three_months">Últimos 3 meses</string>
+    <string name="manage_history">Controla tu historial</string>
+    <string name="miscellaneous">Otros ajustes</string>
+    <string name="color_settings">Ajustes de color</string>
+    <string name="all_history_deleted">Todo el historial borrado</string>
+    <string name="unable_to_delete_history">Imposible eliminar historial</string>
+    <string name="delete_confirmation">Estás seguro de querer borrar el historial?</string>
+    <string name="delete_warning">Esta acción no puede revertirse</string>
+    <string name="today_history_deleted">Historial del día eliminado</string>
 </resources>

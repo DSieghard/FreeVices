@@ -31,19 +31,13 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".views.ui.settings.NewHistorySettingsActivity"
-            android:exported="false" />
-        <activity
-            android:name=".views.ui.settings.NewAppSettingsActivity"
-            android:exported="false" />
-        <activity
-            android:name=".views.ui.settings.NewUserSettingsActivity"
-            android:exported="false" />
-        <activity
             android:name=".views.ui.WelcomeActivity"
             android:exported="false" />
         <activity
             android:name=".views.ui.NewLoginActivity"
+            android:exported="false" />
+        <activity
+            android:name=".views.ui.settings.NewSettingsActivity"
             android:exported="false" />
     </application>
 
